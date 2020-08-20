@@ -1,5 +1,7 @@
 use framebuffer::Framebuffer;
 
+use cheval::cheval::Cheval;
+
 pub struct Window {
 	width: usize,
 	height: usize,
@@ -32,8 +34,8 @@ impl Window {
 	pub fn done( &self ) -> bool {
 		false
 	}
-	pub fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize )  ) {
-		func( &mut self.buffer, self.width, self.height );
+	pub fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
+		func( &mut self.buffer, self.width, self.height, cheval );
 	}
 	pub fn next_frame( &mut self ) {
 		for y in 0..self.height {

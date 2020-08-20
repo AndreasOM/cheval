@@ -8,7 +8,7 @@ edition = "2018"
 
 [[bin]]
 name="cheval"
-path="src/cheval.rs"
+path="src/cheval_main.rs"
 
 [dependencies]
 
