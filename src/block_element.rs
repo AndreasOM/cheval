@@ -17,17 +17,17 @@ impl BlockElement {
 }
 impl Element for BlockElement {
 	fn configure( &mut self, config: &ElementConfig ) {
-		self.x      = config.get_u32_or( "x", 0 );
-		self.y      = config.get_u32_or( "y", 0 );
+		self.x      = config.get_u32_or( "pos_x", 0 );
+		self.y      = config.get_u32_or( "pos_y", 0 );
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
 	fn update( &mut self ) {
-
+		panic!("not called")
 	}
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
-		dbg!(&self);
+//		dbg!(&self);
 		for y in 0..self.height {
 			let py = y + self.y;
 			if py >= height as u32 { continue; }

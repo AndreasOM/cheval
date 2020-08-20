@@ -1,0 +1,36 @@
+elements:
+  - name: Green Block
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 320
+      height: 180
+      color: "0xff80f080"
+
+  - name: Red Block
+    type: block
+    parameters:
+      pos_x: 320
+      pos_y: 0
+      width: 320
+      height: 180
+      color: "0xffff8080"
+
+  - name: White Block
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 180
+      width: 320
+      height: 180
+      color: "0xfff0f0f0"
+
+  - name: Blue Block
+    type: block
+    parameters:
+      pos_x: 320
+      pos_y: 180
+      width: 320
+      height: 180
+      color: "0xff8080ff"
