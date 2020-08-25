@@ -11,10 +11,8 @@ pub struct BlockElement {
 }
 
 impl BlockElement {
-	pub fn set_name(&mut self, name: &str ) {
-		self.name = name.to_string();
-	}
 }
+
 impl Element for BlockElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
@@ -24,8 +22,8 @@ impl Element for BlockElement {
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
 	fn update( &mut self ) {
-		panic!("not called")
 	}
+
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
 //		dbg!(&self);
 		for y in 0..self.height {
@@ -45,6 +43,13 @@ impl Element for BlockElement {
 	}
 	fn name( &self ) -> &str {
 		&self.name
+	}
+	fn set_name(&mut self, name: &str ) {
+		self.name = name.to_string();
+	}
+
+	fn element_type( &self ) -> &str {
+		"block"
 	}
 }
 

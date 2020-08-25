@@ -26,6 +26,7 @@ fn main() {
 
 	dbg!( &cheval );
 	while !window.done() {
+		cheval.update();
 		window.render_frame( &mut render_frame, &cheval );
 		window.next_frame();
 	}

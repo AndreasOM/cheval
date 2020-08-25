@@ -50,10 +50,12 @@ pub trait Element {
 	fn update( &mut self );
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize );
 	fn name( &self ) -> &str;
+	fn set_name( &mut self, name: &str );
+	fn element_type( &self ) -> &str;
 }
 
 impl std::fmt::Debug for Element {
 	fn fmt( &self, f: &mut std::fmt::Formatter ) -> std::fmt::Result {
-		writeln!( f,"[Trait] Element: {}", self.name() )
+		writeln!( f,"[Trait] Element: {} [{}]", self.name(), self.element_type() )
 	}
 }

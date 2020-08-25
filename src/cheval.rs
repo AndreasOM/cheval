@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use serde_yaml;
 
-use crate::block_element::{BlockElement,BlockElementFactory};
+use crate::block_element::BlockElementFactory;
+use crate::lissajous_element::LissajousElementFactory;
 use crate::element::{Element,ElementConfig};
 
 #[derive(Debug)]
@@ -39,8 +40,17 @@ impl Cheval {
 
 		dbg!(&config);
 		for e in config.elements {
-			let mut block_element = BlockElementFactory::create();
-			block_element.set_name( &e.name );
+			let mut element: Box< dyn Element > = match e.the_type.as_ref() {
+				"block" => Box::new( BlockElementFactory::create() ),
+				"lissajous" => Box::new( LissajousElementFactory::create() ),
+//				_ => panic!("Unsupported element type {}", e.the_type ),
+				_ => {
+					println!("Skipping unsupported element type {}", e.the_type);
+					continue
+				},
+			};
+			
+			element.set_name( &e.name );
 
 			let mut element_config = ElementConfig::new();
 
@@ -50,15 +60,21 @@ impl Cheval {
 
 			dbg!(&element_config);
 
-			block_element.configure( &element_config );
+			element.configure( &element_config );
 
-			self.add_element( Box::new( block_element ) );
+			self.add_element( element );
 		}
 
 		Ok(())
 	}
 	pub fn add_element( &mut self, element: Box< dyn Element > ) {
 		self.elements.push( element );
+	}
+
+	pub fn update( &mut self ) {
+		for e in &mut self.elements {
+			e.update();
+		}	
 	}
 
 	pub fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
