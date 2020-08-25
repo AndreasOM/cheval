@@ -43,6 +43,13 @@ impl ElementConfig {
 			_ => default,
 		}
 	}
+
+	pub fn get_string_or( &self, name: &str, default: &str ) -> String {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( s ) ) => s.clone(),
+			_ => default.to_string(),
+		}
+	}
 }
 
 pub trait Element {

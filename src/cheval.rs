@@ -5,6 +5,7 @@ use serde_yaml;
 
 use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
+use crate::image_element::ImageElementFactory;
 use crate::element::{Element,ElementConfig};
 
 #[derive(Debug)]
@@ -18,7 +19,13 @@ struct ConfigElement {
 	name: String,
 	#[serde(rename = "type")]
 	the_type: String,
+	#[serde(default = "default_bool_false")]
+	disabled: bool,
 	parameters: HashMap< String, String >
+}
+
+fn default_bool_false() -> bool {
+    false
 }
 
 #[derive(Debug, Deserialize)]
@@ -40,9 +47,13 @@ impl Cheval {
 
 		dbg!(&config);
 		for e in config.elements {
+			if e.disabled {
+				continue;
+			};
 			let mut element: Box< dyn Element > = match e.the_type.as_ref() {
 				"block" => Box::new( BlockElementFactory::create() ),
 				"lissajous" => Box::new( LissajousElementFactory::create() ),
+				"image" => Box::new( ImageElementFactory::create() ),
 //				_ => panic!("Unsupported element type {}", e.the_type ),
 				_ => {
 					println!("Skipping unsupported element type {}", e.the_type);

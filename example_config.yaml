@@ -1,39 +1,39 @@
 elements:
-  - name: Green Block
+  - name: Green Background Block
     type: block
     parameters:
       pos_x: 0
       pos_y: 0
-      width: 960
-      height: 540
-      color: "0xff80f080"
+      width: 1920
+      height: 1080
+      color: "0xff00f000"
 
   - name: Red Block
     type: block
     parameters:
-      pos_x: 960
+      pos_x: 1824
       pos_y: 0
-      width: 960
-      height: 540
-      color: "0xffff8080"
+      width: 96
+      height: 54
+      color: "0xffff0000"
 
   - name: White Block
     type: block
     parameters:
       pos_x: 0
-      pos_y: 540
-      width: 960
-      height: 540
-      color: "0xfff0f0f0"
+      pos_y: 1026
+      width: 96
+      height: 54
+      color: "0xffffffff"
 
   - name: Blue Block
     type: block
     parameters:
-      pos_x: 960
-      pos_y: 540
-      width: 960
-      height: 540
-      color: "0xff8080ff"
+      pos_x: 1824
+      pos_y: 1026
+      width: 96
+      height: 54
+      color: "0xff0000ff"
 
   - name: Lissa 1
     type: lissajous
@@ -55,3 +55,40 @@ elements:
       count: 100
       offset: 10
       color: "0xff404040"
+
+  - name: Banner Background
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 650
+      filename: data/banner.png
+
+  - name: Banner Title
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 650
+      filename: data/banner-title.png
+
+  - name: Banner Background Test
+    type: image
+    disabled: true
+    parameters:
+      pos_x: 480
+      pos_y: 490
+      filename: data/banner-test.png
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 10
+      pos_y: 650
+      width: 960
+      height: 50
+      size: 40
+      text: "Atem & Rust - #0003"
+
+
+
+
+
