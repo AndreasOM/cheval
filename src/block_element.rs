@@ -1,4 +1,5 @@
 use crate::element::{Element, ElementConfig};
+use crate::context::Context;
 
 #[derive(Debug)]
 pub struct BlockElement {
@@ -21,7 +22,7 @@ impl Element for BlockElement {
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
-	fn update( &mut self ) {
+	fn update( &mut self, context: &mut Context ) {
 	}
 
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {

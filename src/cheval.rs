@@ -8,10 +8,14 @@ use crate::lissajous_element::LissajousElementFactory;
 use crate::image_element::ImageElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
+use crate::context::Context;
+
+use chrono::{DateTime, Utc};
 
 #[derive(Debug)]
 pub struct Cheval {
 	elements: Vec< Box< dyn Element > >,
+	context: Context,
 }
 
 
@@ -38,6 +42,7 @@ impl Cheval {
 	pub fn new() -> Self {
 		Self {
 			elements: Vec::new(),
+			context: Context::new(),
 		}
 	}
 
@@ -85,8 +90,13 @@ impl Cheval {
 	}
 
 	pub fn update( &mut self ) {
+		// :TODO: create a date time element that provides info
+		let now: DateTime<Utc> = Utc::now();
+		let clock_string = now.format("%H:%M:%S");
+		self.context.set_string( "clock_string", &clock_string.to_string() );
+
 		for e in &mut self.elements {
-			e.update();
+			e.update( &mut self.context );
 		}	
 	}
 

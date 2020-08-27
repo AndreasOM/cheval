@@ -1,4 +1,5 @@
 use crate::element::{Element, ElementConfig};
+use crate::context::Context;
 
 use image::DynamicImage;
 use image::GenericImageView;
@@ -39,7 +40,7 @@ impl Element for ImageElement {
 			    self.image = Some( img );
 		}
 	}
-	fn update( &mut self ) {
+	fn update( &mut self, context: &mut Context ) {
 	}
 
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {

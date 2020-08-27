@@ -1,4 +1,5 @@
 use crate::element::{Element, ElementConfig};
+use crate::context::Context;
 
 #[derive(Debug)]
 pub struct LissajousElement {
@@ -26,7 +27,7 @@ impl Element for LissajousElement {
 		self.count  = config.get_u32_or( "count", 1 );
 		self.offset  = config.get_u32_or( "offset", 0 ) as f32;
 	}
-	fn update( &mut self ) {
+	fn update( &mut self, context: &mut Context ) {
 		self.t += 0.1;
 	}
 	

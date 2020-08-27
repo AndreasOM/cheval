@@ -7,3 +7,5 @@ pub mod lissajous_element;
 pub mod image_element;
 pub mod text_element;
 pub mod pixel;
+
+pub mod context;

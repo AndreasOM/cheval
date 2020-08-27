@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::context::Context;
+
 #[derive(Debug)]
 pub enum ElementConfigEntry {
 	U32( u32 ),
@@ -54,7 +56,7 @@ impl ElementConfig {
 
 pub trait Element {
 	fn configure( &mut self, config: &ElementConfig );
-	fn update( &mut self );
+	fn update( &mut self, context: &mut Context );
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize );
 	fn name( &self ) -> &str;
 	fn set_name( &mut self, name: &str );

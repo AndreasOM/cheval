@@ -1,9 +1,11 @@
 use crate::element::{Element, ElementConfig};
 use crate::pixel::Pixel;
+use crate::context::Context;
 
 use std::fs::File;
 use std::io::{BufReader, Read};
 use rusttype::{point, Font, Scale};
+use regex::Regex;
 
 #[derive(Debug)]
 pub struct TextElement {
@@ -17,6 +19,7 @@ pub struct TextElement {
 	fontfile: String,
 	size: u32,
 	font: Option< Font<'static> >,
+	display_text: String,
 }
 
 impl TextElement {
@@ -45,6 +48,7 @@ impl Element for TextElement {
 		self.text	= config.get_string_or( "text", "" );
 		self.fontfile	= config.get_string_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
+		self.display_text	= config.get_string_or( "text", "" );
 
 		// load font
 		/*
@@ -83,7 +87,15 @@ let mut f = match File::open(input[ 0 ]) {
 		self.font = Some( font );
 	}
 
-	fn update( &mut self ) {
+	fn update( &mut self, context: &mut Context ) {
+		let re = Regex::new(r"^\$\{(.+)\}$").unwrap();
+		if let Some( caps ) = re.captures( &self.text ) {
+			let name = &caps[ 1 ];
+			if let Some( value ) = context.get_string( &name ) {
+				self.display_text = value.to_string();
+//				context.set_string( "clock_string", "USED" );
+			}
+		}
 	}
 
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
@@ -92,7 +104,7 @@ let mut f = match File::open(input[ 0 ]) {
 
 			let scale = Scale::uniform( self.size as f32 );
 			let start = point( self.x as f32, ( self.y + self.size ) as f32 );
-			let glyphs: Vec<_> = font.layout( &self.text, scale, start).collect();
+			let glyphs: Vec<_> = font.layout( &self.display_text, scale, start).collect();
 //			dbg!(&glyphs);
 
 			for g in glyphs {
@@ -170,6 +182,7 @@ impl TextElementFactory {
 			fontfile: "".to_string(),
 			size: 20,
 			font: None,
+			display_text: "".to_string(),
 		}
 	}
 }
