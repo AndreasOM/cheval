@@ -6,6 +6,7 @@ use serde_yaml;
 use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
 use crate::image_element::ImageElementFactory;
+use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
 
 #[derive(Debug)]
@@ -54,6 +55,7 @@ impl Cheval {
 				"block" => Box::new( BlockElementFactory::create() ),
 				"lissajous" => Box::new( LissajousElementFactory::create() ),
 				"image" => Box::new( ImageElementFactory::create() ),
+				"text" => Box::new( TextElementFactory::create() ),
 //				_ => panic!("Unsupported element type {}", e.the_type ),
 				_ => {
 					println!("Skipping unsupported element type {}", e.the_type);

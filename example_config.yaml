@@ -56,15 +56,27 @@ elements:
       offset: 10
       color: "0xff404040"
 
+
+
+  - name: Banner Backround Block
+    type: block
+    parameters:
+      pos_x: 10
+      pos_y: 870
+      width: 1900
+      height: 200
+      color: "0xff222222"
+
   - name: Banner Background
     type: image
     parameters:
       pos_x: 10
-      pos_y: 650
+      pos_y: 870
       filename: data/banner.png
 
   - name: Banner Title
     type: image
+    disabled: true
     parameters:
       pos_x: 10
       pos_y: 650
@@ -81,12 +93,52 @@ elements:
   - name: Banner Title
     type: text
     parameters:
-      pos_x: 10
-      pos_y: 650
+      pos_x: 25
+      pos_y: 875
+      width: 960
+      height: 50
+      size: 90
+      text: "Atem & Rust - #0004:"
+      font: data/FiraCode-Medium.ttf
+      color: "0xa0222266"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 870
+      width: 960
+      height: 50
+      size: 90
+      text: "Atem & Rust - #0004:"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 970
       width: 960
       height: 50
       size: 40
-      text: "Atem & Rust - #0003"
+      text: "- Text Element"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 1020
+      width: 960
+      height: 50
+      size: 40
+      text: "- Bonus: Dynamic Data"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
 
 
 
