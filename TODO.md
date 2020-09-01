@@ -7,3 +7,4 @@
 - [ ] Font cache
 - [ ] Animated images
 - [ ] Auto reloading on config
+- [ ] Make config loading more robust

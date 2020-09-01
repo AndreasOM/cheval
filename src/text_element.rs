@@ -1,6 +1,7 @@
 use crate::element::{Element, ElementConfig};
 use crate::pixel::Pixel;
 use crate::context::Context;
+use async_trait::async_trait;
 
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -38,6 +39,7 @@ impl TextElement {
 	}
 }
 
+#[async_trait]
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
@@ -86,6 +88,10 @@ let mut f = match File::open(input[ 0 ]) {
 
 		self.font = Some( font );
 	}
+	async fn run( &mut self ) -> anyhow::Result<()> {
+		Ok(())
+	}
+
 
 	fn update( &mut self, context: &mut Context ) {
 		let re = Regex::new(r"^\$\{(.+)\}$").unwrap();

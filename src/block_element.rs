@@ -1,6 +1,8 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 
+use async_trait::async_trait;
+
 #[derive(Debug)]
 pub struct BlockElement {
 	name: String,
@@ -14,6 +16,7 @@ pub struct BlockElement {
 impl BlockElement {
 }
 
+#[async_trait]
 impl Element for BlockElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
@@ -22,6 +25,11 @@ impl Element for BlockElement {
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
+	async fn run( &mut self ) -> anyhow::Result<()> {
+		Ok(())
+	}
+
+
 	fn update( &mut self, context: &mut Context ) {
 	}
 

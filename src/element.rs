@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use crate::context::Context;
 
+use async_trait::async_trait;
+
 #[derive(Debug)]
 pub enum ElementConfigEntry {
 	U32( u32 ),
@@ -54,10 +56,12 @@ impl ElementConfig {
 	}
 }
 
+#[async_trait]
 pub trait Element {
 	fn configure( &mut self, config: &ElementConfig );
 	fn update( &mut self, context: &mut Context );
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize );
+	async fn run( &mut self ) -> anyhow::Result<()>;
 	fn name( &self ) -> &str;
 	fn set_name( &mut self, name: &str );
 	fn element_type( &self ) -> &str;
@@ -68,3 +72,5 @@ impl std::fmt::Debug for Element {
 		writeln!( f,"[Trait] Element: {} [{}]", self.name(), self.element_type() )
 	}
 }
+
+

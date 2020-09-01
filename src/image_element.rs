@@ -1,6 +1,8 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 
+use async_trait::async_trait;
+
 use image::DynamicImage;
 use image::GenericImageView;
 use crate::pixel::Pixel;
@@ -25,6 +27,7 @@ impl std::fmt::Debug for ImageElement {
 impl ImageElement {
 }
 
+#[async_trait]
 impl Element for ImageElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
@@ -40,6 +43,11 @@ impl Element for ImageElement {
 			    self.image = Some( img );
 		}
 	}
+	async fn run( &mut self ) -> anyhow::Result<()> {
+		Ok(())
+	}
+
+
 	fn update( &mut self, context: &mut Context ) {
 	}
 

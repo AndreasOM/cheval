@@ -1,12 +1,21 @@
 elements:
-  - name: Green Background Block
+  - name: Black Background Block
     type: block
     parameters:
       pos_x: 0
       pos_y: 0
       width: 1920
       height: 1080
-      color: "0xff00f000"
+      color: "0xff000000"
+
+  - name: Green Block
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 96
+      height: 54
+      color: "0xff00ff00"
 
   - name: Red Block
     type: block
@@ -65,7 +74,7 @@ elements:
       pos_y: 870
       width: 1900
       height: 200
-      color: "0xff222222"
+      color: "0xff444444"
 
   - name: Banner Background
     type: image
@@ -90,6 +99,37 @@ elements:
       pos_y: 490
       filename: data/banner-test.png
 
+  - name: Banner Title Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_title.txt
+      variable: banner_title
+
+  - name: Banner Line 0 Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_line_0.txt
+      variable: banner_line_0
+
+  - name: Banner Line 1 Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_line_1.txt
+      variable: banner_line_1
+
+  - name: Banner Title
+    type: text
+    disabled: true
+    parameters:
+      pos_x: 25
+      pos_y: 825
+      width: 960
+      height: 50
+      size: 90
+      text: "${banner_title}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xa0ff2266"
+
   - name: Banner Title
     type: text
     parameters:
@@ -98,7 +138,7 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "Atem & Rust - #0004:"
+      text: "${banner_title}"
       font: data/FiraCode-Medium.ttf
       color: "0xa0222266"
 
@@ -110,7 +150,7 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "Atem & Rust - #0004:"
+      text: "${banner_title}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -122,7 +162,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "- Text Element"
+      text: "${banner_line_0}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -134,7 +174,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "- Bonus: Dynamic Data"
+      text: "${banner_line_1}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 

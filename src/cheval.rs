@@ -5,6 +5,7 @@ use serde_yaml;
 
 use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
+use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
@@ -46,7 +47,7 @@ impl Cheval {
 		}
 	}
 
-	pub fn load( &mut self, config_file_name: &str ) -> Result<(), Box< dyn std::error::Error > > {
+	pub async fn load( &mut self, config_file_name: &str ) -> Result<(), Box< dyn std::error::Error > > {
 		let cf = std::fs::File::open( config_file_name )?;
 
 		let config: Config = serde_yaml::from_reader( cf )?;
@@ -56,8 +57,9 @@ impl Cheval {
 			if e.disabled {
 				continue;
 			};
-			let mut element: Box< dyn Element > = match e.the_type.as_ref() {
-				"block" => Box::new( BlockElementFactory::create() ),
+			let mut element: Box< dyn Element + Send > = match e.the_type.as_ref() {
+				"block" => Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
+				"loadtext" => Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
 				"lissajous" => Box::new( LissajousElementFactory::create() ),
 				"image" => Box::new( ImageElementFactory::create() ),
 				"text" => Box::new( TextElementFactory::create() ),
@@ -83,6 +85,11 @@ impl Cheval {
 			self.add_element( element );
 		}
 
+		for e in self.elements.iter_mut() {
+			e.run().await?;
+		}
+
+		println!("Running...");
 		Ok(())
 	}
 	pub fn add_element( &mut self, element: Box< dyn Element > ) {

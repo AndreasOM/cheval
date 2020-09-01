@@ -1,5 +1,6 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
+use async_trait::async_trait;
 
 #[derive(Debug)]
 pub struct LissajousElement {
@@ -17,6 +18,7 @@ pub struct LissajousElement {
 impl LissajousElement {
 }
 
+#[async_trait]
 impl Element for LissajousElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
@@ -27,6 +29,11 @@ impl Element for LissajousElement {
 		self.count  = config.get_u32_or( "count", 1 );
 		self.offset  = config.get_u32_or( "offset", 0 ) as f32;
 	}
+	async fn run( &mut self )  -> anyhow::Result<()> {
+		Ok(())
+	}
+
+
 	fn update( &mut self, context: &mut Context ) {
 		self.t += 0.1;
 	}

@@ -16,13 +16,14 @@ fn render_frame( buffer: &mut Vec<u32>, width: usize, height: usize, cheval: &Ch
 	cheval.render( buffer, width, height );
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	let mut window = Window::new();
 
 	let mut cheval = Cheval::new();
 
-	cheval.load( "example_config.yaml" );
+	cheval.load( "example_config.yaml" ).await?;
 
 	dbg!( &cheval );
 	while !window.done() {
@@ -30,6 +31,8 @@ fn main() {
 		window.render_frame( &mut render_frame, &cheval );
 		window.next_frame();
 	}
+
+	Ok(())
 }
 
 // mod window;
