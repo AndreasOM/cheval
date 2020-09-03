@@ -113,4 +113,9 @@ impl Cheval {
 			e.render( buffer, width, height );
 		}
 	}
+	pub fn shutdown( &mut self ) {
+		for e in self.elements.iter_mut() {
+			e.shutdown();
+		}
+	}
 }

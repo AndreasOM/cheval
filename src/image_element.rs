@@ -43,6 +43,11 @@ impl Element for ImageElement {
 			    self.image = Some( img );
 		}
 	}
+
+	fn shutdown( &mut self ) {
+		
+	}
+	
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}

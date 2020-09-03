@@ -80,5 +80,10 @@ impl Window {
 		}
 		self.framebuffer.write_frame( &self.frame );
 	}
+	
+	pub fn shutdown( &mut self ) {
+		
+	}
+
 }
 

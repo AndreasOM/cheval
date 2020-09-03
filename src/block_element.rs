@@ -25,6 +25,11 @@ impl Element for BlockElement {
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
+
+	fn shutdown( &mut self ) {
+		
+	}
+
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}

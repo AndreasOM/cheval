@@ -71,6 +71,7 @@ impl ElementConfig {
 #[async_trait]
 pub trait Element {
 	fn configure( &mut self, config: &ElementConfig );
+	fn shutdown( &mut self );
 	fn update( &mut self, context: &mut Context );
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize );
 	async fn run( &mut self ) -> anyhow::Result<()>;

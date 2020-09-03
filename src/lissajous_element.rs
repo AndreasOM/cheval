@@ -29,6 +29,11 @@ impl Element for LissajousElement {
 		self.count  = config.get_u32_or( "count", 1 );
 		self.offset  = config.get_u32_or( "offset", 0 ) as f32;
 	}
+	
+	fn shutdown( &mut self ) {
+		
+	}
+
 	async fn run( &mut self )  -> anyhow::Result<()> {
 		Ok(())
 	}

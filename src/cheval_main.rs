@@ -32,6 +32,8 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 		window.next_frame();
 	}
 
+	cheval.shutdown();
+
 	Ok(())
 }
 

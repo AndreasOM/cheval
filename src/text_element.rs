@@ -88,6 +88,11 @@ let mut f = match File::open(input[ 0 ]) {
 
 		self.font = Some( font );
 	}
+
+	fn shutdown( &mut self ) {
+		
+	}
+	
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}
