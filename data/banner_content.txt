@@ -1,0 +1,4 @@
+Atem & Rust - #0006:
+- [x] Multiline text loading
+- Bonus: Cleanup shutdown
+- Bonus: Command line handling

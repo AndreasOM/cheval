@@ -16,7 +16,8 @@ pub struct LoadTextElement {
 	name: String,
 	filename: String,
 	variable: String,
-	value: String,
+	split_lines: bool,
+	values: Vec<String>,
 	watcher: Option<RecommendedWatcher>,
 	channel: Option<Receiver<Message>>,
 }
@@ -37,6 +38,7 @@ impl Element for LoadTextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.filename = config.get_string_or( "filename", "" );
 		self.variable = config.get_string_or( "variable", "" );
+		self.split_lines = config.get_bool_or( "split_lines", false );
 	}
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		if self.filename != "" {
@@ -81,8 +83,15 @@ impl Element for LoadTextElement {
 				Ok( _msg ) => {
 					if let Ok( s ) = std::fs::read_to_string( &self.filename ) {
 						// :TODO: format string
-						println!("{:?}", &s);
-						self.value = s.to_string();
+						if self.split_lines {
+							let lines: Vec<&str> = s.split('\n').collect();
+							println!("{:#?}", &lines);
+							self.values = lines.iter().map( |l| l.to_string() ).collect();
+							dbg!(&self.values);
+						} else {
+							println!("{:?}", &s);
+							self.values[ 0 ] = s.to_string();
+						}
 					}
 				},
 				_ => {
@@ -91,7 +100,23 @@ impl Element for LoadTextElement {
 			}
 		}
 		if self.variable != "" {
-			context.set_string( &self.variable, &self.value );
+			if self.split_lines {
+				// :TODO: move into helper
+				let parts : Vec<&str> = self.variable.split("{}").collect();
+				let mut i = 0;
+				for l in &self.values {
+					let variable = match parts.len() {
+						0 => format!("{}", i ),
+						1 => format!("{}{}", parts[ 0 ], i ),
+						2 => format!("{}{}{}", parts[ 0 ], i, parts[ 1 ] ),
+						_ => format!("Variable template >{}< not supported", self.variable ), // panic?
+					};
+					context.set_string( &variable, &l );
+					i += 1;
+				}
+			} else {
+				context.set_string( &self.variable, &self.values[ 0 ] );
+			}
 		}
 	}
 
@@ -115,11 +140,14 @@ pub struct LoadTextElementFactory {
 
 impl LoadTextElementFactory {
 	pub fn create() -> LoadTextElement {
+		let mut values = Vec::new();
+		values.push( "".to_string() );
 		LoadTextElement {
 			name: "".to_string(),
 			filename: "".to_string(),
 			variable: "".to_string(),
-			value: "".to_string(),
+			split_lines: false,
+			values: values,
 			watcher: None,
 			channel: None,
 		}

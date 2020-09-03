@@ -8,6 +8,7 @@ use async_trait::async_trait;
 pub enum ElementConfigEntry {
 	U32( u32 ),
 	STRING( String ),
+	BOOL( bool ),
 }
 
 #[derive(Debug)]
@@ -23,7 +24,11 @@ impl ElementConfig {
 	}
 
 	pub fn set( &mut self, name: &str, value: &str ) {
-		if let Ok( v ) = value.parse::<u32>() {
+		if value == "true" {
+			self.entries.insert( name.to_string(), ElementConfigEntry::BOOL( true ) );
+		} else if value == "false" {
+			self.entries.insert( name.to_string(), ElementConfigEntry::BOOL( false ) );
+		} else if let Ok( v ) = value.parse::<u32>() {
 			self.entries.insert( name.to_string(), ElementConfigEntry::U32( v ) );
 		} else  {
 			if let Some( v ) = value.strip_prefix( "0x" ) {
@@ -52,6 +57,13 @@ impl ElementConfig {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( s ) ) => s.clone(),
 			_ => default.to_string(),
+		}
+	}
+
+	pub fn get_bool_or( &self, name: &str, default: bool ) -> bool {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::BOOL( b ) ) => *b,
+			_ => default,
 		}
 	}
 }

@@ -1,1 +1,1 @@
-- [x] Auto reloading
+- [ ] Multiline text loading

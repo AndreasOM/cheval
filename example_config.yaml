@@ -117,6 +117,13 @@ elements:
       filename: data/banner_line_1.txt
       variable: banner_line_1
 
+  - name: Banner Content Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_content.txt
+      variable: banner_content_{}
+      split_lines: true
+
   - name: Banner Title
     type: text
     disabled: true
@@ -138,7 +145,7 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "${banner_title}"
+      text: "${banner_content_0}"
       font: data/FiraCode-Medium.ttf
       color: "0xa0222266"
 
@@ -150,7 +157,7 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "${banner_title}"
+      text: "${banner_content_0}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -162,7 +169,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "${banner_line_0}"
+      text: "${banner_content_1}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -174,7 +181,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "${banner_line_1}"
+      text: "${banner_content_2}"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
