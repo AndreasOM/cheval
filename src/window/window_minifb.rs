@@ -1,6 +1,7 @@
 use minifb;
 
 use cheval::cheval::Cheval;
+use crate::window::Window;
 
 pub struct WindowMinifb {
 	width: usize,
@@ -35,15 +36,17 @@ impl WindowMinifb {
 		};
 		s.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 		s
-	}
+	}	
+}
+impl Window for WindowMinifb {
 
-	pub fn done( &self ) -> bool {
+	fn done( &self ) -> bool {
 		!( self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) )
 	}
-	pub fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
 		func( &mut self.buffer, self.width, self.height, cheval );
 	}
-	pub fn next_frame( &mut self ) {
+	fn next_frame( &mut self ) {
 		// :TODO: handle multisampling for downscaling
 		// :TODO: actually use downscaling factor for multisampling
 		let ds = self.downscale;

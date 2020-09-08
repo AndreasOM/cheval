@@ -1,6 +1,7 @@
 use framebuffer::Framebuffer;
 
 use cheval::cheval::Cheval;
+use crate::window::Window;
 
 pub struct WindowFramebuffer {
 	width: usize,
@@ -29,15 +30,18 @@ impl WindowFramebuffer {
 		};
 //		dbg!(&s);
 		s
-	}
+	}	
+}
 
-	pub fn done( &self ) -> bool {
+impl Window for WindowFramebuffer {
+
+	fn done( &self ) -> bool {
 		false
 	}
-	pub fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
 		func( &mut self.buffer, self.width, self.height, cheval );
 	}
-	pub fn next_frame( &mut self ) {
+	fn next_frame( &mut self ) {
 		for y in 0..self.height {
 			for x in 0..self.width {
 				let o = y * self.width + x;
@@ -80,10 +84,5 @@ impl WindowFramebuffer {
 		}
 		self.framebuffer.write_frame( &self.frame );
 	}
-	
-	pub fn shutdown( &mut self ) {
-		
-	}
-
 }
 

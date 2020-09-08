@@ -2,7 +2,8 @@
 
 use cheval::cheval::Cheval;
 use clap::{App, Arg};
-use crate::window::Window;
+use crate::window::WindowFactory;
+//use crate::window::WindowTrait;
 
 fn render_frame( buffer: &mut Vec<u32>, width: usize, height: usize, cheval: &Cheval )
 {
@@ -29,14 +30,22 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the config file to load.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("window-type")
+							.long("window-type")
+							.short("w")
+							.value_name("WINDOW-TYPE")
+							.help("Set the window type to use.")
+							.takes_value(true)
+						)
 						.get_matches();
 
 	let config = matches.value_of("config").unwrap_or("example_config.yaml").to_string();
+	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
 
 	dbg!(&config);
+	dbg!(&window_type);
 
-
-	let mut window = Window::new();
+	let mut window = WindowFactory::create( &window_type );
 
 	let mut cheval = Cheval::new();
 

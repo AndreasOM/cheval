@@ -1,42 +1,33 @@
 
 use cheval::cheval::Cheval;
 
-#[cfg(target_arch = "x86_64")]
-pub struct Window {
-	window: WindowMinifb,
+pub struct WindowFactory {
 }
 
-#[cfg(target_arch = "arm")]
-pub struct Window {
-	window: WindowFramebuffer,
-}
-
-impl Window {
+impl WindowFactory {
 	#[cfg(target_arch = "x86_64")]
-	pub fn new() -> Self {
-		Self {
-			window: WindowMinifb::new(),
-		}
+	pub fn get_default_window_type( ) -> String {
+		"minifb".to_string()
 	}
-
 	#[cfg(target_arch = "arm")]
-	pub fn new() -> Self {
-		Self {
-			window: WindowFramebuffer::new(),
+	pub fn get_default_window_type( ) -> String {
+		"framebuffer".to_string()
+	}
+	pub fn create( window_type: &str ) -> Box< dyn Window >{
+		match window_type {
+	#[cfg(target_arch = "x86_64")]
+			"minifb" => Box::new( WindowMinifb::new() ),
+	#[cfg(target_arch = "arm")]
+			"framebuffer" => Box::new( WindowFramebuffer::new() ),
+			_ => panic!("window type not supported {:?}", &window_type ),
 		}
 	}
+}
 
-	pub fn done( &self ) -> bool {
-		self.window.done()
-	}
-
-	pub fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
-		self.window.render_frame( func, cheval )
-	}
-
-	pub fn next_frame( &mut self ) {
-		self.window.next_frame()
-	}
+pub trait Window {
+	fn done( &self ) -> bool;
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  );
+	fn next_frame( &mut self );
 }
 
 #[cfg(target_arch = "x86_64")]
