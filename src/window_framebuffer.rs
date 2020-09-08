@@ -12,22 +12,22 @@ pub struct Window {
 
 impl Window {
 	pub fn new() -> Self {
-		let mut framebuffer = Framebuffer::new("/dev/fb0").unwrap_or_else(|e| {
+		let framebuffer = Framebuffer::new("/dev/fb0").unwrap_or_else(|e| {
 			panic!("{}", e)
 		});
 		let width = framebuffer.var_screen_info.xres as usize;
 		let height = framebuffer.var_screen_info.yres as usize;
 		let line_length = framebuffer.fix_screen_info.line_length as usize;
-		let mut buffer = vec![0u32; line_length * height];
-		let mut frame = vec![0u8; line_length * height];
-		let mut s = Self {
+		let buffer = vec![0u32; line_length * height];
+		let frame = vec![0u8; line_length * height];
+		let s = Self {
 			width: width,
 			height: height,
 			buffer: buffer,
 			frame: frame,
 			framebuffer: framebuffer,
 		};
-//		dbg!(s);
+//		dbg!(&s);
 		s
 	}
 
@@ -43,7 +43,7 @@ impl Window {
 				let o = y * self.width + x;
 				let argb = self.buffer[ o ];
 
-				let a = ( argb >> 24 ) as u8;
+//				let a = ( argb >> 24 ) as u8;
 				let r = ( argb >> 16 ) as u8;
 				let g = ( argb >>  8 ) as u8;
 				let b = ( argb >>  0 ) as u8;
@@ -66,11 +66,11 @@ impl Window {
 				// rrrr rggg gggb bbbb
 
 
-				let rgb565: u16 = (
+				let rgb565: u16 =
 					( ( ( r as u16 ) & 0xf8 ) << 8 )
 					| ( ( ( g as u16 ) & 0xfc ) << 3 )
 					| ( ( ( b as u16 ) & 0xf8 ) >> 3 )
-				);
+				;
 
 				let hb = ( ( rgb565 >> 8 ) & 0xff ) as u8;
 				let lb = ( rgb565 & 0xff ) as u8;
