@@ -2,6 +2,7 @@
 
 use cheval::cheval::Cheval;
 use clap::{App, Arg};
+use crate::window::Window;
 
 fn render_frame( buffer: &mut Vec<u32>, width: usize, height: usize, cheval: &Cheval )
 {
@@ -53,13 +54,4 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-// mod window;
-#[cfg(target_arch = "x86_64")]
-mod window_minifb;
-#[cfg(target_arch = "x86_64")]
-pub use window_minifb::Window as Window;
-
-#[cfg(target_arch = "arm")]
-mod window_framebuffer;
-#[cfg(target_arch = "arm")]
-pub use window_framebuffer::Window as Window;
+mod window;

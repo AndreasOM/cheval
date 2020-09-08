@@ -2,7 +2,7 @@ use framebuffer::Framebuffer;
 
 use cheval::cheval::Cheval;
 
-pub struct Window {
+pub struct WindowFramebuffer {
 	width: usize,
 	height: usize,
 	buffer: Vec<u32>,
@@ -10,7 +10,7 @@ pub struct Window {
 	framebuffer: Framebuffer,
 }
 
-impl Window {
+impl WindowFramebuffer {
 	pub fn new() -> Self {
 		let framebuffer = Framebuffer::new("/dev/fb0").unwrap_or_else(|e| {
 			panic!("{}", e)

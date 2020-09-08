@@ -1,6 +1,14 @@
 all:
 
 
+check:
+	cargo check
+
+build-release:
+	cargo build --release
+
+run-release:
+	cargo run --release
 
 arm-check:
 	cargo check --target=arm-unknown-linux-musleabi

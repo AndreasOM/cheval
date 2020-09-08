@@ -2,7 +2,7 @@ use minifb;
 
 use cheval::cheval::Cheval;
 
-pub struct Window {
+pub struct WindowMinifb {
 	width: usize,
 	height: usize,
 	downscale: usize, 
@@ -11,7 +11,7 @@ pub struct Window {
 	window: minifb::Window,
 }
 
-impl Window {
+impl WindowMinifb {
 	pub fn new() -> Self {
 		let w = 1920;
 		let h = 1080;
