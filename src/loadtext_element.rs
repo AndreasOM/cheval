@@ -46,17 +46,18 @@ impl Element for LoadTextElement {
 
 	fn shutdown( &mut self ) {
 		if let Some( tx ) = &self.sender {
-			tx.send( Message::Shutdown );
+			match tx.send( Message::Shutdown ) {
+				_ => {},
+			}
 		}
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		if self.filename != "" {
-			let filename = self.filename.clone();
 			let (tx, rx) = channel();
 
 			let (tx2, rx2) = channel();
-			tx2.send( Message::FileChanged ); // force update on start
+			tx2.send( Message::FileChanged )?; // force update on start
 
 			self.channel = Some( rx2 );
 
@@ -87,8 +88,10 @@ impl Element for LoadTextElement {
 					if keep_running {
 						match rx.try_recv() {
 							Ok(event) => {
-									println!("E: {:?}", event);
-								tx2.send( Message::FileChanged );
+								println!("E: {:?}", event);
+								match tx2.send( Message::FileChanged ) {
+									_ => {},
+								}
 							},
 							Err( TryRecvError::Empty ) => {
 
@@ -150,7 +153,7 @@ impl Element for LoadTextElement {
 		}
 	}
 
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+	fn render( &self, _buffer: &mut Vec<u32>, _width: usize, _height: usize ) {
 	}
 	fn name( &self ) -> &str {
 		&self.name

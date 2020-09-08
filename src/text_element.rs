@@ -4,7 +4,7 @@ use crate::context::Context;
 use async_trait::async_trait;
 
 use std::fs::File;
-use std::io::{BufReader, Read};
+use std::io::Read;
 use rusttype::{point, Font, Scale};
 use regex::Regex;
 
@@ -24,7 +24,7 @@ pub struct TextElement {
 }
 
 impl TextElement {
-	fn fill_box( buffer: &mut Vec<u32>, width: usize, height: usize, x: u32, y: u32, w: u32, h: u32, color: u32 ) {
+	fn _fill_box( buffer: &mut Vec<u32>, width: usize, height: usize, x: u32, y: u32, w: u32, h: u32, color: u32 ) {
 		for iy in 0..h {
 			let py = iy + y;
 			if py >= height as u32 { continue; }
@@ -109,7 +109,7 @@ let mut f = match File::open(input[ 0 ]) {
 		}
 	}
 
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+	fn render( &self, buffer: &mut Vec<u32>, width: usize, _height: usize ) {
 //		dbg!(&self);
 		if let Some( font ) = &self.font {
 

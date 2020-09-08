@@ -35,7 +35,7 @@ impl Element for BlockElement {
 	}
 
 
-	fn update( &mut self, context: &mut Context ) {
+	fn update( &mut self, _context: &mut Context ) {
 	}
 
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {

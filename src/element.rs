@@ -80,7 +80,7 @@ pub trait Element {
 	fn element_type( &self ) -> &str;
 }
 
-impl std::fmt::Debug for Element {
+impl std::fmt::Debug for dyn Element {
 	fn fmt( &self, f: &mut std::fmt::Formatter ) -> std::fmt::Result {
 		writeln!( f,"[Trait] Element: {} [{}]", self.name(), self.element_type() )
 	}

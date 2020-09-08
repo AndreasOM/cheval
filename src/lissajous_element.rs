@@ -39,7 +39,7 @@ impl Element for LissajousElement {
 	}
 
 
-	fn update( &mut self, context: &mut Context ) {
+	fn update( &mut self, _context: &mut Context ) {
 		self.t += 0.1;
 	}
 	

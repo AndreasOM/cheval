@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 use serde_yaml;
 
 use crate::block_element::BlockElementFactory;

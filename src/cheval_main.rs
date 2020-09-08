@@ -1,8 +1,6 @@
 //use window::Window;
 
 use cheval::cheval::Cheval;
-use cheval::block_element::{BlockElement,BlockElementFactory};
-use cheval::element::{Element,ElementConfig};
 use clap::{App, Arg};
 
 fn render_frame( buffer: &mut Vec<u32>, width: usize, height: usize, cheval: &Cheval )
