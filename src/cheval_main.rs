@@ -37,10 +37,23 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the window type to use.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("frames")
+							.long("frames")
+							.short("f")
+							.value_name("FRAMES")
+							.help("Set the number of frames to render.")
+							.takes_value(true)
+						)
 						.get_matches();
 
 	let config = matches.value_of("config").unwrap_or("example_config.yaml").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
+	let frames = matches.value_of("frames").unwrap_or("0").to_string();
+
+	let frames = match frames.parse::<u32>() {
+		Ok( frames ) => frames,
+		Err( _ ) => panic!("Invalid frames {:?}", frames ),
+	};
 
 	dbg!(&config);
 	dbg!(&window_type);
@@ -52,10 +65,15 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	cheval.load( &config ).await?;
 
 	dbg!( &cheval );
+	let mut frame_count = 0;
 	while !window.done() {
 		cheval.update();
 		window.render_frame( &mut render_frame, &cheval );
 		window.next_frame();
+		frame_count += 1;
+		if frames > 0 && frame_count >= frames {
+			break;
+		}
 	}
 
 	cheval.shutdown();

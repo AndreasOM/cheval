@@ -15,6 +15,7 @@ impl WindowFactory {
 	}
 	pub fn create( window_type: &str ) -> Box< dyn Window >{
 		match window_type {
+			"png" => Box::new( WindowPng::new() ),
 	#[cfg(target_arch = "x86_64")]
 			"minifb" => Box::new( WindowMinifb::new() ),
 	#[cfg(target_arch = "arm")]
@@ -40,3 +41,6 @@ use window_minifb::WindowMinifb;
 mod window_framebuffer;
 #[cfg(target_arch = "arm")]
 pub use window_framebuffer::WindowFramebuffer;
+
+mod window_png;
+pub use window_png::WindowPng;
