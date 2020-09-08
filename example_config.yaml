@@ -74,7 +74,7 @@ elements:
       pos_y: 870
       width: 1900
       height: 200
-      color: "0xff444444"
+      color: "0xff666666"
 
   - name: Banner Background
     type: image
