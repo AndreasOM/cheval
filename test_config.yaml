@@ -1,0 +1,9 @@
+elements:
+  - name: Red Block
+    type: block
+    parameters:
+      pos_x: 910
+      pos_y: 490
+      width: 100
+      height: 100
+      color: "0xffaa2222"
