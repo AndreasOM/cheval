@@ -1,5 +1,6 @@
 
 use cheval::cheval::Cheval;
+use cheval::render_buffer::RenderBuffer;
 
 pub struct WindowFactory {
 }
@@ -27,7 +28,7 @@ impl WindowFactory {
 
 pub trait Window {
 	fn done( &self ) -> bool;
-	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  );
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &Cheval ), cheval: &Cheval  );
 	fn next_frame( &mut self );
 }
 

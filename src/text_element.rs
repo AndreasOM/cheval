@@ -2,6 +2,8 @@ use crate::element::{Element, ElementConfig};
 use crate::pixel::Pixel;
 use crate::context::Context;
 use async_trait::async_trait;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use std::fs::File;
 use std::io::Read;
@@ -109,7 +111,7 @@ let mut f = match File::open(input[ 0 ]) {
 		}
 	}
 
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, _height: usize ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
 		if let Some( font ) = &self.font {
 
@@ -125,12 +127,12 @@ let mut f = match File::open(input[ 0 ]) {
 							let x = ( bb.min.x as u32 + x ) as u32;
 							let y = ( bb.min.y as u32 + y ) as u32;
 
-							let o = ( y * width as u32 + x ) as usize;
-							if o < buffer.len() {
-								let old_pixel = Pixel::from_u32( buffer[ o ] );
+							let o = ( y * render_buffer.width as u32 + x ) as usize;
+							if o < render_buffer.buffer.len() {
+								let old_pixel = Pixel::from_u32( render_buffer.buffer[ o ] );
 								let new_pixel = Pixel::from_u32( self.color );
 								let pixel = Pixel::blend_with_alpha_and_opacity( new_pixel, old_pixel, v );
-								buffer[ o ] = pixel.to_u32();
+								render_buffer.buffer[ o ] = pixel.to_u32();
 							}
 						}
 					});

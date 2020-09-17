@@ -2,11 +2,10 @@ use framebuffer::Framebuffer;
 
 use cheval::cheval::Cheval;
 use crate::window::Window;
+use cheval::render_buffer::RenderBuffer;
 
 pub struct WindowFramebuffer {
-	width: usize,
-	height: usize,
-	buffer: Vec<u32>,
+	render_buffer: RenderBuffer,
 	frame: Vec<u8>,
 	framebuffer: Framebuffer,
 }
@@ -19,12 +18,10 @@ impl WindowFramebuffer {
 		let width = framebuffer.var_screen_info.xres as usize;
 		let height = framebuffer.var_screen_info.yres as usize;
 		let line_length = framebuffer.fix_screen_info.line_length as usize;
-		let buffer = vec![0u32; line_length * height];
 		let frame = vec![0u8; line_length * height];
+		let render_buffer = RenderBuffer::new( width, height );
 		let s = Self {
-			width: width,
-			height: height,
-			buffer: buffer,
+			render_buffer: render_buffer,
 			frame: frame,
 			framebuffer: framebuffer,
 		};
@@ -38,14 +35,14 @@ impl Window for WindowFramebuffer {
 	fn done( &self ) -> bool {
 		false
 	}
-	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
-		func( &mut self.buffer, self.width, self.height, cheval );
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &Cheval ), cheval: &Cheval  ) {
+		func( &mut self.render_buffer, cheval );
 	}
 	fn next_frame( &mut self ) {
-		for y in 0..self.height {
-			for x in 0..self.width {
-				let o = y * self.width + x;
-				let argb = self.buffer[ o ];
+		for y in 0..self.render_buffer.height {
+			for x in 0..self.render_buffer.width {
+				let o = y * self.render_buffer.width + x;
+				let argb = self.render_buffer.buffer[ o ];
 
 //				let a = ( argb >> 24 ) as u8;
 				let r = ( argb >> 16 ) as u8;

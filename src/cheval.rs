@@ -10,8 +10,12 @@ use crate::image_element::ImageElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
 use crate::context::Context;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use chrono::{DateTime, Utc};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Cheval {
@@ -107,11 +111,19 @@ impl Cheval {
 		}	
 	}
 
-	pub fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+	pub fn render( &self, render_buffer: &mut RenderBuffer ) {
+/*		
 		for e in &self.elements {
 //			dbg!(e);
-			e.render( buffer, width, height );
-		}
+			e.render( &mut render_buffer.buffer, render_buffer.width, render_buffer.height );
+		};
+*/		
+
+		let mut render_context = RenderContext::new();
+		for e in &self.elements {
+//			dbg!(e);
+			e.render( render_buffer, &mut render_context );
+		};
 	}
 	pub fn shutdown( &mut self ) {
 		for e in self.elements.iter_mut() {

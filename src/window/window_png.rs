@@ -1,11 +1,10 @@
 use cheval::cheval::Cheval;
 use crate::window::Window;
+use cheval::render_buffer::RenderBuffer;
 
 pub struct WindowPng {
-	width: usize,
-	height: usize,
+	render_buffer: RenderBuffer,
 	downscale: usize, 
-	buffer: Vec<u32>,
 	frame: Vec<u32>,
 	filename: Option<String>,
 }
@@ -17,11 +16,10 @@ impl WindowPng {
 		let ds = 2;
 		let fw = w/ds;
 		let fh = h/ds;
+		let render_buffer = RenderBuffer::new( w, h );
 		Self {
-			width: w,
-			height: h,
+			render_buffer,
 			downscale: ds,
-			buffer: vec![0u32; w * h],
 			frame: vec![0u32; fw * fh],
 			filename: Some( "window.png".to_string() ), //None,
 		}
@@ -32,36 +30,36 @@ impl Window for WindowPng {
 	fn done( &self ) -> bool {
 		false
 	}
-	fn render_frame( &mut self, func: &mut dyn FnMut( &mut Vec<u32>, usize, usize, &Cheval ), cheval: &Cheval  ) {
-		func( &mut self.buffer, self.width, self.height, cheval );
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &Cheval ), cheval: &Cheval  ) {
+		func( &mut self.render_buffer, cheval );
 	}
 	fn next_frame( &mut self ) {
 		// :TODO: handle multisampling for downscaling
 		// :TODO: actually use downscaling factor for multisampling
 		let ds = self.downscale;
-		let fw = self.width / ds;
-		let fh = self.height / ds;
+		let fw = self.render_buffer.width / ds;
+		let fh = self.render_buffer.height / ds;
 
 		for y in 0..fh {
 			for x in 0..fw {
-				let so = ( y * ds ) * self.width + ( x * ds );
+				let so = ( y * ds ) * self.render_buffer.width + ( x * ds );
 				let mut argb = vec![0u32;4];
-				let pixel = self.buffer[ so ];
+				let pixel = self.render_buffer.buffer[ so ];
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.buffer[ so + 1 ];
+				let pixel = self.render_buffer.buffer[ so + 1 ];
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.buffer[ so + self.width ];
+				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.buffer[ so + self.width + 1 ];
+				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;

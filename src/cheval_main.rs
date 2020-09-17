@@ -4,17 +4,18 @@ use cheval::cheval::Cheval;
 use clap::{App, Arg};
 use crate::window::WindowFactory;
 //use crate::window::WindowTrait;
+use cheval::render_buffer::RenderBuffer;
 
-fn render_frame( buffer: &mut Vec<u32>, width: usize, height: usize, cheval: &Cheval )
+fn render_frame( render_buffer: &mut RenderBuffer, cheval: &Cheval )
 {
-	for y in 0..height {
-		for x in 0..width {
-			let o = y * width + x;
-			buffer[ o ] = 0x00000000;
+	for y in 0..render_buffer.height {
+		for x in 0..render_buffer.width {
+			let o = y * render_buffer.width + x;
+			render_buffer.buffer[ o ] = 0x00000000;
 		}
 	}
 
-	cheval.render( buffer, width, height );
+	cheval.render( render_buffer );
 }
 
 #[tokio::main]

@@ -1,5 +1,7 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use async_trait::async_trait;
 
@@ -29,23 +31,23 @@ impl Element for BlockElement {
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}
-	
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+
+	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
+//		dbg!(&render_context);
 		for y in 0..self.height {
 			let py = y + self.y;
-			if py >= height as u32 { continue; }
+			if py >= render_buffer.height as u32 { continue; }
 			for x in 0..self.width {
 				let px = x + self.x;
-				if px >= width as u32 { continue; }
+				if px >= render_buffer.width as u32 { continue; }
 
 //				dbg!(&px, &py);
 
-				let o = ( py * width as u32 + px ) as usize;
-				buffer[ o ] = self.color;
+				let o = ( py * render_buffer.width as u32 + px ) as usize;
+				render_buffer.buffer[ o ] = self.color;
 			}
 		}
-
 	}
 	fn name( &self ) -> &str {
 		&self.name

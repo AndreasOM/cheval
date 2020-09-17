@@ -1,6 +1,8 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use async_trait::async_trait;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 #[derive(Debug)]
 pub struct LissajousElement {
@@ -43,7 +45,7 @@ impl Element for LissajousElement {
 		self.t += 0.1;
 	}
 	
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 		for c in 0..self.count {
 			let t = self.t + self.offset + 0.1 * c as f32;
 			let x = ( ( self.width as f32 * t.sin() ) as isize ).saturating_add( self.x as isize ) as i32;
@@ -51,12 +53,12 @@ impl Element for LissajousElement {
 			let y = ( ( self.height as f32 * t.sin() ) as isize ).saturating_add( self.y as isize ) as i32;
 			for dy in 0..5 {
 				for dx in 0..5 {
-					if x < 0 || x.saturating_add( dx ) >= width as i32 { continue; }
-					if y < 0 || y.saturating_add( dy ) >= height as i32 { continue; }
+					if x < 0 || x.saturating_add( dx ) >= render_buffer.width as i32 { continue; }
+					if y < 0 || y.saturating_add( dy ) >= render_buffer.height as i32 { continue; }
 
-					let o = ( ( y+dy ) * width as i32 + x + dx ) as usize;
+					let o = ( ( y+dy ) * render_buffer.width as i32 + x + dx ) as usize;
 
-					buffer[ o ] = self.color;
+					render_buffer.buffer[ o ] = self.color;
 				}
 			}
 		}

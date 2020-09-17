@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use crate::context::Context;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use async_trait::async_trait;
 
@@ -73,7 +75,8 @@ pub trait Element {
 	fn configure( &mut self, config: &ElementConfig );
 	fn shutdown( &mut self ) {}
 	fn update( &mut self, _context: &mut Context ) {}
-	fn render( &self, _buffer: &mut Vec<u32>, _width: usize, _height: usize ) {}
+	// fn render( &self, _buffer: &mut Vec<u32>, _width: usize, _height: usize ) {}
+	fn render( &self, _render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {}
 	async fn run( &mut self ) -> anyhow::Result<()>;
 	fn name( &self ) -> &str;
 	fn set_name( &mut self, name: &str );

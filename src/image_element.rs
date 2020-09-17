@@ -1,5 +1,7 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use async_trait::async_trait;
 
@@ -56,35 +58,35 @@ impl Element for ImageElement {
 	fn update( &mut self, _context: &mut Context ) {
 	}
 
-	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
 		match &self.image {
 			None => {
 				for y in 0..self.height {
 					let py = y + self.y;
-					if py >= height as u32 { continue; }
+					if py >= render_buffer.height as u32 { continue; }
 					for x in 0..self.width {
 						let px = x + self.x;
-						if px >= width as u32 { continue; }
+						if px >= render_buffer.width as u32 { continue; }
 
 		//				dbg!(&px, &py);
 
-						let o = ( py * width as u32 + px ) as usize;
-						buffer[ o ] = self.color;
+						let o = ( py * render_buffer.width as u32 + px ) as usize;
+						render_buffer.buffer[ o ] = self.color;
 					}
 				}
 			},
 			Some( img ) => {
 				for y in 0..self.height {
 					let py = y + self.y;
-					if py >= height as u32 { continue; }
+					if py >= render_buffer.height as u32 { continue; }
 					for x in 0..self.width {
 						let px = x + self.x;
-						if px >= width as u32 { continue; }
+						if px >= render_buffer.width as u32 { continue; }
 
-						let o = ( py * width as u32 + px ) as usize;
+						let o = ( py * render_buffer.width as u32 + px ) as usize;
 
-						let old_pixel = buffer[ o ];
+						let old_pixel = render_buffer.buffer[ o ];
 
             			let pixel = img.get_pixel(x, y);						
 
@@ -98,7 +100,7 @@ impl Element for ImageElement {
 						let old_pixel = Pixel::from_u32( old_pixel );
 						let pixel = Pixel::blend_with_alpha( pixel, old_pixel );
 //						let pixel = ImageElement::mix_argb_with_alpha( pixel, old_pixel, 1.0 );
-						buffer[ o ] = pixel.to_u32();
+						render_buffer.buffer[ o ] = pixel.to_u32();
 					}
 				}
 			},

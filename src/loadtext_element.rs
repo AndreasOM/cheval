@@ -1,5 +1,7 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
+use crate::render_context::RenderContext;
+use crate::render_buffer::RenderBuffer;
 
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use std::sync::mpsc::channel;
@@ -153,8 +155,6 @@ impl Element for LoadTextElement {
 		}
 	}
 
-	fn render( &self, _buffer: &mut Vec<u32>, _width: usize, _height: usize ) {
-	}
 	fn name( &self ) -> &str {
 		&self.name
 	}
