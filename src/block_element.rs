@@ -26,18 +26,10 @@ impl Element for BlockElement {
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
 
-	fn shutdown( &mut self ) {
-		
-	}
-
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}
-
-
-	fn update( &mut self, _context: &mut Context ) {
-	}
-
+	
 	fn render( &self, buffer: &mut Vec<u32>, width: usize, height: usize ) {
 //		dbg!(&self);
 		for y in 0..self.height {
