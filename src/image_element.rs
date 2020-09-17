@@ -62,21 +62,31 @@ impl Element for ImageElement {
 //		dbg!(&self);
 		match &self.image {
 			None => {
-				for y in 0..self.height {
-					let py = y + self.y;
-					if py >= render_buffer.height as u32 { continue; }
-					for x in 0..self.width {
-						let px = x + self.x;
-						if px >= render_buffer.width as u32 { continue; }
-
-		//				dbg!(&px, &py);
-
-						let o = ( py * render_buffer.width as u32 + px ) as usize;
-						render_buffer.buffer[ o ] = self.color;
-					}
-				}
+				render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height, |_,_,_,_,p: &mut u32| {
+					*p = self.color;
+				});
 			},
 			Some( img ) => {
+				render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height,
+					|_sx, _sy, x, y, p: &mut u32| {
+						let old_pixel = *p;
+
+	        			let pixel = img.get_pixel(x, y);						
+
+						let pixel: u32 = 
+							( ( ( pixel[ 3 ] & 0xff ) as u32 ) << 24 )
+							| ( ( ( pixel[ 0 ] & 0xff ) as u32 ) << 16 )
+							| ( ( ( pixel[ 1 ] & 0xff ) as u32 ) <<  8 )
+							| ( ( ( pixel[ 2 ] & 0xff ) as u32 ) <<  0 );
+
+						let pixel = Pixel::from_u32( pixel );
+						let old_pixel = Pixel::from_u32( old_pixel );
+						let pixel = Pixel::blend_with_alpha( pixel, old_pixel );
+
+						*p = pixel.to_u32();
+					}
+				);
+/*
 				for y in 0..self.height {
 					let py = y + self.y;
 					if py >= render_buffer.height as u32 { continue; }
@@ -103,6 +113,7 @@ impl Element for ImageElement {
 						render_buffer.buffer[ o ] = pixel.to_u32();
 					}
 				}
+*/				
 			},
 		}
 

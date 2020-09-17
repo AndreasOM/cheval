@@ -35,19 +35,15 @@ impl Element for BlockElement {
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
 //		dbg!(&render_context);
-		for y in 0..self.height {
-			let py = y + self.y;
-			if py >= render_buffer.height as u32 { continue; }
-			for x in 0..self.width {
-				let px = x + self.x;
-				if px >= render_buffer.width as u32 { continue; }
-
-//				dbg!(&px, &py);
-
-				let o = ( py * render_buffer.width as u32 + px ) as usize;
-				render_buffer.buffer[ o ] = self.color;
-			}
+/*
+		for( x, y, block_x, block_y, pixel) in render_buffer.enumerate_pixel_in_block_mut( self.x, self.y, self.width, self.height ) {
+			*pixel = self.color;
 		}
+*/
+
+		render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height, |_x,_y,_bx,_by,p: &mut u32| {
+			*p = self.color;
+		});
 	}
 	fn name( &self ) -> &str {
 		&self.name
