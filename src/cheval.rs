@@ -21,6 +21,7 @@ use std::rc::Rc;
 pub struct Cheval {
 	elements: Vec< Box< dyn Element > >,
 	context: Context,
+	last_update_time: DateTime<Utc>,
 }
 
 
@@ -48,6 +49,7 @@ impl Cheval {
 		Self {
 			elements: Vec::new(),
 			context: Context::new(),
+			last_update_time: Utc::now(),
 		}
 	}
 
@@ -106,6 +108,11 @@ impl Cheval {
 		let clock_string = now.format("%H:%M:%S");
 		self.context.set_string( "clock_string", &clock_string.to_string() );
 
+		let frametime_duration = now.signed_duration_since( self.last_update_time );
+		let frametime = frametime_duration.num_milliseconds() as f64;
+		let frametime_string = format!("{}", frametime );
+		self.context.set_string( "frametime_string", &frametime_string );
+		self.last_update_time = now;
 		for e in &mut self.elements {
 			e.update( &mut self.context );
 		}	

@@ -5,15 +5,35 @@ use clap::{App, Arg};
 use crate::window::WindowFactory;
 //use crate::window::WindowTrait;
 use cheval::render_buffer::RenderBuffer;
+use std::fs::File;
 
 fn render_frame( render_buffer: &mut RenderBuffer, cheval: &Cheval )
 {
+/*	
 	for y in 0..render_buffer.height {
 		for x in 0..render_buffer.width {
 			let o = y * render_buffer.width + x;
 			render_buffer.buffer[ o ] = 0x00000000;
 		}
 	}
+*/
+	let size = render_buffer.width * render_buffer.height;
+	for p in &mut render_buffer.buffer[0..size] {
+		*p = 0x00000000;
+	}
+
+/*
+	unsafe 
+	{
+		let p = render_buffer.buffer.as_mut_ptr();
+
+		// Initialize elements via raw pointer writes, then set length.
+		let size = render_buffer.width * render_buffer.height;
+		for i in 0..size {
+		    *p.add(i) = 0 as u32;
+		}
+	}
+*/	
 
 	cheval.render( render_buffer );
 }
@@ -67,6 +87,9 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	dbg!( &cheval );
 	let mut frame_count = 0;
+/* :TODO: hide behind feature flag	
+	let guard = pprof::ProfilerGuard::new(100).unwrap();
+*/
 	while !window.done() {
 		cheval.update();
 		window.render_frame( &mut render_frame, &cheval );
@@ -76,7 +99,13 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 			break;
 		}
 	}
-
+/* :TODO: hide behind feature flag	
+	if let Ok(report) = guard.report().build() {
+		println!("report: {}", &report);
+    	let file = File::create("flamegraph.svg").unwrap();
+    	report.flamegraph(file).unwrap();		
+	};
+*/
 	cheval.shutdown();
 
 	Ok(())

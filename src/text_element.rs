@@ -76,7 +76,7 @@ let mut f = match File::open(input[ 0 ]) {
 		            panic!("error turning FontCollection into a Font: {}", e);
 		        });
 		       */
-
+/*
 		let mut font_file = File::open( &self.fontfile ).unwrap_or_else(|e| {
 			panic!("{}", e);
 		});
@@ -89,6 +89,7 @@ let mut f = match File::open(input[ 0 ]) {
 		let font = Font::try_from_vec( buffer ).unwrap(); //.expect( panic!("error constructing a Font from vec" ) );
 
 		self.font = Some( font );
+*/		
 	}
 
 	fn shutdown( &mut self ) {
@@ -113,6 +114,16 @@ let mut f = match File::open(input[ 0 ]) {
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
+		render_context.use_font( &self.fontfile );
+		render_context.draw_text(
+			render_buffer,
+			&self.display_text,
+			self.x, self.y,
+			self.width, self.height,
+			self.size,					// :TODO: maybe move this to use font
+			self.color
+		);
+/*		
 		if let Some( font ) = &self.font {
 
 			let scale = Scale::uniform( self.size as f32 );
@@ -164,6 +175,7 @@ let mut f = match File::open(input[ 0 ]) {
 			*/
 
 		}
+*/
 
 	}
 	fn name( &self ) -> &str {

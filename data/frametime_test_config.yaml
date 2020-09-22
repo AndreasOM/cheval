@@ -1,0 +1,12 @@
+elements:
+  - name: FrameTime
+    type: text
+    parameters:
+      pos_x: 1540
+      pos_y: 90
+      width: 960
+      height: 50
+      size: 90
+      text: "${frametime_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"

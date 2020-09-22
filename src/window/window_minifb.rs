@@ -51,10 +51,15 @@ impl Window for WindowMinifb {
 		let fw = self.render_buffer.width / ds;
 		let fh = self.render_buffer.height / ds;
 
+		let mut argb = vec![0u32;4];
 		for y in 0..fh {
 			for x in 0..fw {
+				argb[ 0 ] = 0;
+				argb[ 1 ] = 0;
+				argb[ 2 ] = 0;
+				argb[ 3 ] = 0;
+
 				let so = ( y * ds ) * self.render_buffer.width + ( x * ds );
-				let mut argb = vec![0u32;4];
 				let pixel = self.render_buffer.buffer[ so ];
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
@@ -78,7 +83,6 @@ impl Window for WindowMinifb {
 				argb[ 1 ] /= 4;
 				argb[ 2 ] /= 4;
 				argb[ 3 ] /= 4;
-
 
 				let pixel = 
 					( ( argb[ 1 ] & 0xff ) << 16 )
