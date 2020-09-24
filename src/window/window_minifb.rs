@@ -41,7 +41,7 @@ impl Window for WindowMinifb {
 	fn done( &self ) -> bool {
 		!( self.window.is_open() && !self.window.is_key_down(minifb::Key::Escape) )
 	}
-	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &Cheval ), cheval: &Cheval  ) {
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &mut Cheval ), cheval: &mut Cheval  ) {
 		func( &mut self.render_buffer, cheval );
 	}
 	fn next_frame( &mut self ) {

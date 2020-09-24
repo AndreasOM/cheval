@@ -28,7 +28,7 @@ impl WindowFactory {
 
 pub trait Window {
 	fn done( &self ) -> bool;
-	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &Cheval ), cheval: &Cheval  );
+	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &mut Cheval ), cheval: &mut Cheval  );
 	fn next_frame( &mut self );
 }
 

@@ -22,6 +22,7 @@ pub struct Cheval {
 	elements: Vec< Box< dyn Element > >,
 	context: Context,
 	last_update_time: DateTime<Utc>,
+	render_context: RenderContext,
 }
 
 
@@ -50,6 +51,7 @@ impl Cheval {
 			elements: Vec::new(),
 			context: Context::new(),
 			last_update_time: Utc::now(),
+			render_context: RenderContext::new(),
 		}
 	}
 
@@ -118,7 +120,7 @@ impl Cheval {
 		}	
 	}
 
-	pub fn render( &self, render_buffer: &mut RenderBuffer ) {
+	pub fn render( &mut self, render_buffer: &mut RenderBuffer ) {
 /*		
 		for e in &self.elements {
 //			dbg!(e);
@@ -126,10 +128,10 @@ impl Cheval {
 		};
 */		
 
-		let mut render_context = RenderContext::new();
+//		let mut render_context = RenderContext::new();
 		for e in &self.elements {
 //			dbg!(e);
-			e.render( render_buffer, &mut render_context );
+			e.render( render_buffer, &mut self.render_context );
 		};
 	}
 	pub fn shutdown( &mut self ) {

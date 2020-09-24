@@ -7,7 +7,7 @@ use crate::window::WindowFactory;
 use cheval::render_buffer::RenderBuffer;
 use std::fs::File;
 
-fn render_frame( render_buffer: &mut RenderBuffer, cheval: &Cheval )
+fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 {
 /*	
 	for y in 0..render_buffer.height {
@@ -92,7 +92,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 */
 	while !window.done() {
 		cheval.update();
-		window.render_frame( &mut render_frame, &cheval );
+		window.render_frame( &mut render_frame, &mut cheval );
 		window.next_frame();
 		frame_count += 1;
 		if frames > 0 && frame_count >= frames {

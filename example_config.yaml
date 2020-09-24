@@ -146,7 +146,7 @@ elements:
       height: 50
       size: 90
       text: "${banner_content_0}"
-      font: data/FiraCode-Medium.ttf
+      font: data/OpenDyslexic_Bold.ttf
       color: "0xa0222266"
 
   - name: Banner Title
@@ -158,7 +158,7 @@ elements:
       height: 50
       size: 90
       text: "${banner_content_0}"
-      font: data/FiraCode-Medium.ttf
+      font: data/OpenDyslexic_Bold.ttf
       color: "0xffffffff"
 
   - name: Banner Title
