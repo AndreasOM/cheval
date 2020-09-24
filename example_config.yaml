@@ -143,7 +143,7 @@ elements:
       pos_x: 25
       pos_y: 875
       width: 960
-      height: 50
+      height: 100
       size: 90
       text: "${banner_content_0}"
       font: data/OpenDyslexic_Bold.ttf
@@ -155,7 +155,7 @@ elements:
       pos_x: 20
       pos_y: 870
       width: 960
-      height: 50
+      height: 100
       size: 90
       text: "${banner_content_0}"
       font: data/OpenDyslexic_Bold.ttf
@@ -191,7 +191,7 @@ elements:
       pos_x: 1540
       pos_y: 20
       width: 960
-      height: 50
+      height: 100
       size: 90
       text: "${clock_string}"
       font: data/FiraCode-Medium.ttf

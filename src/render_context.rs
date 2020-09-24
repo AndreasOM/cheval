@@ -52,8 +52,8 @@ impl RenderContext{
 		&self,
 		render_buffer: &mut RenderBuffer,
 		text: &str,
-		x: u32,
-		y: u32,
+		pos_x: u32,
+		pos_y: u32,
 		width: u32,
 		height: u32,
 		size: u32,
@@ -64,16 +64,38 @@ impl RenderContext{
 				if let Some( font ) = &font {
 
 					let scale = Scale::uniform( size as f32 );
-					let start = point( x as f32, ( y + size ) as f32 );
+					let start = point( pos_x as f32, ( pos_y + size ) as f32 );
 					let glyphs: Vec<_> = font.layout( &text, scale, start).collect();
 		//			dbg!(&glyphs);
 
+					let end_x = pos_x + width;
+					let end_y = pos_y + height;
+
 					for g in glyphs {
 						if let Some( bb ) = &g.pixel_bounding_box() {
+							/* :TODO: use nested loops instead of closure
+								let bb = glyph.pixel_bounding_box();
+								for y in 0..bb.height() {
+								    for x in 0..bb.width() {
+								        o(x, y, calc_coverage(&glyph, x, y));
+								    }
+								}
+							*/
 							g.draw(|x, y, v| {
 								if v > 0.0 {
 									let x = ( bb.min.x as u32 + x ) as u32;
+									if x >= end_x {
+										return;
+									}
+									if x>= render_buffer.width as u32 {
+										return;
+									}
+
 									let y = ( bb.min.y as u32 + y ) as u32;
+									if y >= end_y {
+										return;
+									}
+
 
 									let o = ( y * render_buffer.width as u32 + x ) as usize;
 									if o < render_buffer.buffer.len() {

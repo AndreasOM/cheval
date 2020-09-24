@@ -4,7 +4,7 @@
 ## TODO
 - [ ] Add more position modes, e.g negative values for "from bottom/right"
 - [ ] Add clipping at buffer edges
-	- [ ] Add clipping for text
+	- [x] Add clipping for text
 - [ ] Add support for animated images
 - [ ] Auto reloading on config
 - [ ] Make config loading more robust
@@ -14,9 +14,10 @@
 - [ ] Put profiling behind feature flag
 - [ ] Put profiling behind command line flag
 - [ ] Fix mutability of self in Cheval::render()
+- [ ] Add animations
+- [ ] Add audio support
 
 ## DONE
-
 - [x] Implement font cache
 - [x] Text rendering
 - [x] Add clean error handling
