@@ -8,7 +8,6 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct RenderContext{
 	fonts: HashMap<String, Option< Font<'static> >>,
-	// :HACK:
 	current_font: Option< String >,
 }
 
@@ -25,8 +24,6 @@ impl RenderContext{
 		&mut self,
 		fontfile: &str,
 	) -> anyhow::Result<()> {
-		// :TODO: actually cache multiple fonts
-
 		if self.fonts.contains_key( fontfile ) {
 			self.current_font = Some( fontfile.to_string() );
 		} else {
@@ -40,10 +37,11 @@ impl RenderContext{
 				panic!("{}", e);
 			});
 
-			// :TODO: handle error to avoid constant retries
-			let font = Font::try_from_vec( buffer ).unwrap(); //.expect( panic!("error constructing a Font from vec" ) );
-
-			self.fonts.insert( fontfile.to_string(), Some( font ) );
+			if let Some( font ) = Font::try_from_vec( buffer ) {
+				self.fonts.insert( fontfile.to_string(), Some( font ) );
+			} else {
+				self.fonts.insert( fontfile.to_string(), None );
+			};
 		}
 
 
