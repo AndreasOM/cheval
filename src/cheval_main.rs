@@ -65,6 +65,13 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the number of frames to render.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("scaling")
+							.long("scaling")
+							.short("s")
+							.value_name("SCALING")
+							.help("Set the scaling for the rendering.")
+							.takes_value(true)
+						)
 						.get_matches();
 
 	let config = matches.value_of("config").unwrap_or("example_config.yaml").to_string();
@@ -76,10 +83,17 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 		Err( _ ) => panic!("Invalid frames {:?}", frames ),
 	};
 
+	let scaling = matches.value_of("scaling").unwrap_or("1").to_string();
+
+	let scaling = match scaling.parse::<f32>() {
+		Ok( scaling ) => scaling,
+		Err( _ ) => panic!("Invalid scaling {:?}", scaling ),
+	};
+
 	dbg!(&config);
 	dbg!(&window_type);
 
-	let mut window = WindowFactory::create( &window_type );
+	let mut window = WindowFactory::create( &window_type, scaling );
 
 	let mut cheval = Cheval::new();
 

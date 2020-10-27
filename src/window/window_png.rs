@@ -10,13 +10,19 @@ pub struct WindowPng {
 }
 
 impl WindowPng {
-	pub fn new() -> Self {
+	pub fn new( scaling: f32 ) -> Self {
 		let w = 1920;
 		let h = 1080;
-		let ds = 2;
+		let ds = if scaling == 0.5 { 2 }
+					else if scaling == 1.0 { 1 }
+					else {
+						panic!("Unsupported scaling")
+					};
+
 		let fw = w/ds;
 		let fh = h/ds;
 		let render_buffer = RenderBuffer::new( w, h );
+
 		Self {
 			render_buffer,
 			downscale: ds,
@@ -49,25 +55,26 @@ impl Window for WindowPng {
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.render_buffer.buffer[ so + 1 ];
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+				if ds == 2 {
+					let pixel = self.render_buffer.buffer[ so + 1 ];
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				argb[ 1 ] /= 4;
-				argb[ 2 ] /= 4;
-				argb[ 3 ] /= 4;
-
+					argb[ 1 ] /= 4;
+					argb[ 2 ] /= 4;
+					argb[ 3 ] /= 4;
+				}
 
 				let pixel = 
 					( ( argb[ 1 ] & 0xff ) << 16 )
