@@ -74,6 +74,7 @@ impl RenderContext{
 					for g in glyphs {
 						if let Some( bb ) = &g.pixel_bounding_box() {
 							/* :TODO: use nested loops instead of closure
+								// pseudo code from `rusttype` crate
 								let bb = glyph.pixel_bounding_box();
 								for y in 0..bb.height() {
 								    for x in 0..bb.width() {
