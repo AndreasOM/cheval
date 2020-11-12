@@ -29,7 +29,7 @@ enum Message {
 #[derive(Debug)]
 struct HttpState {
 	id: String,
-//	http_sender: mpsc::Sender< Message >,
+	http_sender: mpsc::Sender< Message >,
 }
 
 #[derive(Debug)]
@@ -160,7 +160,7 @@ impl Cheval {
 			let server = HttpServer::new(move || {
 				let http_state = HttpState {
 					id: "default".to_string(),
-//					http_sender: tx2,
+					http_sender: tx2.clone(),
 				};
 								App::new()
 									.data( http_state )
