@@ -38,7 +38,8 @@ fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 	cheval.render( render_buffer );
 }
 
-#[tokio::main]
+//#[tokio::main]
+#[actix_web::main]
 async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	let matches = App::new("cheval")
@@ -72,11 +73,17 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the scaling for the rendering.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("enable-http")
+							.long("enable-http")
+							.help("Enable HTTP api.")
+							.takes_value(false)
+						)
 						.get_matches();
 
 	let config = matches.value_of("config").unwrap_or("example_config.yaml").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
 	let frames = matches.value_of("frames").unwrap_or("0").to_string();
+	let enable_http = matches.occurrences_of("enable-http") > 0;
 
 	let frames = match frames.parse::<u32>() {
 		Ok( frames ) => frames,
@@ -92,12 +99,18 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	dbg!(&config);
 	dbg!(&window_type);
+	dbg!(&enable_http);
 
 	let mut window = WindowFactory::create( &window_type, scaling );
 
 	let mut cheval = Cheval::new();
 
+	if enable_http {
+		cheval.enable_http();
+	}
+
 	cheval.load( &config ).await?;
+	cheval.initialize();
 
 	dbg!( &cheval );
 	let mut frame_count = 0;
