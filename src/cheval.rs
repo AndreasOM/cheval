@@ -68,11 +68,13 @@ struct Config {
 		state: web::Data<HttpState>,		
 		web::Path((name, value)): web::Path<(String, String)>
 	) -> impl Responder {
-/*		
-		match tx.send( Message::SetVariable( name.clone(), value.clone() ) ) {
+
+		
+		match state.http_sender.send( Message::SetVariable( name.clone(), value.clone() ) ) {
 			_ => {},
 		};
-*/
+
+//		dbg!(&name, &value);
 		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
 	}
 
@@ -202,7 +204,24 @@ impl Cheval {
 		self.last_update_time = now;
 		for e in &mut self.elements {
 			e.update( &mut self.context );
-		}	
+		}
+
+		if let Some( http_receiver ) = &self.http_receiver {
+			match http_receiver.try_recv() {
+				Ok( msg ) => {
+//					dbg!("http_receiver got message", &msg);
+					match msg {
+						Message::SetVariable( name, value ) => {
+							dbg!( "set variable", &name, &value );
+							self.context.set_string( &name, &value );
+							dbg!(&self.context);
+						}
+						_ => {},
+					}
+				}
+				_ => {},
+			}
+		}
 	}
 
 	pub fn render( &mut self, render_buffer: &mut RenderBuffer ) {

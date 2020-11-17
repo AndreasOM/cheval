@@ -137,6 +137,18 @@ elements:
       font: data/FiraCode-Medium.ttf
       color: "0xa0ff2266"
 
+  - name: Test Fuu
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 775
+      width: 960
+      height: 100
+      size: 90
+      text: "${fuu}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa09999cc"
+
   - name: Banner Title
     type: text
     parameters:

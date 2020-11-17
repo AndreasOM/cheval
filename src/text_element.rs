@@ -108,6 +108,8 @@ let mut f = match File::open(input[ 0 ]) {
 			if let Some( value ) = context.get_string( &name ) {
 				self.display_text = value.to_string();
 //				context.set_string( "clock_string", "USED" );
+			} else {
+				dbg!("Variable not found", &name);
 			}
 		}
 	}
