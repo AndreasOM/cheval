@@ -137,7 +137,14 @@ elements:
       font: data/FiraCode-Medium.ttf
       color: "0xa0ff2266"
 
-  - name: Test Fuu
+  - name: Countdown
+    type: countdown
+    parameters:
+      variable: countdown
+      text_variable: countdown_text
+      hide_on_zero: true
+
+  - name: Countdown Text
     type: text
     parameters:
       pos_x: 25
@@ -145,7 +152,7 @@ elements:
       width: 960
       height: 100
       size: 90
-      text: "${fuu}"
+      text: "${countdown_text}"
       font: data/OpenDyslexic_Bold.ttf
       color: "0xa09999cc"
 

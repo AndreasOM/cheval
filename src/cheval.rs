@@ -4,6 +4,7 @@ use serde::Deserialize;
 use serde_yaml;
 
 use crate::block_element::BlockElementFactory;
+use crate::countdown_element::CountdownElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
 use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
@@ -113,6 +114,7 @@ impl Cheval {
 			};
 			let mut element: Box< dyn Element + Send > = match e.the_type.as_ref() {
 				"block" => Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
+				"countdown" => Box::new( CountdownElementFactory::create() ) as Box<dyn Element + Send>,
 				"loadtext" => Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
 				"lissajous" => Box::new( LissajousElementFactory::create() ),
 				"image" => Box::new( ImageElementFactory::create() ),
@@ -202,6 +204,7 @@ impl Cheval {
 		let frametime_string = format!("{}", frametime );
 		self.context.set_string( "frametime_string", &frametime_string );
 		self.last_update_time = now;
+		self.context.set_time_step( frametime/1000.0 );
 		for e in &mut self.elements {
 			e.update( &mut self.context );
 		}
