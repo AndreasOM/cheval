@@ -7,11 +7,19 @@ use async_trait::async_trait;
 use hhmmss::Hhmmss;
 
 #[derive(Debug)]
+enum Mode {
+	Countdown,
+	StopWatch,
+}
+
+#[derive(Debug)]
 pub struct CountdownElement {
 	name: String,
 	variable: String,
 	text_variable: String,
 	hide_on_zero: bool,
+	mode: Mode,
+	initial_value: String,
 }
 
 impl CountdownElement {
@@ -23,44 +31,72 @@ impl Element for CountdownElement {
 		self.variable		= config.get_string_or( "variable", "" );
 		self.text_variable	= config.get_string_or( "text_variable", "" );
 		self.hide_on_zero	= config.get_bool_or( "hide_on_zero", false );
+		self.mode = match config.get_string_or( "mode", "Countdown" ).as_ref() {
+			"StopWatch" => Mode::StopWatch,
+			_ => Mode::Countdown,
+		};
+		self.initial_value	= config.get_string_or( "initial_value", "0.0" );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
 	}
 
-	fn update( &mut self, context: &mut Context ) {
-		match context.get_string( &self.variable ) {
-			Some( value ) => {
-//				dbg!(&value);
-				if let Ok( v ) = value.parse::<f32>() {
-					let v = v - context.time_step() as f32;
-					let v = if v > 0.0 { v } else { 0.0 };
-					let s = format!("{}", v );
-					context.set_string( &self.variable, &s );
-					let duration = std::time::Duration::new( v as u64, 0);
-					let fs = if v <= 1.0 {
-						if self.hide_on_zero {
-							"".to_string()
-						} else {
-							duration.hhmmss()
-						}
-					} else if v <= 86400.0 {
-						duration.hhmmss()
-					} else {
-						":TODO: >24h".to_string()
-					};
-					context.set_string( &self.text_variable, &fs );
-				} else {
-					context.set_string( &self.text_variable, "NaN" );
-				}
 
+	fn update( &mut self, context: &mut Context ) {
+		// count
+		let ov = match context.get_string( &self.variable ) {
+			Some( value ) => {
+				dbg!(&self.name, &value);
+				if let Ok( v ) = value.parse::<f32>() {
+					let v = match self.mode {
+						Mode::Countdown => {
+							v - context.time_step() as f32
+						},
+						Mode::StopWatch => {
+							if v >= 0.0 {
+								v + context.time_step() as f32
+							} else {
+								v
+							}
+						},
+					};
+//					let v = if v > 0.0 { v } else { 0.0 };
+					let duration = std::time::Duration::new( v as u64, 0);
+					let s = format!("{}", v );
+					context.set_string( &self.variable, &s );					
+					Some( v )
+				} else {
+//					let v = &self.initial_value;
+//					context.set_string( &self.variable, &v );
+					None
+				}
 			},
 			None => {
-				context.set_string( &self.variable, "0.0" );
-				context.set_string( &self.text_variable, "" );
+				let v = &self.initial_value;
+				println!("Setting initial value for {} to {}", &self.name, &v );
+				context.set_string( &self.variable, &v );
+				dbg!(&context);
+				None
+			},
+		};
+		// format
+		match ov {
+			Some( v ) => {
+				if v <= 1.0 && self.hide_on_zero {
+					context.set_string( &self.text_variable, "" );
+				} else if v <= 86400.0 {
+					let duration = std::time::Duration::new( v as u64, 0);
+					context.set_string( &self.text_variable, &duration.hhmmss() );
+				} else {
+					context.set_string( &self.text_variable, ":TODO: >24h" );
+				}
+			},
+			None => {
+				context.set_string( &self.text_variable, "NaN" );
 			}
 		}
+
 	}
 
 	fn name( &self ) -> &str {
@@ -86,6 +122,8 @@ impl CountdownElementFactory {
 			variable: "".to_string(),
 			text_variable: "".to_string(),
 			hide_on_zero: false,
+			mode: Mode::Countdown,
+			initial_value: "".to_string(),
 		}
 	}
 }
