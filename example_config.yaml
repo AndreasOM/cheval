@@ -157,6 +157,19 @@ elements:
       font: data/OpenDyslexic_Bold.ttf
       color: "0xa09999cc"
 
+  - name: Countdown Bar Width Expression
+    type: expression
+    parameters:
+      expression: "countdown_width=${countdown}/${countdown_full}*${countdown_bar_full_width}"
+      expression2: "countdown_width:${countdown_full}:${countdown}:/:${countdown_bar_full_width}:*="
+      comment: "
+        0 = countdown_width
+        1 = countdown_full
+        2 = countdown
+        3 = countdown_bar_full_width
+
+        0:e1:e2:op/:e3:op*op="
+
   - name: Countdown Bar
     type: block
     parameters:

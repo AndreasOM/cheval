@@ -53,4 +53,13 @@ impl Context {
 
 		default.to_string()
 	}
+
+	pub fn expand_u32_or( &self, s: &str, default: u32 ) -> u32 {
+		let s = self.expand_string_or( s, "" );
+		if let Ok( u ) = s.parse::<u32>() {
+			u
+		} else {
+			default
+		}
+	}
 }

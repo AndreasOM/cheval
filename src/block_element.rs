@@ -13,6 +13,7 @@ pub struct BlockElement {
 	width: u32,
 	height: u32,
 	color: u32,
+	width_var: String,
 }
 
 impl BlockElement {
@@ -23,13 +24,17 @@ impl Element for BlockElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
 		self.y      = config.get_u32_or( "pos_y", 0 );
-		self.width  = config.get_u32_or( "width", 0 );
+		self.width_var  = config.get_string_or( "width", "0");
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
 		Ok(())
+	}
+
+	fn update( &mut self, context: &mut Context ) {
+		self.width = context.expand_u32_or( &self.width_var, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -70,6 +75,7 @@ impl BlockElementFactory {
 			width: 0,
 			height: 0,
 			color: 0xff00ffff,
+			width_var: "0".to_string(),
 		}
 	}
 }
