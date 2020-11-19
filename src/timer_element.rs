@@ -13,7 +13,7 @@ enum Mode {
 }
 
 #[derive(Debug)]
-pub struct CountdownElement {
+pub struct TimerElement {
 	name: String,
 	variable: String,
 	text_variable: String,
@@ -22,11 +22,11 @@ pub struct CountdownElement {
 	initial_value: String,
 }
 
-impl CountdownElement {
+impl TimerElement {
 }
 
 #[async_trait]
-impl Element for CountdownElement {
+impl Element for TimerElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.variable		= config.get_string_or( "variable", "" );
 		self.text_variable	= config.get_string_or( "text_variable", "" );
@@ -111,13 +111,13 @@ impl Element for CountdownElement {
 	}
 }
 
-pub struct CountdownElementFactory {
+pub struct TimerElementFactory {
 
 }
 
-impl CountdownElementFactory {
-	pub fn create() -> CountdownElement {
-		CountdownElement {
+impl TimerElementFactory {
+	pub fn create() -> TimerElement {
+		TimerElement {
 			name: "".to_string(),
 			variable: "".to_string(),
 			text_variable: "".to_string(),

@@ -138,11 +138,12 @@ elements:
       color: "0xa0ff2266"
 
   - name: Countdown
-    type: countdown
+    type: timer
     parameters:
       variable: countdown
       text_variable: countdown_text
       hide_on_zero: true
+      initial_value: 900
 
   - name: Countdown Text
     type: text
@@ -153,6 +154,27 @@ elements:
       height: 100
       size: 90
       text: "${countdown_text}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa09999cc"
+
+  - name: StopWatch
+    type: timer
+    parameters:
+      mode: StopWatch
+      variable: stopwatch
+      text_variable: stopwatch_text
+      hide_on_zero: true
+      initial_value: -1
+
+  - name: StopWatch Text
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 675
+      width: 960
+      height: 100
+      size: 90
+      text: "${stopwatch_text}"
       font: data/OpenDyslexic_Bold.ttf
       color: "0xa09999cc"
 

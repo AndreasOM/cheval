@@ -4,7 +4,6 @@ use serde::Deserialize;
 use serde_yaml;
 
 use crate::block_element::BlockElementFactory;
-use crate::countdown_element::CountdownElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
 use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
@@ -13,6 +12,7 @@ use crate::element::{Element,ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
+use crate::timer_element::TimerElementFactory;
 
 use chrono::{DateTime, Utc};
 use std::sync::mpsc;
@@ -114,7 +114,7 @@ impl Cheval {
 			};
 			let mut element: Box< dyn Element + Send > = match e.the_type.as_ref() {
 				"block" => Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
-				"countdown" => Box::new( CountdownElementFactory::create() ) as Box<dyn Element + Send>,
+				"timer" => Box::new( TimerElementFactory::create() ) as Box<dyn Element + Send>,
 				"loadtext" => Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
 				"lissajous" => Box::new( LissajousElementFactory::create() ),
 				"image" => Box::new( ImageElementFactory::create() ),

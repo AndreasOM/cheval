@@ -3,11 +3,11 @@ pub mod element;
 
 
 pub mod block_element;
-pub mod countdown_element;
 pub mod lissajous_element;
 pub mod loadtext_element;
 pub mod image_element;
 pub mod text_element;
+pub mod timer_element;
 pub mod pixel;
 
 pub mod context;
