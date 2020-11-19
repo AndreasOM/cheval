@@ -47,7 +47,7 @@ impl Element for TimerElement {
 		// count
 		let ov = match context.get_string( &self.variable ) {
 			Some( value ) => {
-				dbg!(&self.name, &value);
+//				dbg!(&self.name, &value);
 				if let Ok( v ) = value.parse::<f32>() {
 					let v = match self.mode {
 						Mode::Countdown => {
