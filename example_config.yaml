@@ -157,6 +157,15 @@ elements:
       font: data/OpenDyslexic_Bold.ttf
       color: "0xa09999cc"
 
+  - name: Countdown Bar
+    type: block
+    parameters:
+      pos_x: 710
+      pos_y: 0
+      width: "${countdown_width}"
+      height: 54
+      color: "0xff0088aa"
+
   - name: StopWatch
     type: timer
     parameters:

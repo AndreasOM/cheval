@@ -8,7 +8,6 @@ use crate::render_buffer::RenderBuffer;
 use std::fs::File;
 use std::io::Read;
 use rusttype::{point, Font, Scale};
-use regex::Regex;
 
 #[derive(Debug)]
 pub struct TextElement {
@@ -102,16 +101,7 @@ let mut f = match File::open(input[ 0 ]) {
 
 
 	fn update( &mut self, context: &mut Context ) {
-		let re = Regex::new(r"^\$\{(.+)\}$").unwrap();
-		if let Some( caps ) = re.captures( &self.text ) {
-			let name = &caps[ 1 ];
-			if let Some( value ) = context.get_string( &name ) {
-				self.display_text = value.to_string();
-//				context.set_string( "clock_string", "USED" );
-			} else {
-				dbg!("Variable not found", &name);
-			}
-		}
+		self.display_text = context.expand_string_or( &self.text, "" );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {

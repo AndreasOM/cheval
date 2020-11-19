@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use regex::Regex;
 
 #[derive(Debug)]
 pub struct Context {
@@ -28,5 +29,28 @@ impl Context {
 
 	pub fn get_string( &self, name: &str ) -> Option< &str > {
 		self.variables.get( name ).map(|s| s.as_ref() )
+	}
+
+	pub fn get_expanded_string( &self, name: &str ) -> Option< &str > {
+		match self.get_string( name ) {
+			None => None,
+			Some( s ) => {
+				Some( s )
+			},
+		}
+	}
+
+	pub fn expand_string_or( &self, s: &str, default: &str ) -> String {
+		let re = Regex::new(r"^\$\{(.+)\}$").unwrap();
+		if let Some( caps ) = re.captures( &s ) {
+			let name = &caps[ 1 ];
+			if let Some( value ) = self.get_string( &name ) {
+				return value.to_string();
+			} else {
+				dbg!("Variable not found", &name);
+			}
+		};
+
+		default.to_string()
 	}
 }
