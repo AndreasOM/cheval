@@ -2,6 +2,7 @@
 - [ ] Extract shared rendering functions
 
 ## TODO
+- [ ] Add visual countdown example
 - [ ] Add more position modes, e.g negative values for "from bottom/right"
 - [ ] Add clipping at buffer edges
 	- [x] Add clipping for text
@@ -16,8 +17,13 @@
 - [ ] Fix mutability of self in Cheval::render()
 - [ ] Add animations
 - [ ] Add audio support
+- [ ] Check file watcher (seems to be broken sometimes)
+- [ ] Add support for multiple pages
+- [ ] Allow elements to register for http (or just sign them up all)
 
 ## DONE
+- [x] Add timer element
+- [x] Add http API (setVariable)
 - [x] Implement font cache
 - [x] Text rendering
 - [x] Add clean error handling
