@@ -28,7 +28,16 @@ enum Message {
 	None,
 	SetVariable( String, String ),
 	SetElementVisibilityByName( String, bool ),
+	ListElementInstances( mpsc::Sender< Response > ),
 }
+
+#[derive(Debug)]
+enum Response {
+	None,
+	NotImplemented( String ),
+	ElementInstanceList( String ),
+}
+
 
 #[derive(Debug)]
 struct HttpState {
@@ -106,6 +115,36 @@ struct Config {
 			_ => {},
 		};
 		format!("hide ({}) name == {}", &state.id, &name)
+	}
+
+	async fn list_element_instances(
+		state: web::Data<HttpState>,
+	) -> impl Responder {
+		let (sender, receiver) = mpsc::channel();
+
+		match state.http_sender.send( Message::ListElementInstances( sender ) ) {
+			Ok(_) => {
+				match receiver.recv() {
+					Ok( msg ) => {
+						match msg {
+							Response::ElementInstanceList( l ) => {
+								return l;
+							}
+							_ => {
+								dbg!(&msg);
+							}
+						}
+					},
+					Err( e ) => {
+						dbg!( &e );
+					}
+				}
+				format!("elements ->")
+			},
+			_ => {
+				format!("{{}}")
+			},
+		}
 	}
 
 	async fn greet(req: HttpRequest) -> impl Responder {
@@ -220,8 +259,8 @@ impl Cheval {
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
 									.route("/show/name/{name}", web::get().to(show_by_name))
 									.route("/hide/name/{name}", web::get().to(hide_by_name))
-									.route("/", web::get().to(greet))
-									.route("/{name}", web::get().to(greet))
+									.route("/list_element_instances", web::get().to(list_element_instances))
+//									.route("/", web::get().to(greet))
 							})
 							.bind("0.0.0.0:8080")?
 							.run();
@@ -284,6 +323,11 @@ impl Cheval {
 								} ),
 							);
 						}
+						Message::ListElementInstances( sender ) => {
+							match sender.send( Response::ElementInstanceList( "{\":TODO\": false}".to_string() ) ) {
+								_ => {},
+							};
+						},
 						x => {
 							dbg!("unhandled", &x);
 						},
