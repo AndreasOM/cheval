@@ -37,7 +37,6 @@ struct HttpState {
 
 #[derive(Debug)]
 pub struct Cheval {
-//	elements: Vec< Box< dyn Element > >,
 	element_instances: Vec< ElementInstance >,
 	context: Context,
 	last_update_time: DateTime<Utc>,
@@ -90,7 +89,6 @@ struct Config {
 impl Cheval {
 	pub fn new() -> Self {
 		Self {
-//			elements: Vec::new(),
 			element_instances: Vec::new(),
 			context: Context::new(),
 			last_update_time: Utc::now(),
@@ -143,11 +141,9 @@ impl Cheval {
 			element.configure( &element_config );
 
 			let element_instance = ElementInstance::new( element );
-//			self.add_element( element );
 			self.add_element_instance( element_instance );
 		}
 
-//		for e in self.elements.iter_mut() {
 		for e in self.element_instances.iter_mut() {
 			e.run().await?;
 		}
@@ -155,11 +151,7 @@ impl Cheval {
 		println!("Running...");
 		Ok(())
 	}
-/*	
-	pub fn add_element( &mut self, element: Box< dyn Element > ) {
-		self.elements.push( element );
-	}
-*/
+
 	pub fn add_element_instance( &mut self, element_instance: ElementInstance ) {
 		self.element_instances.push( element_instance );
 	}
@@ -217,7 +209,6 @@ impl Cheval {
 		self.context.set_string( "frametime_string", &frametime_string );
 		self.last_update_time = now;
 		self.context.set_time_step( frametime/1000.0 );
-//		for e in &mut self.elements {
 		for e in &mut self.element_instances {
 			e.update( &mut self.context );
 		}
@@ -249,14 +240,12 @@ impl Cheval {
 */		
 
 //		let mut render_context = RenderContext::new();
-//		for e in &self.elements {
 		for e in &self.element_instances {
 //			dbg!(e);
 			e.render( render_buffer, &mut self.render_context );
 		};
 	}
 	pub fn shutdown( &mut self ) {
-//		for e in self.elements.iter_mut() {
 		for e in self.element_instances.iter_mut() {
 			e.shutdown();
 		}
