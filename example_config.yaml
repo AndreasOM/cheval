@@ -143,7 +143,7 @@ elements:
       variable: countdown
       text_variable: countdown_text
       hide_on_zero: true
-      initial_value: 900
+      initial_value: 0
 
   - name: Countdown Text
     type: text
@@ -159,6 +159,7 @@ elements:
 
   - name: Countdown Bar Width Expression
     type: expression
+    disabled: true
     parameters:
       expression: "countdown_width=${countdown}/${countdown_full}*${countdown_bar_full_width}"
       expression2: "countdown_width:${countdown_full}:${countdown}:/:${countdown_bar_full_width}:*="
