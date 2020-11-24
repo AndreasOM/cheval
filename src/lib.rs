@@ -2,6 +2,8 @@ pub mod cheval;
 pub mod element;
 
 
+pub mod element_instance;
+
 pub mod block_element;
 pub mod lissajous_element;
 pub mod loadtext_element;
