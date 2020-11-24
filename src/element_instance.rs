@@ -7,6 +7,7 @@ use crate::render_buffer::RenderBuffer;
 #[derive(Debug)]
 pub struct ElementInstance {
 	element: Box< dyn Element >,
+	is_visible: bool,
 }
 
 
@@ -16,6 +17,7 @@ impl ElementInstance {
 	) -> Self {
 		Self {
 			element: element,
+			is_visible: true,
 		}
 	}
 
@@ -39,4 +41,15 @@ impl ElementInstance {
 		self.element.shutdown()
 	}
 
+	pub fn is_visible( &self ) -> bool {
+		self.is_visible
+	}
+
+	pub fn hide( &mut self ) {
+		self.is_visible = false;
+	} 
+
+	pub fn show( &mut self ) {
+		self.is_visible = true;
+	} 
 }

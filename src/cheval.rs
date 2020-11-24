@@ -54,11 +54,17 @@ struct ConfigElement {
 	the_type: String,
 	#[serde(default = "default_bool_false")]
 	disabled: bool,
+	#[serde(default = "default_bool_true")]
+	visible: bool,
 	parameters: HashMap< String, String >
 }
 
 fn default_bool_false() -> bool {
     false
+}
+
+fn default_bool_true() -> bool {
+    true
 }
 
 #[derive(Debug, Deserialize)]
@@ -140,7 +146,13 @@ impl Cheval {
 
 			element.configure( &element_config );
 
-			let element_instance = ElementInstance::new( element );
+			let mut element_instance = ElementInstance::new( element );
+			if e.visible {
+				element_instance.show();
+			} else {
+				element_instance.hide();
+			};
+			
 			self.add_element_instance( element_instance );
 		}
 
@@ -242,7 +254,9 @@ impl Cheval {
 //		let mut render_context = RenderContext::new();
 		for e in &self.element_instances {
 //			dbg!(e);
-			e.render( render_buffer, &mut self.render_context );
+			if e.is_visible() {
+				e.render( render_buffer, &mut self.render_context );
+			}
 		};
 	}
 	pub fn shutdown( &mut self ) {

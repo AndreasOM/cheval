@@ -19,6 +19,7 @@ elements:
 
   - name: Red Block
     type: block
+    visible: false
     parameters:
       pos_x: 1824
       pos_y: 0

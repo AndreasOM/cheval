@@ -47,8 +47,8 @@ impl Context {
 			if let Some( value ) = self.get_string( &name ) {
 				value.to_string()
 			} else {
-				dbg!("Variable not found", &name);
-				dbg!("Returning default for", &s, &default);
+//				dbg!("Variable not found", &name);
+//				dbg!("Returning default for", &s, &default);
 
 				default.to_string()
 			}
