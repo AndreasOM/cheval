@@ -173,6 +173,7 @@ elements:
 
   - name: Countdown Bar
     type: block
+    disabled: false
     parameters:
       pos_x: 710
       pos_y: 0
