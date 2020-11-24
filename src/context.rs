@@ -45,15 +45,16 @@ impl Context {
 		if let Some( caps ) = re.captures( &s ) {
 			let name = &caps[ 1 ];
 			if let Some( value ) = self.get_string( &name ) {
-				return value.to_string();
+				value.to_string()
 			} else {
 				dbg!("Variable not found", &name);
+				dbg!("Returning default for", &s, &default);
+
+				default.to_string()
 			}
-		};
-
-		// :TODO: return correct result of not expandble
-
-		default.to_string()
+		} else {
+			s.to_string()
+		}
 	}
 
 	pub fn expand_u32_or( &self, s: &str, default: u32 ) -> u32 {
