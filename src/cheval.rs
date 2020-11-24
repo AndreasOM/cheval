@@ -27,6 +27,7 @@ use actix_web::{web, App, HttpRequest, HttpServer, Responder, rt::System};
 enum Message {
 	None,
 	SetVariable( String, String ),
+	SetElementVisibilityByName( String, bool ),
 }
 
 #[derive(Debug)]
@@ -85,6 +86,26 @@ struct Config {
 
 //		dbg!(&name, &value);
 		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
+	}
+
+	async fn show_by_name(
+		state: web::Data<HttpState>,		
+		web::Path((name)): web::Path<(String)>
+	) -> impl Responder {
+		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), true ) ) {
+			_ => {},
+		};
+		format!("show ({}) name == {}", &state.id, &name)
+	}
+
+	async fn hide_by_name(
+		state: web::Data<HttpState>,		
+		web::Path((name)): web::Path<(String)>
+	) -> impl Responder {
+		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), false ) ) {
+			_ => {},
+		};
+		format!("hide ({}) name == {}", &state.id, &name)
 	}
 
 	async fn greet(req: HttpRequest) -> impl Responder {
@@ -168,6 +189,18 @@ impl Cheval {
 		self.element_instances.push( element_instance );
 	}
 
+	pub fn run_for_element_instance_with_name(
+		&mut self,
+		name: &str,
+		func: Box< dyn Fn( &mut ElementInstance ) >,
+	) {
+		for e in &mut self.element_instances {
+			if e.name() == name {
+				func( e );
+			}
+		}
+	}
+
 	pub fn initialize( &mut self ) -> anyhow::Result<()> {
 		if self.http_enabled {
 			let (tx, rx) = mpsc::channel();
@@ -185,6 +218,8 @@ impl Cheval {
 								App::new()
 									.data( http_state )
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
+									.route("/show/name/{name}", web::get().to(show_by_name))
+									.route("/hide/name/{name}", web::get().to(hide_by_name))
 									.route("/", web::get().to(greet))
 									.route("/{name}", web::get().to(greet))
 							})
@@ -235,9 +270,28 @@ impl Cheval {
 							self.context.set_string( &name, &value );
 							dbg!(&self.context);
 						}
-						_ => {},
+						Message::SetElementVisibilityByName( name, visible ) => {
+							dbg!( "set visibility", &name, &visible );
+							self.run_for_element_instance_with_name(
+								&name,
+								Box::new( move |element_instance| {
+									dbg!("Found element_instance", &element_instance);
+									if visible {
+										element_instance.show();
+									} else {
+										element_instance.hide();										
+									}
+								} ),
+							);
+						}
+						x => {
+							dbg!("unhandled", &x);
+						},
 					}
 				}
+				Empty => {
+
+				},
 				_ => {},
 			}
 		}

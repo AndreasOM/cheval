@@ -21,6 +21,10 @@ impl ElementInstance {
 		}
 	}
 
+	pub fn name( &self ) -> &str {
+		self.element.name()
+	}
+
 	pub async fn run( &mut self ) -> anyhow::Result<()> {
 		self.element.run().await
 	}
