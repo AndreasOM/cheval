@@ -1,0 +1,84 @@
+elements:
+  - name: Background
+    type: image
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      filename: data/banner_next_background.png
+
+  - name: Banner Content Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_next_content.txt
+      variable: banner_content_{}
+      split_lines: true
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 245
+      width: 960
+      height: 150
+      size: 120
+      text: "${banner_content_0}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa06622aa"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 240
+      width: 960
+      height: 150
+      size: 120
+      text: "${banner_content_0}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xffffffff"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 370
+      width: 1880
+      height: 120
+      size: 80
+      text: "${banner_content_1}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 440
+      width: 1880
+      height: 120
+      size: 80
+      text: "${banner_content_2}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 510
+      width: 1880
+      height: 120
+      size: 80
+      text: "${banner_content_3}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 580
+      width: 1880
+      height: 120
+      size: 80
+      text: "${banner_content_4}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"

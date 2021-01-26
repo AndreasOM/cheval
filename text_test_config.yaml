@@ -1,0 +1,45 @@
+elements:
+  - name: Black Background Block
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 1920
+      height: 1080
+      color: "0xff000000"
+
+  - name: Clock
+    type: text
+    parameters:
+      pos_x: 1540
+      pos_y: 20
+      width: 960
+      height: 50
+      size: 90
+      text: "${clock_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: FrameTime
+    type: text
+    parameters:
+      pos_x: 1540
+      pos_y: 90
+      width: 960
+      height: 50
+      size: 90
+      text: "${frametime_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: DummyText
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 20
+      width: 960
+      height: 50
+      size: 90
+      text: "DummY!"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"

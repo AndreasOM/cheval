@@ -1,0 +1,5 @@
+Atem & Rust
+Rendering stream overlays on a RaspberryPi
+#rustlang, #raspberrypi, #gfxcoding
+
+Tuesday & Thursday evenings (CET)

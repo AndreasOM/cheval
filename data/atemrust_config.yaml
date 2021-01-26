@@ -1,0 +1,292 @@
+elements:
+  - name: Black Background Block
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 1920
+      height: 1080
+      color: "0xff000000"
+
+  - name: Green Block
+    type: block
+    disabled: true
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 96
+      height: 54
+      color: "0xff00ff00"
+
+  - name: Red Block
+    type: block
+    visible: false
+    parameters:
+      pos_x: 1824
+      pos_y: 0
+      width: 96
+      height: 54
+      color: "0xffff0000"
+
+  - name: White Block
+    type: block
+    disabled: true
+    parameters:
+      pos_x: 0
+      pos_y: 1026
+      width: 96
+      height: 54
+      color: "0xffffffff"
+
+  - name: Blue Block
+    type: block
+    disabled: true
+    parameters:
+      pos_x: 1824
+      pos_y: 1026
+      width: 96
+      height: 54
+      color: "0xff0000ff"
+
+  - name: Lissa 1
+    type: lissajous
+    disabled: true
+    parameters:
+      pos_x: 960
+      pos_y: 540
+      width: 660
+      height: 340
+      count: 100
+      color: "0xff808080"
+
+  - name: Lissa 2
+    type: lissajous
+    disabled: true
+    parameters:
+      pos_x: 960
+      pos_y: 540
+      width: 650
+      height: 320
+      count: 100
+      offset: 10
+      color: "0xff404040"
+
+  - name: Banner Backround Block
+    type: block
+    disabled: true
+    parameters:
+      pos_x: 10
+      pos_y: 870
+      width: 1900
+      height: 200
+      color: "0xff666666"
+
+  - name: Banner Background Image
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 870
+      filename: data/banner.png
+
+  - name: Banner Background
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 870
+      filename: data/banner_title.png
+
+  - name: Banner Title
+    type: image
+    disabled: true
+    parameters:
+      pos_x: 10
+      pos_y: 650
+      filename: data/banner-title.png
+
+  - name: Banner Background Test
+    type: image
+    disabled: true
+    parameters:
+      pos_x: 480
+      pos_y: 490
+      filename: data/banner-test.png
+
+  - name: Banner Title Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_title.txt
+      variable: banner_title
+
+  - name: Banner Line 0 Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_line_0.txt
+      variable: banner_line_0
+
+  - name: Banner Line 1 Loader
+    type: loadtext
+    parameters:
+      filename: data/banner_line_1.txt
+      variable: banner_line_1
+
+  - name: Banner Content Loader
+    type: loadtext
+    parameters:
+      filename: data/atemrust_banner_content.txt
+      variable: banner_content_{}
+      split_lines: true
+
+  - name: Banner Title
+    type: text
+    disabled: true
+    parameters:
+      pos_x: 25
+      pos_y: 825
+      width: 960
+      height: 50
+      size: 90
+      text: "${banner_title}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xa0ff2266"
+
+  - name: Countdown
+    type: timer
+    parameters:
+      variable: countdown
+      text_variable: countdown_text
+      hide_on_zero: true
+      initial_value: 0
+
+  - name: Countdown Text
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 775
+      width: 960
+      height: 100
+      size: 90
+      text: "${countdown_text}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa09999cc"
+
+  - name: Countdown Bar Width Expression
+    type: expression
+    disabled: true
+    parameters:
+      expression: "countdown_width=${countdown}/${countdown_full}*${countdown_bar_full_width}"
+      expression2: "countdown_width:${countdown_full}:${countdown}:/:${countdown_bar_full_width}:*="
+      comment: "
+        0 = countdown_width
+        1 = countdown_full
+        2 = countdown
+        3 = countdown_bar_full_width
+
+        0:e1:e2:op/:e3:op*op="
+
+  - name: Countdown Bar
+    type: block
+    disabled: false
+    parameters:
+      pos_x: 710
+      pos_y: 0
+      width: "${countdown_width}"
+      height: 54
+      color: "0xff0088aa"
+
+  - name: StopWatch
+    type: timer
+    parameters:
+      mode: StopWatch
+      variable: stopwatch
+      text_variable: stopwatch_text
+      hide_on_zero: true
+      initial_value: -1
+
+  - name: StopWatch Text
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 675
+      width: 960
+      height: 100
+      size: 90
+      text: "${stopwatch_text}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa09999cc"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 25
+      pos_y: 875
+      width: 960
+      height: 100
+      size: 90
+      text: "${banner_content_0}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xa0222266"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 870
+      width: 960
+      height: 100
+      size: 90
+      text: "${banner_content_0}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xffffffff"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 970
+      width: 960
+      height: 50
+      size: 40
+      text: "${banner_content_1}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Banner Title
+    type: text
+    parameters:
+      pos_x: 20
+      pos_y: 1020
+      width: 960
+      height: 50
+      size: 40
+      text: "${banner_content_2}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Clock
+    type: text
+    parameters:
+      pos_x: 1540
+      pos_y: 20
+      width: 960
+      height: 100
+      size: 90
+      text: "${clock_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Broken Clock
+    type: text
+    disabled: true
+    parameters:
+      pos_x: 1540
+      pos_y: 220
+      width: 960
+      height: 50
+      size: 90
+      text: "${clock_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+
+
+
