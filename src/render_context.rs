@@ -1,6 +1,8 @@
 use crate::render_buffer::RenderBuffer;
 use rusttype::{point, Font, Scale};
 use crate::pixel::Pixel;
+use crate::axisalignedrectangle::AxisAlignedRectangle;
+
 use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
@@ -56,9 +58,13 @@ impl RenderContext{
 		pos_y: u32,
 		width: u32,
 		height: u32,
+		bounding_box: &AxisAlignedRectangle,
 		size: u32,
 		color: u32,
 	) -> anyhow::Result<()> {
+		self.draw_frame( render_buffer, pos_x, pos_y, width, height, 0xff44ee44 );
+		self.draw_frame( render_buffer, bounding_box.x, bounding_box.y, bounding_box.width, bounding_box.height, 0xffff4444 );
+
 		if let Some( fontfile ) = &self.current_font {
 			if let Some( font ) = &self.fonts.get( fontfile ) {
 				if let Some( font ) = &font {
@@ -68,8 +74,10 @@ impl RenderContext{
 					let glyphs: Vec<_> = font.layout( &text, scale, start).collect();
 		//			dbg!(&glyphs);
 
-					let end_x = pos_x + width;
-					let end_y = pos_y + height;
+					let start_x = bounding_box.x;
+					let start_y = bounding_box.y;
+					let end_x = bounding_box.x + bounding_box.width; // pos_x + width;
+					let end_y = bounding_box.y + bounding_box.height; // pos_y + height;
 
 					for g in glyphs {
 						if let Some( bb ) = &g.pixel_bounding_box() {
@@ -82,19 +90,30 @@ impl RenderContext{
 								    }
 								}
 							*/
+							let debug_overflow = true;
+
 							g.draw(|x, y, v| {
 								if v > 0.0 {
+									let mut color = color;
 									let x = ( bb.min.x as u32 + x ) as u32;
-									if x >= end_x {
-										return;
+									if x >= end_x || x < start_x {
+										if debug_overflow {
+											color = 0xff44ee44; 
+										} else {
+											return;
+										}
 									}
 									if x>= render_buffer.width as u32 {
 										return;
 									}
 
 									let y = ( bb.min.y as u32 + y ) as u32;
-									if y >= end_y {
-										return;
+									if y >= end_y || y < start_y {
+										if debug_overflow {
+											color = 0xff44ee44; 
+										} else {
+											return;
+										}
 									}
 
 
@@ -115,4 +134,21 @@ impl RenderContext{
 
 		Ok(())
 	}
+	pub fn draw_frame(
+		&self,
+		render_buffer: &mut RenderBuffer,
+		pos_x: u32,
+		pos_y: u32,
+		width: u32,
+		height: u32,
+		color: u32,
+	) -> anyhow::Result<()> {
+		render_buffer.for_pixel_in_block( pos_x, pos_y, width, height, |x,y,_bx,_by,p: &mut u32| {
+			if x == pos_x || x == pos_x + width - 1 || y == pos_y || y == pos_y + height - 1 {
+				*p = color;
+			}
+		});
+		Ok(())
+	}
+
 }

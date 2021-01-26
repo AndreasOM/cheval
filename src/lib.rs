@@ -2,6 +2,8 @@ pub mod cheval;
 pub mod element;
 
 
+pub mod axisalignedrectangle;
+
 pub mod element_instance;
 
 pub mod block_element;

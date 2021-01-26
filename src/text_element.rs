@@ -4,6 +4,7 @@ use crate::context::Context;
 use async_trait::async_trait;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
+use crate::axisalignedrectangle::AxisAlignedRectangle;
 
 use std::fs::File;
 use std::io::Read;
@@ -22,6 +23,7 @@ pub struct TextElement {
 	size: u32,
 	font: Option< Font<'static> >,
 	display_text: String,
+	bounding_box: AxisAlignedRectangle,
 }
 
 impl TextElement {
@@ -52,6 +54,16 @@ impl Element for TextElement {
 		self.fontfile	= config.get_string_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
+
+		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
+		let mut bb = AxisAlignedRectangle::new();
+
+		bb.x = config.get_u32_or( "bounding_box_pos_x", self.x );
+		bb.y = config.get_u32_or( "bounding_box_pos_y", self.y );
+		bb.width = config.get_u32_or( "bounding_box_width", self.width );
+		bb.height = config.get_u32_or( "bounding_box_height", self.height );
+
+		self.bounding_box = bb;
 
 		// load font
 		/*
@@ -112,6 +124,7 @@ let mut f = match File::open(input[ 0 ]) {
 			&self.display_text,
 			self.x, self.y,
 			self.width, self.height,
+			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color
 		);
@@ -200,6 +213,7 @@ impl TextElementFactory {
 			size: 20,
 			font: None,
 			display_text: "".to_string(),
+			bounding_box: AxisAlignedRectangle::new(),
 		}
 	}
 }

@@ -297,3 +297,29 @@ elements:
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
+  - name : Overflow Test Background
+    type: block
+    disabled: true
+    parameters:
+      pos_x: 200
+      pos_y: 200
+      width: 960
+      height: 50
+      color: 0xff666666
+
+  - name: Overflow Test
+    type: text
+    parameters:
+      pos_x: 150
+      pos_y: 150
+      width: 960
+      height: 150
+      size: 90
+      # bounding box is optional, and defaults to pos + size as above
+      bounding_box_pos_x: 200
+      bounding_box_pos_y: 200
+      bounding_box_width: 500
+      bounding_box_height: 50
+      text: "Overflow Test ... with a very long string for testing"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"

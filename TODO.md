@@ -1,7 +1,14 @@
+TODO: This file is not up to date. Sorry.
+
+
 ## In Progress
+- [ ] Add bounding box support for text rendering
 - [ ] Extract shared rendering functions
 
 ## TODO
+- [ ] Change config format
+	- [ ] Add general config section
+	- [ ] Add support for multiple "pages"
 - [ ] Add visual countdown example
 - [ ] Add more position modes, e.g negative values for "from bottom/right"
 - [ ] Add clipping at buffer edges
@@ -20,6 +27,7 @@
 - [ ] Check file watcher (seems to be broken sometimes)
 - [ ] Add support for multiple pages
 - [ ] Allow elements to register for http (or just sign them up all)
+- [ ] Allow using css names for colors
 
 ## DONE
 - [x] Add timer element
