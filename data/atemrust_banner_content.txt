@@ -1,3 +1,2 @@
-Atem & Rust - #0016:
-- Getting back into the game
-- [ ] Add better font rendering
+Atem & Rust - #0017:
+- [ ] Optimze text rendering
