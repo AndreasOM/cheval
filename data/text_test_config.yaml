@@ -320,6 +320,6 @@ elements:
       bounding_box_pos_y: 400
       bounding_box_width: 500
       bounding_box_height: 50
-      text: "Overflow Test ... with a very long string for testing"
+      text: "Overflow Test ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
