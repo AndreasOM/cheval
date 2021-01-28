@@ -79,7 +79,22 @@ impl RenderContext{
 					let end_x = bounding_box.x + bounding_box.width; // pos_x + width;
 					let end_y = bounding_box.y + bounding_box.height; // pos_y + height;
 
+					let mut visible_glyphs = Vec::new();
+
 					for g in glyphs {
+						let bb = g.pixel_bounding_box();
+						match bb {
+							Some( r ) => {
+								if r.max.x >= bounding_box.x as i32 && r.min.x < ( bounding_box.x + bounding_box.width ) as i32 {
+//									self.draw_frame( render_buffer, r.min.x as u32, r.min.y as u32, ( r.max.x - r.min.x ) as u32, ( r.max.y - r.min.y ) as u32, 0xffaaaaee );
+									visible_glyphs.push( g );
+								}
+							},
+							None => {}
+						}
+					}
+
+					for g in visible_glyphs {
 						if let Some( bb ) = &g.pixel_bounding_box() {
 							/* :TODO: use nested loops instead of closure
 								// pseudo code from `rusttype` crate
@@ -96,15 +111,17 @@ impl RenderContext{
 								if v > 0.0 {
 									let mut color = color;
 									let x = ( bb.min.x as u32 + x ) as u32;
+
+									if x>= render_buffer.width as u32 {
+										return;
+									}
+
 									if x >= end_x || x < start_x {
 										if debug_overflow {
 											color = 0xff44ee44; 
 										} else {
 											return;
 										}
-									}
-									if x>= render_buffer.width as u32 {
-										return;
 									}
 
 									let y = ( bb.min.y as u32 + y ) as u32;
