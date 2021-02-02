@@ -42,24 +42,34 @@ impl Context {
 		}
 	}
 
-	pub fn expand_string_or( &self, s: &str, default: &str ) -> String {
-		let re = Regex::new(r"^\$\{(.+)\}$").unwrap();
+	// :TODO: maybe return str instead String to avoid potentially unneeded copies
+	pub fn expand_string_or( &mut self, s: &str, default: &str ) -> String {
+		let re = Regex::new(r"^\$\{([^:]+)(:(.+))?\}$").unwrap();	// :TODO: we could use non greedy matching here
 		if let Some( caps ) = re.captures( &s ) {
+//			dbg!(&caps);
 			let name = &caps[ 1 ];
+//			dbg!(&name);
 			if let Some( value ) = self.get_string( &name ) {
 				value.to_string()
 			} else {
 //				dbg!("Variable not found", &name);
 //				dbg!("Returning default for", &s, &default);
-
-				default.to_string()
+				match caps.get( 3 ) {
+					Some( c ) => {
+						self.set_string( &name, c.as_str() );
+						c.as_str().to_string()
+					},
+					None => {
+						default.to_string()
+					},
+				}
 			}
 		} else {
 			s.to_string()
 		}
 	}
 
-	pub fn expand_u32_or( &self, s: &str, default: u32 ) -> u32 {
+	pub fn expand_u32_or( &mut self, s: &str, default: u32 ) -> u32 {
 		let s = self.expand_string_or( s, "" );
 		if let Ok( u ) = s.parse::<u32>() {
 			u
@@ -68,7 +78,7 @@ impl Context {
 		}
 	}
 
-	pub fn 	expand_var_to_u32_or( &self, v: &Variable, default: u32 ) -> u32 {
+	pub fn 	expand_var_to_u32_or( &mut self, v: &Variable, default: u32 ) -> u32 {
 		match v {
 			Variable::U32( u ) => {
 				*u
