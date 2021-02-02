@@ -4,6 +4,8 @@ pub mod element;
 
 pub mod axisalignedrectangle;
 
+pub mod variable;
+
 pub mod element_instance;
 
 pub mod block_element;

@@ -4,6 +4,8 @@ use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 
+use crate::variable::Variable;
+
 use async_trait::async_trait;
 
 #[derive(Debug)]
@@ -52,6 +54,14 @@ impl ElementConfig {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::U32( v ) ) => *v,
 			_ => default,
+		}
+	}
+
+	pub fn get_variable_or( &self, name: &str, default: u32 ) -> Variable {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::U32( v ) ) => Variable::U32( *v ),
+			Some( ElementConfigEntry::STRING( v ) ) => Variable::STRING( v.clone() ),
+			_ => Variable::U32( default ),
 		}
 	}
 

@@ -10,9 +10,13 @@ use std::fs::File;
 use std::io::Read;
 use rusttype::{point, Font, Scale};
 
+use crate::variable::Variable;
+
 #[derive(Debug)]
 pub struct TextElement {
 	name: String,
+	x_var: Variable,
+	y_var: Variable,
 	x: u32,
 	y: u32,
 	width: u32,
@@ -45,7 +49,9 @@ impl TextElement {
 #[async_trait]
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
-		self.x      = config.get_u32_or( "pos_x", 0 );
+//		self.x      = config.get_u32_or( "pos_x", 0 );
+		self.x_var  = config.get_variable_or( "pos_x", 0u32 );
+		self.y_var  = config.get_variable_or( "pos_y", 0u32 );
 		self.y      = config.get_u32_or( "pos_y", 0 );
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
@@ -58,7 +64,7 @@ impl Element for TextElement {
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
 
-		bb.x = config.get_u32_or( "bounding_box_pos_x", self.x );
+		bb.x = config.get_u32_or( "bounding_box_pos_x", 0 ); // :TODO: resolve variable or use variable in bb -> self.x );
 		bb.y = config.get_u32_or( "bounding_box_pos_y", self.y );
 		bb.width = config.get_u32_or( "bounding_box_width", self.width );
 		bb.height = config.get_u32_or( "bounding_box_height", self.height );
@@ -114,6 +120,8 @@ let mut f = match File::open(input[ 0 ]) {
 
 	fn update( &mut self, context: &mut Context ) {
 		self.display_text = context.expand_string_or( &self.text, "" );
+		self.x            = context.expand_var_to_u32_or( &self.x_var, 0 );
+		self.y            = context.expand_var_to_u32_or( &self.y_var, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -203,6 +211,8 @@ impl TextElementFactory {
 	pub fn create() -> TextElement {
 		TextElement {
 			name: "".to_string(),
+			x_var: Variable::EMPTY,
+			y_var: Variable::EMPTY,
 			x: 0,
 			y: 0,
 			width: 0,

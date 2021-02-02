@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use regex::Regex;
 
+use crate::variable::Variable;
+
 #[derive(Debug)]
 pub struct Context {
 	time_step: f64,
@@ -65,4 +67,24 @@ impl Context {
 			default
 		}
 	}
+
+	pub fn 	expand_var_to_u32_or( &self, v: &Variable, default: u32 ) -> u32 {
+		match v {
+			Variable::U32( u ) => {
+				*u
+			},
+			Variable::STRING( s ) => {
+				let s = self.expand_string_or( s, "" );
+				if let Ok( u ) = s.parse::<u32>() {
+					u
+				} else if let Ok( f ) = s.parse::<f32>() {
+					f as u32
+				} else {
+					default
+				}
+			},
+			_ => default,
+		}
+	}
+
 }

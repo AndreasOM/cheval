@@ -307,11 +307,28 @@ elements:
       height: 50
       color: 0xff666666
 
+  - name: Countdown
+    type: timer
+    parameters:
+      mode: StopWatch
+      variable: countdown_x
+      text_variable: countdown_text_x
+      hide_on_zero: false
+      initial_value: 0
+      scale: "${countdown_x_scale}"
+
+  - name: Text Pos Y Variable 
+    type: variable
+    parameters:
+      comment: This is not yet implemented
+      variable: text_pos_y
+      value: 340
+
   - name: Overflow Test
     type: text
     parameters:
-      pos_x: 100
-      pos_y: 350
+      pos_x: "${countdown_x}"
+      pos_y: "${text_pos_y}"
       width: 960
       height: 150
       size: 120

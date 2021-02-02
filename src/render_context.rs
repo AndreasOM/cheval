@@ -105,7 +105,7 @@ impl RenderContext{
 								    }
 								}
 							*/
-							let debug_overflow = true;
+							let debug_overflow = false; //true;
 
 							g.draw(|x, y, v| {
 								if v > 0.0 {

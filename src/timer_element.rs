@@ -2,6 +2,7 @@ use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
+use crate::variable::Variable;
 
 use async_trait::async_trait;
 use hhmmss::Hhmmss;
@@ -20,6 +21,8 @@ pub struct TimerElement {
 	hide_on_zero: bool,
 	mode: Mode,
 	initial_value: String,
+	scale_var: Variable,
+	scale: u32,
 }
 
 impl TimerElement {
@@ -36,6 +39,8 @@ impl Element for TimerElement {
 			_ => Mode::Countdown,
 		};
 		self.initial_value	= config.get_string_or( "initial_value", "0.0" );
+		self.scale_var  = config.get_variable_or( "scale", 1u32 );
+//		self.scale = config.get_u32_or( "scale", 1 );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
@@ -44,6 +49,7 @@ impl Element for TimerElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
+		self.scale            = context.expand_var_to_u32_or( &self.scale_var, 1 );
 		// count
 		let ov = match context.get_string( &self.variable ) {
 			Some( value ) => {
@@ -51,11 +57,11 @@ impl Element for TimerElement {
 				if let Ok( v ) = value.parse::<f32>() {
 					let v = match self.mode {
 						Mode::Countdown => {
-							v - context.time_step() as f32
+							v - self.scale as f32 * context.time_step() as f32
 						},
 						Mode::StopWatch => {
 							if v >= 0.0 {
-								v + context.time_step() as f32
+								v + self.scale as f32 * context.time_step() as f32
 							} else {
 								v
 							}
@@ -124,6 +130,8 @@ impl TimerElementFactory {
 			hide_on_zero: false,
 			mode: Mode::Countdown,
 			initial_value: "".to_string(),
+			scale_var: Variable::U32( 1 ),
+			scale: 1,
 		}
 	}
 }
