@@ -9,6 +9,7 @@ use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
 use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
+use crate::scrolltext_element::ScrollTextElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
 use crate::context::Context;
@@ -181,12 +182,13 @@ impl Cheval {
 				continue;
 			};
 			let mut element: Box< dyn Element + Send > = match e.the_type.as_ref() {
-				"block" => Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
-				"timer" => Box::new( TimerElementFactory::create() ) as Box<dyn Element + Send>,
-				"loadtext" => Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
-				"lissajous" => Box::new( LissajousElementFactory::create() ),
-				"image" => Box::new( ImageElementFactory::create() ),
-				"text" => Box::new( TextElementFactory::create() ),
+				"block"			=> Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
+				"timer"			=> Box::new( TimerElementFactory::create() ) as Box<dyn Element + Send>,
+				"loadtext"		=> Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
+				"lissajous" 	=> Box::new( LissajousElementFactory::create() ),
+				"image"			=> Box::new( ImageElementFactory::create() ),
+				"text"			=> Box::new( TextElementFactory::create() ),
+				"scrolltext"	=> Box::new( ScrollTextElementFactory::create() ),
 //				_ => panic!("Unsupported element type {}", e.the_type ),
 				_ => {
 					println!("Skipping unsupported element type {}", e.the_type);

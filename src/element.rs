@@ -11,6 +11,7 @@ use async_trait::async_trait;
 #[derive(Debug)]
 pub enum ElementConfigEntry {
 	U32( u32 ),
+	F32( f32 ),
 	STRING( String ),
 	BOOL( bool ),
 }
@@ -34,6 +35,8 @@ impl ElementConfig {
 			self.entries.insert( name.to_string(), ElementConfigEntry::BOOL( false ) );
 		} else if let Ok( v ) = value.parse::<u32>() {
 			self.entries.insert( name.to_string(), ElementConfigEntry::U32( v ) );
+		} else if let Ok( v ) = value.parse::<f32>() {
+			self.entries.insert( name.to_string(), ElementConfigEntry::F32( v ) );
 		} else  {
 			if let Some( v ) = value.strip_prefix( "0x" ) {
 				match u32::from_str_radix( v, 16 ) {
@@ -53,6 +56,15 @@ impl ElementConfig {
 	pub fn get_u32_or( &self, name: &str, default: u32 ) -> u32 {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::U32( v ) ) => *v,
+			Some( ElementConfigEntry::F32( v ) ) => *v as u32,
+			_ => default,
+		}
+	}
+
+	pub fn get_f32_or( &self, name: &str, default: f32 ) -> f32 {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::F32( v ) ) => *v,
+			Some( ElementConfigEntry::U32( v ) ) => *v as f32,
 			_ => default,
 		}
 	}
@@ -69,6 +81,7 @@ impl ElementConfig {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( s ) ) => s.clone(),
 			Some( ElementConfigEntry::U32( v ) ) => format!("{}", v),
+			Some( ElementConfigEntry::F32( v ) ) => format!("{}", v),
 			_ => default.to_string(),
 		}
 	}

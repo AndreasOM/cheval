@@ -327,6 +327,7 @@ elements:
 
   - name: Overflow Test
     type: text
+    disabled: true
     parameters:
       pos_x: "${countdown_x}"
       pos_y: "${text_pos_y:340}"
@@ -334,6 +335,20 @@ elements:
       height: 150
       size: 120
       # bounding box is optional, and defaults to pos + size as above
+      bounding_box_pos_x: 600
+      bounding_box_pos_y: 340
+      bounding_box_width: 500
+      bounding_box_height: 150
+      text: "Scroll Me!"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Scroll Test
+    type: scrolltext
+    disabled: false
+    parameters:
+      speed: 50.0
+      size: 120
       bounding_box_pos_x: 600
       bounding_box_pos_y: 340
       bounding_box_width: 500
