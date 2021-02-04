@@ -310,12 +310,13 @@ elements:
   - name: Countdown
     type: timer
     parameters:
-      mode: StopWatch
+      mode: Countdown
       variable: countdown_x
       text_variable: countdown_text_x
       hide_on_zero: false
-      initial_value: 0
-      scale: "${countdown_x_scale}"
+      repeat: true
+      initial_value: 1100
+      scale: "${countdown_x_scale:150}"
 
   - name: Text Pos Y Variable 
     type: variable
@@ -333,10 +334,10 @@ elements:
       height: 150
       size: 120
       # bounding box is optional, and defaults to pos + size as above
-      bounding_box_pos_x: 200
-      bounding_box_pos_y: 400
+      bounding_box_pos_x: 600
+      bounding_box_pos_y: 340
       bounding_box_width: 500
-      bounding_box_height: 50
-      text: "Overflow Test ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing ... with a very long string for testing"
+      bounding_box_height: 150
+      text: "Scroll Me!"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"

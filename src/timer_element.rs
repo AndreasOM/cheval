@@ -19,8 +19,9 @@ pub struct TimerElement {
 	variable: String,
 	text_variable: String,
 	hide_on_zero: bool,
+	repeat: bool,
 	mode: Mode,
-	initial_value: String,
+	initial_value: Variable,
 	scale_var: Variable,
 	scale: u32,
 }
@@ -34,12 +35,13 @@ impl Element for TimerElement {
 		self.variable		= config.get_string_or( "variable", "" );
 		self.text_variable	= config.get_string_or( "text_variable", "" );
 		self.hide_on_zero	= config.get_bool_or( "hide_on_zero", false );
+		self.repeat			= config.get_bool_or( "repeat", false );
 		self.mode = match config.get_string_or( "mode", "Countdown" ).as_ref() {
 			"StopWatch" => Mode::StopWatch,
 			_ => Mode::Countdown,
 		};
-		self.initial_value	= config.get_string_or( "initial_value", "0.0" );
-		self.scale_var  = config.get_variable_or( "scale", 1u32 );
+		self.initial_value	= config.get_variable_or( "initial_value", 0 );
+		self.scale_var		= config.get_variable_or( "scale", 1u32 );
 //		self.scale = config.get_u32_or( "scale", 1 );
 	}
 
@@ -68,7 +70,18 @@ impl Element for TimerElement {
 						},
 					};
 //					let v = if v > 0.0 { v } else { 0.0 };
-					let duration = std::time::Duration::new( v as u64, 0);
+//					let duration = std::time::Duration::new( v as u64, 0);
+					let v = if v < 0.0 {
+						if self.repeat {
+							let initial_value = context.expand_var_to_f32_or( &self.initial_value, 0.0 );
+							v + initial_value
+						} else {
+							v
+						}
+					} else {
+						v
+					};
+
 					let s = format!("{}", v );
 					context.set_string( &self.variable, &s );					
 					Some( v )
@@ -79,9 +92,10 @@ impl Element for TimerElement {
 				}
 			},
 			None => {
-				let v = &self.initial_value;
-				println!("Setting initial value for {} to {}", &self.name, &v );
-				context.set_string( &self.variable, &v );
+				let v = context.expand_var_to_f32_or( &self.initial_value, 0.0 );
+				let s = format!("{}", v );
+				println!("Setting initial value for {} to {}", &self.name, &s );
+				context.set_string( &self.variable, &s );
 				dbg!(&context);
 				None
 			},
@@ -128,8 +142,9 @@ impl TimerElementFactory {
 			variable: "".to_string(),
 			text_variable: "".to_string(),
 			hide_on_zero: false,
+			repeat: false,
 			mode: Mode::Countdown,
-			initial_value: "".to_string(),
+			initial_value: Variable::EMPTY,
 			scale_var: Variable::U32( 1 ),
 			scale: 1,
 		}

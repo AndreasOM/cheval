@@ -97,4 +97,26 @@ impl Context {
 		}
 	}
 
+	pub fn 	expand_var_to_f32_or( &mut self, v: &Variable, default: f32 ) -> f32 {
+		match v {
+			Variable::F32( u ) => {
+				*u
+			},
+			Variable::U32( u ) => {
+				*u as f32
+			},
+			Variable::STRING( s ) => {
+				let s = self.expand_string_or( s, "" );
+				if let Ok( u ) = s.parse::<u32>() {
+					u as f32
+				} else if let Ok( f ) = s.parse::<f32>() {
+					f
+				} else {
+					default
+				}
+			},
+			_ => default,
+		}
+	}
+
 }
