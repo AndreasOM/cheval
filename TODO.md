@@ -2,10 +2,11 @@ TODO: This file is not up to date. Sorry.
 
 
 ## In Progress
-- [ ] Add bounding box support for text rendering
 - [ ] Extract shared rendering functions
 
 ## TODO
+- [ ] Refactor Variable to allow baking of value
+- [ ] Use Variable where sensible
 - [ ] Change config format
 	- [ ] Add general config section
 	- [ ] Add support for multiple "pages"
@@ -25,11 +26,11 @@ TODO: This file is not up to date. Sorry.
 - [ ] Add animations
 - [ ] Add audio support
 - [ ] Check file watcher (seems to be broken sometimes)
-- [ ] Add support for multiple pages
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Allow using css names for colors
 
 ## DONE
+- [x] Add bounding box support for text rendering
 - [x] Add timer element
 - [x] Add http API (setVariable)
 - [x] Implement font cache
