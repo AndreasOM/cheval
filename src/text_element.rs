@@ -52,7 +52,6 @@ impl Element for TextElement {
 //		self.x      = config.get_u32_or( "pos_x", 0 );
 		self.x_var  = config.get_variable_or( "pos_x", 0u32 );
 		self.y_var  = config.get_variable_or( "pos_y", 0u32 );
-		self.y      = config.get_u32_or( "pos_y", 0 );
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
@@ -64,8 +63,9 @@ impl Element for TextElement {
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
 
-		bb.x = config.get_u32_or( "bounding_box_pos_x", 0 ); // :TODO: resolve variable or use variable in bb -> self.x );
-		bb.y = config.get_u32_or( "bounding_box_pos_y", self.y );
+		let junk = 0;
+		bb.x = config.get_u32_or( "bounding_box_pos_x", junk ); // :TODO: resolve variable or use variable in bb -> self.x );
+		bb.y = config.get_u32_or( "bounding_box_pos_y", junk ); // :TODO: resolve variable or use variable in bb -> self.y );
 		bb.width = config.get_u32_or( "bounding_box_width", self.width );
 		bb.height = config.get_u32_or( "bounding_box_height", self.height );
 
