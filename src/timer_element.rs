@@ -22,8 +22,7 @@ pub struct TimerElement {
 	repeat: bool,
 	mode: Mode,
 	initial_value: Variable,
-	scale_var: Variable,
-	scale: u32,
+	scale: Variable,
 }
 
 impl TimerElement {
@@ -41,8 +40,7 @@ impl Element for TimerElement {
 			_ => Mode::Countdown,
 		};
 		self.initial_value	= config.get_variable_or( "initial_value", 0 );
-		self.scale_var		= config.get_variable_or( "scale", 1u32 );
-//		self.scale = config.get_u32_or( "scale", 1 );
+		self.scale		= config.get_variable_or( "scale", 1u32 );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
@@ -51,7 +49,8 @@ impl Element for TimerElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
-		self.scale            = context.expand_var_to_u32_or( &self.scale_var, 1 );
+		self.scale.bake_f32_or( context, 1.0 );
+		let scale = self.scale.as_f32();
 		// count
 		let ov = match context.get_string( &self.variable ) {
 			Some( value ) => {
@@ -59,11 +58,11 @@ impl Element for TimerElement {
 				if let Ok( v ) = value.parse::<f32>() {
 					let v = match self.mode {
 						Mode::Countdown => {
-							v - self.scale as f32 * context.time_step() as f32
+							v - scale * context.time_step() as f32
 						},
 						Mode::StopWatch => {
 							if v >= 0.0 {
-								v + self.scale as f32 * context.time_step() as f32
+								v + scale * context.time_step() as f32
 							} else {
 								v
 							}
@@ -145,8 +144,7 @@ impl TimerElementFactory {
 			repeat: false,
 			mode: Mode::Countdown,
 			initial_value: Variable::new(),
-			scale_var: Variable::from_u32( 1 ),
-			scale: 1,
+			scale: Variable::from_f32( 1.0 ),
 		}
 	}
 }
