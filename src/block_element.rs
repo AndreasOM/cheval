@@ -2,6 +2,7 @@ use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
+use crate::variable::Variable;
 
 use async_trait::async_trait;
 
@@ -10,10 +11,9 @@ pub struct BlockElement {
 	name: String,
 	x: u32,
 	y: u32,
-	width: u32,
+	width: Variable,
 	height: u32,
 	color: u32,
-	width_var: String,
 }
 
 impl BlockElement {
@@ -24,7 +24,7 @@ impl Element for BlockElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.x      = config.get_u32_or( "pos_x", 0 );
 		self.y      = config.get_u32_or( "pos_y", 0 );
-		self.width_var  = config.get_string_or( "width", "0");
+		self.width = config.get_variable_or( "width", &Variable::from_u32( 0 ));
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 	}
@@ -34,7 +34,7 @@ impl Element for BlockElement {
 	}
 
 	fn update( &mut self, context: &mut Context ) {
-		self.width = context.expand_u32_or( &self.width_var, 0 );
+		self.width.bake_u32_or( context, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -46,7 +46,7 @@ impl Element for BlockElement {
 		}
 */
 
-		render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height, |_x,_y,_bx,_by,p: &mut u32| {
+		render_buffer.for_pixel_in_block( self.x, self.y, self.width.as_u32(), self.height, |_x,_y,_bx,_by,p: &mut u32| {
 			*p = self.color;
 		});
 	}
@@ -72,10 +72,9 @@ impl BlockElementFactory {
 			name: "".to_string(),
 			x: 0,
 			y: 0,
-			width: 0,
+			width: Variable::from_u32( 0 ),
 			height: 0,
 			color: 0xff00ffff,
-			width_var: "0".to_string(),
 		}
 	}
 }

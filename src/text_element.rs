@@ -48,8 +48,8 @@ impl TextElement {
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 //		self.x      = config.get_u32_or( "pos_x", 0 );
-		self.x      = config.get_variable_or( "pos_x", 0u32 );
-		self.y      = config.get_variable_or( "pos_y", 0u32 );
+		self.x      = config.get_variable_or( "pos_x", &Variable::from_u32( 0 ) );
+		self.y      = config.get_variable_or( "pos_y", &Variable::from_u32( 0 ) );
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
@@ -62,8 +62,8 @@ impl Element for TextElement {
 		let mut bb = AxisAlignedRectangle::new();
 
 		let junk = 0;
-		bb.x = config.get_u32_or( "bounding_box_pos_x", junk ); // :TODO: resolve variable or use variable in bb -> self.x );
-		bb.y = config.get_u32_or( "bounding_box_pos_y", junk ); // :TODO: resolve variable or use variable in bb -> self.y );
+		bb.x = config.get_variable_or( "bounding_box_pos_x", &self.x );
+		bb.y = config.get_variable_or( "bounding_box_pos_y", &self.y );
 		bb.width = config.get_u32_or( "bounding_box_width", self.width );
 		bb.height = config.get_u32_or( "bounding_box_height", self.height );
 
@@ -85,14 +85,15 @@ impl Element for TextElement {
 		self.display_text = context.expand_string_or( &self.text, "" );
 		self.x.bake_u32_or( context, 0 );
 		self.y.bake_u32_or( context, 0 );
+		self.bounding_box.bake( context );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
-
+/*
 		if &self.name == "Banner Title" {
 			dbg!(&self);
 		}
-
+*/
 //		dbg!(&self);
 		render_context.use_font( &self.fontfile );
 		render_context.draw_text(

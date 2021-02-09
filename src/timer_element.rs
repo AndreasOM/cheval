@@ -39,8 +39,8 @@ impl Element for TimerElement {
 			"StopWatch" => Mode::StopWatch,
 			_ => Mode::Countdown,
 		};
-		self.initial_value	= config.get_variable_or( "initial_value", 0 );
-		self.scale		= config.get_variable_or( "scale", 1u32 );
+		self.initial_value	= config.get_variable_or( "initial_value", &Variable::from_u32( 0 ));
+		self.scale			= config.get_variable_or( "scale", &Variable::from_f32( 1.0 ) );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {

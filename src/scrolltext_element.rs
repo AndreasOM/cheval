@@ -42,8 +42,8 @@ impl Element for ScrollTextElement {
 		let mut bb = AxisAlignedRectangle::new();
 
 		let junk = 0;
-		bb.x = config.get_u32_or( "bounding_box_pos_x", junk );
-		bb.y = config.get_u32_or( "bounding_box_pos_y", junk );
+		bb.x = config.get_variable_or( "bounding_box_pos_x", &Variable::from_u32( 0 ) );
+		bb.y = config.get_variable_or( "bounding_box_pos_y", &Variable::from_u32( 0 ) );
 		bb.width = config.get_u32_or( "bounding_box_width", junk );
 		bb.height = config.get_u32_or( "bounding_box_height", junk );
 
@@ -72,12 +72,12 @@ impl Element for ScrollTextElement {
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
 		render_context.use_font( &self.fontfile );
-		let pos_x = self.bounding_box.x as f32 + self.offset;
+		let pos_x = self.bounding_box.x.as_u32() as f32 + self.offset;
 
 		render_context.draw_text(
 			render_buffer,
 			&self.display_text,
-			pos_x as u32, self.bounding_box.y,
+			pos_x as u32, self.bounding_box.y.as_u32(),
 			self.bounding_box.width, self.bounding_box.height,
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font

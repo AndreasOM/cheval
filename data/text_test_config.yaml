@@ -356,3 +356,13 @@ elements:
       text: "Scroll Me!"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
+
+  - name: Cyan Block
+    type: block
+    disabled: false
+    parameters:
+      pos_x: 0
+      pos_y: 500
+      width: "${countdown_x:1920}"
+      height: 80
+      color: "0x0000ffff"
