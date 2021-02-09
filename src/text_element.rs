@@ -121,8 +121,8 @@ impl TextElementFactory {
 	pub fn create() -> TextElement {
 		TextElement {
 			name: "".to_string(),
-			x_var: Variable::EMPTY,
-			y_var: Variable::EMPTY,
+			x_var: Variable::new(),
+			y_var: Variable::new(),
 			x: 0,
 			y: 0,
 			width: 0,

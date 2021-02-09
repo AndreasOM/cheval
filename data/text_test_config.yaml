@@ -327,7 +327,7 @@ elements:
 
   - name: Overflow Test
     type: text
-    disabled: true
+    disabled: false
     parameters:
       pos_x: "${countdown_x}"
       pos_y: "${text_pos_y:340}"
@@ -345,7 +345,7 @@ elements:
 
   - name: Scroll Test
     type: scrolltext
-    disabled: false
+    disabled: true
     parameters:
       speed: 50.0
       size: 120

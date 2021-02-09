@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use regex::Regex;
 
-use crate::variable::Variable;
+use crate::variable::{Original, Variable};
 
 #[derive(Debug)]
 pub struct Context {
@@ -79,12 +79,12 @@ impl Context {
 	}
 
 	pub fn 	expand_var_to_u32_or( &mut self, v: &Variable, default: u32 ) -> u32 {
-		match v {
-			Variable::U32( u ) => {
-				*u
+		match v.original() {
+			Original::U32( u ) => {
+				u
 			},
-			Variable::STRING( s ) => {
-				let s = self.expand_string_or( s, "" );
+			Original::STRING( s ) => {
+				let s = self.expand_string_or( &s, "" );
 				if let Ok( u ) = s.parse::<u32>() {
 					u
 				} else if let Ok( f ) = s.parse::<f32>() {
@@ -98,15 +98,15 @@ impl Context {
 	}
 
 	pub fn 	expand_var_to_f32_or( &mut self, v: &Variable, default: f32 ) -> f32 {
-		match v {
-			Variable::F32( u ) => {
-				*u
+		match v.original() {
+			Original::F32( u ) => {
+				u
 			},
-			Variable::U32( u ) => {
-				*u as f32
+			Original::U32( u ) => {
+				u as f32
 			},
-			Variable::STRING( s ) => {
-				let s = self.expand_string_or( s, "" );
+			Original::STRING( s ) => {
+				let s = self.expand_string_or( &s, "" );
 				if let Ok( u ) = s.parse::<u32>() {
 					u as f32
 				} else if let Ok( f ) = s.parse::<f32>() {

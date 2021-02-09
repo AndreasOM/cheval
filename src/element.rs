@@ -71,9 +71,9 @@ impl ElementConfig {
 
 	pub fn get_variable_or( &self, name: &str, default: u32 ) -> Variable {
 		match self.entries.get( name ) {
-			Some( ElementConfigEntry::U32( v ) ) => Variable::U32( *v ),
-			Some( ElementConfigEntry::STRING( v ) ) => Variable::STRING( v.clone() ),
-			_ => Variable::U32( default ),
+			Some( ElementConfigEntry::U32( v ) ) => Variable::from_u32( *v ),
+			Some( ElementConfigEntry::STRING( v ) ) => Variable::from_str( v ),
+			_ => Variable::from_u32( default ),
 		}
 	}
 

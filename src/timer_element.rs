@@ -144,8 +144,8 @@ impl TimerElementFactory {
 			hide_on_zero: false,
 			repeat: false,
 			mode: Mode::Countdown,
-			initial_value: Variable::EMPTY,
-			scale_var: Variable::U32( 1 ),
+			initial_value: Variable::new(),
+			scale_var: Variable::from_u32( 1 ),
 			scale: 1,
 		}
 	}
