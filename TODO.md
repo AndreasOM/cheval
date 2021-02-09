@@ -2,10 +2,11 @@ TODO: This file is not up to date. Sorry.
 
 
 ## In Progress
+- [ ] Refactor Variable to allow baking of value
 - [ ] Extract shared rendering functions
 
 ## TODO
-- [ ] Refactor Variable to allow baking of value
+- [ ] Fix default for bounding boxes
 - [ ] Use Variable where sensible
 - [ ] Change config format
 	- [ ] Add general config section

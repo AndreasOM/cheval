@@ -57,12 +57,22 @@ impl Variable {
 	}
 
 	// :TODO: maybe it could be better to have the context bake us, instead of us baking ourselves
+	pub fn bake_u32_or( &mut self, context: &mut Context, default: u32 ) -> bool {
+		self.baked =  Baked::U32( context.expand_var_to_u32_or( &self, default ) );
+		true
+	}
 	pub fn bake_f32_or( &mut self, context: &mut Context, default: f32 ) -> bool {
 		self.baked =  Baked::F32( context.expand_var_to_f32_or( &self, default ) );
 		true
 	}
 
 	// :TODO: maybe we want to implement into here
+	pub fn as_u32(&self) -> u32 {
+		match self.baked {
+			Baked::U32( v ) => v,
+			_ => panic!("Tried to get Variable as u32 that is not an U32"),
+		}
+	}
 	pub fn as_f32(&self) -> f32 {
 		match self.baked {
 			Baked::F32( v ) => v,

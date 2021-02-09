@@ -234,11 +234,14 @@ elements:
       width: 960
       height: 100
       size: 90
+      bounding_box_pos_x: 20
+      bounding_box_pos_y: 870
+      bounding_box_width: 960
       text: "${banner_content_0}"
       font: data/OpenDyslexic_Bold.ttf
       color: "0xffffffff"
 
-  - name: Banner Title
+  - name: Banner Text 1
     type: text
     parameters:
       pos_x: 20
@@ -250,7 +253,7 @@ elements:
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
-  - name: Banner Title
+  - name: Banner Text 2
     type: text
     parameters:
       pos_x: 20

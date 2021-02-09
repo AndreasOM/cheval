@@ -15,10 +15,8 @@ use crate::variable::Variable;
 #[derive(Debug)]
 pub struct TextElement {
 	name: String,
-	x_var: Variable,
-	y_var: Variable,
-	x: u32,
-	y: u32,
+	x: Variable,
+	y: Variable,
 	width: u32,
 	height: u32,
 	color: u32,
@@ -50,8 +48,8 @@ impl TextElement {
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 //		self.x      = config.get_u32_or( "pos_x", 0 );
-		self.x_var  = config.get_variable_or( "pos_x", 0u32 );
-		self.y_var  = config.get_variable_or( "pos_y", 0u32 );
+		self.x      = config.get_variable_or( "pos_x", 0u32 );
+		self.y      = config.get_variable_or( "pos_y", 0u32 );
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
@@ -71,6 +69,7 @@ impl Element for TextElement {
 
 		self.bounding_box = bb;
 
+		dbg!(&self);
 	}
 
 	fn shutdown( &mut self ) {
@@ -84,17 +83,22 @@ impl Element for TextElement {
 
 	fn update( &mut self, context: &mut Context ) {
 		self.display_text = context.expand_string_or( &self.text, "" );
-		self.x            = context.expand_var_to_u32_or( &self.x_var, 0 );
-		self.y            = context.expand_var_to_u32_or( &self.y_var, 0 );
+		self.x.bake_u32_or( context, 0 );
+		self.y.bake_u32_or( context, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+
+		if &self.name == "Banner Title" {
+			dbg!(&self);
+		}
+
 //		dbg!(&self);
 		render_context.use_font( &self.fontfile );
 		render_context.draw_text(
 			render_buffer,
 			&self.display_text,
-			self.x, self.y,
+			self.x.as_u32(), self.y.as_u32(),
 			self.width, self.height,
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
@@ -121,10 +125,8 @@ impl TextElementFactory {
 	pub fn create() -> TextElement {
 		TextElement {
 			name: "".to_string(),
-			x_var: Variable::new(),
-			y_var: Variable::new(),
-			x: 0,
-			y: 0,
+			x: Variable::from_u32( 0 ),
+			y: Variable::from_u32( 0 ),
 			width: 0,
 			height: 0,
 			color: 0xff00ffff,
