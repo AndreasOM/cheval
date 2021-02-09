@@ -1,5 +1,6 @@
 use crate::context::Context;
 
+use std::convert::From;
 
 #[derive(Clone,Debug)]
 pub enum Original {
@@ -9,7 +10,7 @@ pub enum Original {
 	STRING(String)
 }
 
-#[derive(Debug)]
+#[derive(Clone,Debug)]
 pub enum Baked {
 	EMPTY,
 	U32(u32),
@@ -17,7 +18,7 @@ pub enum Baked {
 	STRING(String)
 }
 
-#[derive(Debug)]
+#[derive(Clone,Debug)]
 pub struct Variable {
 	original: Original,
 	baked: Baked
@@ -80,3 +81,22 @@ impl Variable {
 		}
 	}
 }
+/*
+impl From<Variable> for f32 {
+    fn from(v: Variable) -> Self {
+		match v.baked {
+			Baked::F32( v ) => v,
+			_ => panic!("Tried to get Variable as f32 that is not an F32"),
+		}
+    }
+}
+*/
+impl Into<f32> for Variable {
+    fn into(self) -> f32 {
+		match self.baked {
+			Baked::F32( v ) => v,
+			_ => panic!("Tried to get Variable as f32 that is not an F32"),
+		}
+    }
+}
+

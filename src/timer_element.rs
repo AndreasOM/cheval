@@ -50,7 +50,10 @@ impl Element for TimerElement {
 
 	fn update( &mut self, context: &mut Context ) {
 		self.scale.bake_f32_or( context, 1.0 );
-		let scale = self.scale.as_f32();
+		let scale: f32 = self.scale.as_f32();
+
+//		let scale: f32 = self.scale.into(); // :TODO: fix me
+
 		// count
 		let ov = match context.get_string( &self.variable ) {
 			Some( value ) => {
