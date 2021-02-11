@@ -4,8 +4,15 @@ use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 
 #[derive(Debug)]
+enum Visibility {
+	Hidden,
+	Visible,
+}
+
+#[derive(Debug)]
 pub struct Page {
 	element_instances: Vec< ElementInstance >,
+	visibility: Visibility,
 }
 
 impl Page {
@@ -13,6 +20,7 @@ impl Page {
 	pub fn new() -> Self {
 		Self {
 			element_instances: Vec::new(),
+			visibility: Visibility::Hidden,
 		}
 	}
 
@@ -44,11 +52,13 @@ impl Page {
 		}
 	}
 	pub fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
-		for e in &self.element_instances {
-			if e.is_visible() {
-				e.render( render_buffer, render_context );
-			}
-		};		
+		if self.is_visible() {
+			for e in &self.element_instances {
+				if e.is_visible() {
+					e.render( render_buffer, render_context );
+				}
+			};
+		}
 	}
 
 	pub async fn run( &mut self ) -> anyhow::Result<()> {
@@ -57,5 +67,20 @@ impl Page {
 		}
 		Ok(())	
 	}
+
+	pub fn is_visible( &self ) -> bool {
+		match self.visibility {
+			Visibility::Visible => true,
+			_ => false,
+		}
+	}
+
+	pub fn hide( &mut self ) {
+		self.visibility = Visibility::Hidden;
+	} 
+
+	pub fn show( &mut self ) {
+		self.visibility = Visibility::Visible;
+	} 
 
 }

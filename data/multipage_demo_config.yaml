@@ -8,6 +8,7 @@ elements:
       width: 960
       height: 540
       color: "0xffaa8888"
+default_page: 1
 pages:
   - name: Page Green Block
     elements:
@@ -20,6 +21,17 @@ pages:
           width: 960
           height: 540
           color: "0xff00aa00"
+      - name: Page Green Text
+        type: text
+        parameters:
+          pos_x: 20
+          pos_y: 20
+          width: 960
+          height: 120
+          size: 90
+          text: "Page Green"
+          font: data/FiraCode-Medium.ttf
+          color: "0xffffffff"
   - name: Page Blue Block
     elements:
       - name: Blue Block
@@ -31,3 +43,14 @@ pages:
           width: 960
           height: 540
           color: "0xff5588dd"
+      - name: Page Blue Text
+        type: text
+        parameters:
+          pos_x: 20
+          pos_y: 20
+          width: 960
+          height: 120
+          size: 90
+          text: "Page Blue"
+          font: data/FiraCode-Medium.ttf
+          color: "0xffffffff"

@@ -52,6 +52,7 @@ pub struct Cheval {
 //	element_instances: Vec< ElementInstance >,
 	page: Option< Page >,
 	pages: Vec< Page >,
+	active_page: usize,
 	context: Context,
 	last_update_time: DateTime<Utc>,
 	render_context: RenderContext,
@@ -88,6 +89,7 @@ fn default_bool_true() -> bool {
 
 #[derive(Debug, Deserialize)]
 struct Config {
+	default_page: Option< usize >,
 	pages: Option< Vec< ConfigPage > >,
 	elements: Option< Vec< ConfigElement > >,
 }
@@ -168,6 +170,7 @@ impl Cheval {
 //			element_instances: Vec::new(),
 			page: None,
 			pages: Vec::new(),
+			active_page: 1,
 			context: Context::new(),
 			last_update_time: Utc::now(),
 			render_context: RenderContext::new(),
@@ -238,14 +241,21 @@ impl Cheval {
 
 		let config: Config = serde_yaml::from_reader( cf )?;
 
+		if let Some( default_page ) = &config.default_page {
+			self.active_page = *default_page;
+		}
+
 		dbg!(&config);
 		if let Some( elements ) = &config.elements {
 			let mut page = Page::new();	// global/top page
 
 			Cheval::load_elements_for_page( &mut page, &elements ).await?;
 
+			page.show();
 			self.page = Some( page );
 		}
+
+		// :TODO: allow start page to be configured
 
 		if let Some( pages ) = &config.pages {
 			for active_page_config in pages {
@@ -253,7 +263,12 @@ impl Cheval {
 
 				Cheval::load_elements_for_page( &mut page, &active_page_config.elements ).await?;
 
+				dbg!(self.pages.len(), &self.active_page);
+				if self.pages.len() == self.active_page {
+					page.show();
+				}
 				self.pages.push( page );
+
 			}
 		} 
 		println!("Running...");
