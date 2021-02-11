@@ -1,0 +1,33 @@
+elements:
+  - name: Pink Block
+    type: block
+    disabled: false
+    parameters:
+      pos_x: 480
+      pos_y: 270
+      width: 960
+      height: 540
+      color: "0xffaa8888"
+pages:
+  - name: Page Green Block
+    elements:
+      - name: Green Block
+        type: block
+        disabled: false
+        parameters:
+          pos_x: 0
+          pos_y: 0
+          width: 960
+          height: 540
+          color: "0xff00aa00"
+  - name: Page Blue Block
+    elements:
+      - name: Blue Block
+        type: block
+        disabled: false
+        parameters:
+          pos_x: 960
+          pos_y: 540
+          width: 960
+          height: 540
+          color: "0xff5588dd"

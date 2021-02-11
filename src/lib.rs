@@ -15,6 +15,7 @@ pub mod image_element;
 pub mod scrolltext_element;
 pub mod text_element;
 pub mod timer_element;
+pub mod page;
 pub mod pixel;
 
 pub mod context;
