@@ -81,6 +81,7 @@ impl Variable {
 		}
 	}
 }
+// :IDEA: use From/Into trait
 /*
 impl From<Variable> for f32 {
     fn from(v: Variable) -> Self {
@@ -91,6 +92,7 @@ impl From<Variable> for f32 {
     }
 }
 */
+/*
 impl Into<f32> for Variable {
     fn into(self) -> f32 {
 		match self.baked {
@@ -99,4 +101,6 @@ impl Into<f32> for Variable {
 		}
     }
 }
+*/
+
 
