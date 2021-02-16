@@ -1,0 +1,53 @@
+elements:
+  - name: Main Page Header Text
+    type: text
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 960
+      height: 200
+      size: 120
+      color: "0xffffffff"
+      text: "anti666 - cheval"
+      font: examples/fonts/blogger-sans/Blogger_Sans.otf
+  - name: Main Page Page Number Text
+    type: text
+    parameters:
+      pos_x: 0
+      pos_y: 1010
+      width: 960
+      height: 70
+      size: 50
+      color: "0xffffffff"
+      text: "${cheval_active_page_number}"
+      font: examples/fonts/blogger-sans/Blogger_Sans.otf
+
+default_page: 0
+pages:
+  - name: Page 0
+    elements:
+      - name: Page 0 Page Number Text
+        type: text
+        parameters:
+          pos_x: 960
+          pos_y: 880
+          width: 960
+          height: 200
+          size: 120
+          color: "0xffffffff"
+          text: "Page 0"
+          font: examples/fonts/blogger-sans/Blogger_Sans.otf
+  - name: Page 1
+    elements:
+      - name: Page 1 Page Number Text
+        type: text
+        parameters:
+          pos_x: 960
+          pos_y: 880
+          width: 960
+          height: 200
+          size: 120
+          color: "0xffffffff"
+          text: "Page 1"
+          font: examples/fonts/blogger-sans/Blogger_Sans.otf
+

@@ -372,12 +372,15 @@ impl Cheval {
 				old_page_no = Some( self.active_page );
 				old_page.hide();
 			}
+			self.active_page = page_no;
 			if let Some( page ) = self.pages.get_mut( page_no ) {
 				new_page_no = Some( page_no );
-				self.active_page = page_no;
 				page.show();
 			}
 		}
+
+		let cheval_active_page_number = format!("{}", self.active_page);
+		self.context.set_string( "cheval_active_page_number", &cheval_active_page_number.to_string() );
 
 		( new_page_no, old_page_no )
 	}
