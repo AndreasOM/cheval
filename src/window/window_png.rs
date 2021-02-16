@@ -113,5 +113,9 @@ impl Window for WindowPng {
 			}
 		}
 	}
+
+	fn get_key( &mut self ) -> Option< u32 > {
+		None
+	}
 }
 

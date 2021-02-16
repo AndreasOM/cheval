@@ -30,6 +30,7 @@ pub trait Window {
 	fn done( &self ) -> bool;
 	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &mut Cheval ), cheval: &mut Cheval  );
 	fn next_frame( &mut self );
+	fn get_key( &mut self ) -> Option< u32 >;
 }
 
 #[cfg(target_arch = "x86_64")]

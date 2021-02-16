@@ -118,6 +118,9 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	let guard = pprof::ProfilerGuard::new(100).unwrap();
 */
 	while !window.done() {
+		while let Some( key ) = window.get_key() {
+			cheval.add_key( key );
+		}
 		cheval.update();
 		window.render_frame( &mut render_frame, &mut cheval );
 		window.next_frame();

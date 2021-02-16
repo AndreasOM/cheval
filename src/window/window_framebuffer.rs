@@ -81,5 +81,11 @@ impl Window for WindowFramebuffer {
 		}
 		self.framebuffer.write_frame( &self.frame );
 	}
+
+	fn get_key( &mut self ) -> Option< u32 > {
+		// :TODO:
+		None
+	}
+
 }
 

@@ -562,6 +562,26 @@ impl Cheval {
 //			}
 		};
 	}
+
+	pub fn add_key( &mut self, key: u32 ) {
+		// :TODO: add keys to queue, and handle in update
+		match key {
+			63234 => {	// Cursor Left
+				self.goto_prev_page();
+			},
+			63235 => {	// Cursor Right
+				self.goto_next_page();
+			},
+			x if x >=48 && x<=57 => { // 0
+				let p = x - 48;
+				self.goto_page( p as usize );
+			}
+			_ => {
+				dbg!("Got key", &key);
+			}
+		}
+	}
+
 	pub fn shutdown( &mut self ) {
 		for p in self.pages.iter_mut() {
 			p.shutdown();

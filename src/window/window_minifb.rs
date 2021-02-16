@@ -4,11 +4,33 @@ use cheval::cheval::Cheval;
 use crate::window::Window;
 use cheval::render_buffer::RenderBuffer;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+type KeyVec = Rc<RefCell<Vec<u32>>>;
+
+struct Input {
+    keys: KeyVec,
+}
+
+impl Input {
+    fn new(data: &KeyVec) -> Input {
+        Input { keys: data.clone() }
+    }
+}
+
+impl minifb::InputCallback for Input {
+    fn add_char(&mut self, uni_char: u32) {
+        self.keys.borrow_mut().push(uni_char);
+    }
+}
+
 pub struct WindowMinifb {
 	render_buffer: RenderBuffer,
 	downscale: usize, 
 	frame: Vec<u32>,
 	window: minifb::Window,
+	keybuffer: Rc<RefCell<Vec<u32>>>,
 }
 
 impl WindowMinifb {
@@ -19,20 +41,26 @@ impl WindowMinifb {
 		let fw = w/ds;
 		let fh = h/ds;
 		let render_buffer = RenderBuffer::new( w, h );
-		let mut s = Self {
-			render_buffer,
-			downscale: ds,
-			frame: vec![0u32; fw * fh],
-			window: minifb::Window::new(
+		let keybuffer = KeyVec::new(RefCell::new(Vec::new()));
+		let input = Box::new( Input::new( &keybuffer ) );
+		let window = minifb::Window::new(
 				"Test",
 				fw,
 				fh,
 				minifb::WindowOptions::default()
 			).unwrap_or_else(|e| {
         		panic!("{}", e);
-    		}),
+    		});
+
+		let mut s = Self {
+			render_buffer,
+			downscale: ds,
+			frame: vec![0u32; fw * fh],
+			window: window,
+    		keybuffer: keybuffer,
 		};
 		s.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+		s.window.set_input_callback(input);
 		s
 	}	
 }
@@ -99,6 +127,16 @@ impl Window for WindowMinifb {
         self.window
             .update_with_buffer(&self.frame, fw, fh )
             .unwrap();
+	}
+
+	fn get_key( &mut self ) -> Option< u32 > {
+		let mut keys = self.keybuffer.borrow_mut();
+
+		if keys.is_empty() {
+			None
+		} else {
+			Some( keys.remove( 0 ) )
+		}
 	}
 }
 
