@@ -54,3 +54,26 @@ pages:
           text: "Page Blue"
           font: data/FiraCode-Medium.ttf
           color: "0xffffffff"
+
+  - name: Page Purple Block
+    elements:
+      - name: Blue Block
+        type: block
+        disabled: false
+        parameters:
+          pos_x: 960
+          pos_y: 540
+          width: 960
+          height: 540
+          color: "0xffdd55dd"
+      - name: Page Purple Text
+        type: text
+        parameters:
+          pos_x: 20
+          pos_y: 20
+          width: 960
+          height: 120
+          size: 90
+          text: "Page Purple"
+          font: data/FiraCode-Medium.ttf
+          color: "0xffffffff"

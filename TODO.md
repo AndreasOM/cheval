@@ -6,6 +6,8 @@ TODO: This file is not up to date. Sorry.
 - [ ] Extract shared rendering functions
 
 ## TODO
+- [ ] Merge goto next&prev page into turn page with direction
+- [ ] Decide on http response for page changes
 - [ ] Fix default for bounding boxes
 - [ ] Use Variable where sensible
 - [ ] Change config format

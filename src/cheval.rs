@@ -31,6 +31,9 @@ enum Message {
 	SetVariable( String, String ),
 	SetElementVisibilityByName( String, bool ),
 	ListElementInstances( mpsc::Sender< Response > ),
+	GotoNextPage( mpsc::Sender< Response > ),
+	GotoPrevPage( mpsc::Sender< Response > ),
+	GotoPage( mpsc::Sender< Response >, usize ),
 }
 
 #[derive(Debug)]
@@ -38,6 +41,7 @@ enum Response {
 	None,
 	NotImplemented( String ),
 	ElementInstanceList( String ),
+	PageChanged( Option< usize >, Option< usize > ),	// new page #, old page #
 }
 
 
@@ -159,6 +163,91 @@ struct Config {
 		}
 	}
 
+	async fn goto_next_page(
+		state: web::Data<HttpState>,
+	) -> impl Responder {
+		let (sender, receiver) = mpsc::channel();
+		match state.http_sender.send( Message::GotoNextPage( sender ) ) {
+			Ok( _ ) => {
+				match receiver.recv() {
+					Ok( msg ) => {
+						match msg {
+							Response::PageChanged( new_page_no, old_page_no ) => {
+								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+							},
+							_ => {
+								dbg!(&msg);
+							}
+						}
+					},
+					Err( e ) => {
+						dbg!( &e );
+					}
+				}
+			}
+			_ => {},
+		};
+
+		format!("{{}}")
+	}
+
+	async fn goto_prev_page(
+		state: web::Data<HttpState>,
+	) -> impl Responder {
+		let (sender, receiver) = mpsc::channel();
+		match state.http_sender.send( Message::GotoPrevPage( sender ) ) {
+			Ok( _ ) => {
+				match receiver.recv() {
+					Ok( msg ) => {
+						match msg {
+							Response::PageChanged( new_page_no, old_page_no ) => {
+								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+							},
+							_ => {
+								dbg!(&msg);
+							}
+						}
+					},
+					Err( e ) => {
+						dbg!( &e );
+					}
+				}
+			}
+			_ => {},
+		};
+
+		format!("{{}}")
+	}
+
+	async fn goto_page_number(
+		state: web::Data<HttpState>,
+		web::Path((page_no)): web::Path<(usize)>
+	) -> impl Responder {
+		let (sender, receiver) = mpsc::channel();
+		match state.http_sender.send( Message::GotoPage( sender, page_no ) ) {
+			Ok( _ ) => {
+				match receiver.recv() {
+					Ok( msg ) => {
+						match msg {
+							Response::PageChanged( new_page_no, old_page_no ) => {
+								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+							},
+							_ => {
+								dbg!(&msg);
+							}
+						}
+					},
+					Err( e ) => {
+						dbg!( &e );
+					}
+				}
+			}
+			_ => {},
+		};
+
+		format!("{{}}")
+	}
+
 	async fn greet(req: HttpRequest) -> impl Responder {
 	    let name = req.match_info().get("name").unwrap_or("World");
 	    format!("Hello {}!", &name)
@@ -275,6 +364,38 @@ impl Cheval {
 		Ok(())
 	}
 
+	fn goto_page( &mut self, page_no: usize ) -> ( Option< usize >, Option< usize > ) {
+		let mut old_page_no = None;
+		let mut new_page_no = None;
+		if self.active_page != page_no {
+			if let Some( old_page ) = self.pages.get_mut( self.active_page ) {
+				old_page_no = Some( self.active_page );
+				old_page.hide();
+			}
+			if let Some( page ) = self.pages.get_mut( page_no ) {
+				new_page_no = Some( page_no );
+				self.active_page = page_no;
+				page.show();
+			}
+		}
+
+		( new_page_no, old_page_no )
+	}
+
+	fn goto_next_page( &mut self ) -> ( Option< usize >, Option< usize > ) {
+		let page_no = ( self.active_page + 1 ) % self.pages.len();
+		self.goto_page( page_no )
+	}
+
+	fn goto_prev_page( &mut self ) -> ( Option< usize >, Option< usize > ) {
+		let page_no = if self.active_page > 0 {
+			self.active_page - 1
+		} else {
+			self.pages.len() - 1
+		};
+		self.goto_page( page_no )
+	}
+
 /*
 	pub fn add_element_instance( &mut self, element_instance: ElementInstance ) {
 		self.element_instances.push( element_instance );
@@ -317,6 +438,9 @@ impl Cheval {
 									// :TODO: implement list_pages
 									// :TODO: list element instances for specific page
 									.route("/list_element_instances", web::get().to(list_element_instances))
+									.route("/page/next", web::get().to(goto_next_page))
+									.route("/page/prev", web::get().to(goto_prev_page))
+									.route("/page/number/{number}", web::get().to(goto_page_number))
 //									.route("/", web::get().to(greet))
 							})
 							.bind("0.0.0.0:8080")?
@@ -385,6 +509,24 @@ impl Cheval {
 						}
 						Message::ListElementInstances( sender ) => {
 							match sender.send( Response::ElementInstanceList( "{\":TODO\": false}".to_string() ) ) {
+								_ => {},
+							};
+						},
+						Message::GotoNextPage( sender ) => {
+							let ( new_page_no, old_page_no ) = self.goto_next_page();
+							match sender.send( Response::PageChanged( new_page_no, old_page_no ) ) {
+								_ => {},
+							};
+						},
+						Message::GotoPrevPage( sender ) => {
+							let ( new_page_no, old_page_no ) = self.goto_prev_page();
+							match sender.send( Response::PageChanged( new_page_no, old_page_no ) ) {
+								_ => {},
+							};
+						},
+						Message::GotoPage( sender, page_no ) => {
+							let ( new_page_no, old_page_no ) = self.goto_page( page_no );
+							match sender.send( Response::PageChanged( new_page_no, old_page_no ) ) {
 								_ => {},
 							};
 						},
