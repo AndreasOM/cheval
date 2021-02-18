@@ -1,3 +1,3 @@
-Atem & Rust - #0022:
-- [x] Multipage switching
-- [ ] Bonus: Create better config example
+Atem & Rust - #0023:
+- [ ] Start adding expression support
+-> Expresso for the win!
