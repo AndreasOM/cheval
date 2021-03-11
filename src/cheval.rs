@@ -57,8 +57,10 @@ pub struct Cheval {
 	page: Option< Page >,
 	pages: Vec< Page >,
 	active_page: usize,
+	variable_filename: Option< String >,
 	context: Context,
 	last_update_time: DateTime<Utc>,
+	start_time: DateTime<Utc>,
 	render_context: RenderContext,
 	http_enabled: bool,
 	http_server: Option< actix_web::dev::Server >,
@@ -94,6 +96,7 @@ fn default_bool_true() -> bool {
 #[derive(Debug, Deserialize)]
 struct Config {
 	default_page: Option< usize >,
+	variable_filename: Option< String >,
 	pages: Option< Vec< ConfigPage > >,
 	elements: Option< Vec< ConfigElement > >,
 }
@@ -260,8 +263,10 @@ impl Cheval {
 			page: None,
 			pages: Vec::new(),
 			active_page: 1,
+			variable_filename: None,
 			context: Context::new(),
 			last_update_time: Utc::now(),
+			start_time: Utc::now(),
 			render_context: RenderContext::new(),
 			http_enabled: false,
 			http_server: None,
@@ -329,6 +334,29 @@ impl Cheval {
 		let cf = std::fs::File::open( config_file_name )?;
 
 		let config: Config = serde_yaml::from_reader( cf )?;
+
+		if let Some( variable_filename ) = &config.variable_filename {
+			self.variable_filename = Some( variable_filename.clone() );
+			self.context.get_mut_machine().load_variable_storage( &variable_filename );
+		}
+
+		// :HACK:
+		let function_table = self.context.get_mut_machine().get_mut_function_table();
+
+		function_table.register(
+			"sin",
+			|argc, variable_stack, _variable_storage| {
+				// :TODO: handle wrong argc
+
+				let fv = variable_stack.pop_as_f32();
+
+				let r = fv.sin();
+
+				variable_stack.push( expresso::variables::Variable::F32( r ) );
+				true
+			}
+		);
+		// -- :HACK:		
 
 		if let Some( default_page ) = &config.default_page {
 			self.active_page = *default_page;
@@ -479,6 +507,13 @@ impl Cheval {
 		self.context.set_string( "frametime_string", &frametime_string );
 		self.last_update_time = now;
 		self.context.set_time_step( frametime/1000.0 );
+
+
+		let time_since_start = now.signed_duration_since( self.start_time );
+		let time_since_start = time_since_start.num_milliseconds() as f64 / 1000.0;
+
+		self.context.get_mut_machine().get_mut_variable_storage().set( "time", expresso::variables::Variable::F32( time_since_start as f32 ) );
+
 		if let Some( p ) = &mut self.page {
 			p.update( &mut self.context );
 		}
@@ -592,5 +627,8 @@ impl Cheval {
 		if let Some( p ) = &mut self.page {
 			p.shutdown();
 		}
+		if let Some( variable_filename ) = &self.variable_filename {
+			self.context.get_mut_machine().save_variable_storage( &variable_filename );
+		}		
 	}
 }

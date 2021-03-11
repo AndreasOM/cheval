@@ -157,17 +157,29 @@ elements:
       hide_on_zero: true
       initial_value: 0
 
-  - name: Countdown Text
+  - name: Countdown Text Shadow
     type: text
     parameters:
-      pos_x: 25
-      pos_y: 775
+      pos_x: 1552
+      pos_y: 2
       width: 960
       height: 100
       size: 90
       text: "${countdown_text}"
       font: data/OpenDyslexic_Bold.ttf
-      color: "0xa09999cc"
+      color: "0x80ddddff"
+
+  - name: Countdown Text
+    type: text
+    parameters:
+      pos_x: 1550
+      pos_y: 0
+      width: 960
+      height: 100
+      size: 90
+      text: "${countdown_text}"
+      font: data/OpenDyslexic_Bold.ttf
+      color: "0xff9999cc"
 
   - name: Countdown Bar Width Expression
     type: expression
@@ -204,6 +216,7 @@ elements:
 
   - name: StopWatch Text
     type: text
+    disabled: true
     parameters:
       pos_x: 25
       pos_y: 675
@@ -267,6 +280,7 @@ elements:
 
   - name: Clock
     type: text
+    disabled: true
     parameters:
       pos_x: 1540
       pos_y: 20

@@ -1,20 +1,27 @@
 use std::collections::HashMap;
 use regex::Regex;
 
+use expresso::expression::Expression;
+use expresso::machine::Machine;
+
 use crate::variable::{Original, Variable};
 
 #[derive(Debug)]
 pub struct Context {
 	time_step: f64,
-	variables: HashMap<String,String>,
+	machine: Machine,
 }
 
 impl Context {
 	pub fn new() -> Self {
 		Self {
 			time_step: 1.0/60.0,
-			variables: HashMap::new(),
+			machine: Machine::new(),
 		}
+	}
+
+	pub fn get_mut_machine( &mut self ) -> &mut Machine {
+		&mut self.machine
 	}
 
 	pub fn set_time_step( &mut self, time_step: f64 ) {
@@ -26,11 +33,14 @@ impl Context {
 	}
 
 	pub fn set_string( &mut self, name: &str, value: &str ) {
-		self.variables.insert( name.to_string(), value.to_string() );
+		self.machine.get_mut_variable_storage().set( name, expresso::variables::Variable::String( value.to_string() ) );
 	}
 
 	pub fn get_string( &self, name: &str ) -> Option< &str > {
-		self.variables.get( name ).map(|s| s.as_ref() )
+		match self.machine.get_variable_storage().get( name ) {
+			Some( expresso::variables::Variable::String( s ) ) => Some( s ),
+			o => todo!("{:?}", &o),
+		}
 	}
 
 	pub fn get_expanded_string( &self, name: &str ) -> Option< &str > {
@@ -45,6 +55,7 @@ impl Context {
 	// :TODO: maybe return str instead String to avoid potentially unneeded copies
 	pub fn expand_string_or( &mut self, s: &str, default: &str ) -> String {
 		let re = Regex::new(r"^\$\{([^:]+)(:(.+))?\}$").unwrap();	// :TODO: we could use non greedy matching here
+		let re2 = Regex::new(r"^\$\[([^:]+)(:(.+))?\]$").unwrap();	// :TODO: we could use non greedy matching here
 		if let Some( caps ) = re.captures( &s ) {
 //			dbg!(&caps);
 			let name = &caps[ 1 ];
@@ -64,9 +75,28 @@ impl Context {
 					},
 				}
 			}
+		} else if let Some( caps ) = re2.captures( &s ) {
+			let mut expression = Expression::new();
+			expression.from_str( &caps[ 1 ] );
+//			println!("{}", expression);
+			let mut r = expression.run( &mut self.machine );
+			match r.pop() {
+				Some( expresso::variables::Variable::I32( i ) ) => {
+					format!("{}", i )
+				},
+				Some( expresso::variables::Variable::F32( f ) ) => {
+					format!("{}", f )
+				},
+				None => format!("No result" ),
+				r => todo!("Result is not printable {:?}", r ),
+			}
+
+//			format!("Expression: {}", &caps[ 1 ])
 		} else {
 			s.to_string()
 		}
+
+
 	}
 
 	pub fn expand_u32_or( &mut self, s: &str, default: u32 ) -> u32 {

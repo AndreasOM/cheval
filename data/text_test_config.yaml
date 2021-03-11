@@ -1,3 +1,4 @@
+variable_filename: text_test_variables.yaml
 elements:
   - name: Black Background Block
     type: block
@@ -15,7 +16,7 @@ elements:
       pos_x: 1540
       pos_y: 20
       width: 960
-      height: 50
+      height: 150
       size: 90
       text: "${clock_string}"
       font: data/FiraCode-Medium.ttf
@@ -30,6 +31,18 @@ elements:
       height: 50
       size: 90
       text: "${frametime_string}"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Time Since Start
+    type: text
+    parameters:
+      pos_x: $[1290+100*sin(0.5*3.14+$time*0.5)]
+      pos_y: $[250+100*sin($time*0.5)]
+      width: 960
+      height: 150
+      size: 40
+      text: "$[10*sin($time*0.1)]"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
