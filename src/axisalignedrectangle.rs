@@ -1,10 +1,10 @@
-use crate::variable::Variable;
+use crate::bakedexpression::BakedExpression;
 use crate::context::Context;
 
 #[derive(Debug)]
 pub struct AxisAlignedRectangle {
-	pub x: Variable,
-	pub y: Variable,
+	pub x: BakedExpression,
+	pub y: BakedExpression,
 	pub width: u32,
 	pub height: u32,
 }
@@ -12,8 +12,8 @@ pub struct AxisAlignedRectangle {
 impl AxisAlignedRectangle {
 	pub fn new() -> Self {
 		AxisAlignedRectangle{
-			x: Variable::from_u32( 0 ),
-			y: Variable::from_u32( 0 ),
+			x: BakedExpression::from_u32( 0 ),
+			y: BakedExpression::from_u32( 0 ),
 			width: 0,
 			height: 0,
 		}

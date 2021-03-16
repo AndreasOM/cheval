@@ -1,8 +1,8 @@
+use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
-use crate::variable::Variable;
 
 use async_trait::async_trait;
 use hhmmss::Hhmmss;
@@ -21,8 +21,8 @@ pub struct TimerElement {
 	hide_on_zero: bool,
 	repeat: bool,
 	mode: Mode,
-	initial_value: Variable,
-	scale: Variable,
+	initial_value: BakedExpression,
+	scale: BakedExpression,
 }
 
 impl TimerElement {
@@ -39,8 +39,8 @@ impl Element for TimerElement {
 			"StopWatch" => Mode::StopWatch,
 			_ => Mode::Countdown,
 		};
-		self.initial_value	= config.get_variable_or( "initial_value", &Variable::from_u32( 0 ));
-		self.scale			= config.get_variable_or( "scale", &Variable::from_f32( 1.0 ) );
+		self.initial_value	= config.get_bakedexpression_u32( "initial_value", 0 );
+		self.scale			= config.get_bakedexpression_f32( "scale", 1.0 );
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
@@ -55,49 +55,43 @@ impl Element for TimerElement {
 //		let scale: f32 = self.scale.into(); // :TODO: fix me
 
 		// count
-		let ov = match context.get_string( &self.variable ) {
-			Some( value ) => {
-//				dbg!(&self.name, &value);
-				if let Ok( v ) = value.parse::<f32>() {
-					let v = match self.mode {
-						Mode::Countdown => {
-							v - scale * context.time_step() as f32
-						},
-						Mode::StopWatch => {
-							if v >= 0.0 {
-								v + scale * context.time_step() as f32
-							} else {
-								v
-							}
-						},
-					};
-//					let v = if v > 0.0 { v } else { 0.0 };
-//					let duration = std::time::Duration::new( v as u64, 0);
-					let v = if v < 0.0 {
-						if self.repeat {
-							let initial_value = context.expand_var_to_f32_or( &self.initial_value, 0.0 );
-							v + initial_value
+//		dbg!(&self.variable);
+		let ov = match context.get_f32( &self.variable ) {
+			Some( v ) => {
+				let v = match self.mode {
+					Mode::Countdown => {
+						v - scale * context.time_step() as f32
+					},
+					Mode::StopWatch => {
+						if v >= 0.0 {
+							v + scale * context.time_step() as f32
 						} else {
 							v
 						}
+					},
+				};
+//					let v = if v > 0.0 { v } else { 0.0 };
+//					let duration = std::time::Duration::new( v as u64, 0);
+				let v = if v < 0.0 {
+					if self.repeat {
+						self.initial_value.bake_f32_or( context, 0.0 );
+						let initial_value = self.initial_value.as_f32();
+						v + initial_value
 					} else {
 						v
-					};
-
-					let s = format!("{}", v );
-					context.set_string( &self.variable, &s );					
-					Some( v )
+					}
 				} else {
-//					let v = &self.initial_value;
-//					context.set_string( &self.variable, &v );
-					None
-				}
+					v
+				};
+
+				context.set_f32( &self.variable, v );
+				Some( v )
 			},
 			None => {
-				let v = context.expand_var_to_f32_or( &self.initial_value, 0.0 );
-				let s = format!("{}", v );
-				println!("Setting initial value for {} to {}", &self.name, &s );
-				context.set_string( &self.variable, &s );
+				self.initial_value.bake_f32_or( context, 0.0 );
+				let v = self.initial_value.as_f32();
+				println!("Setting initial value for {} to {}", &self.name, v );
+				context.set_f32( &self.variable, v );
 				dbg!(&context);
 				None
 			},
@@ -146,8 +140,8 @@ impl TimerElementFactory {
 			hide_on_zero: false,
 			repeat: false,
 			mode: Mode::Countdown,
-			initial_value: Variable::new(),
-			scale: Variable::from_f32( 1.0 ),
+			initial_value: BakedExpression::from_u32( 0 ),
+			scale: BakedExpression::from_f32( 1.0 ),
 		}
 	}
 }

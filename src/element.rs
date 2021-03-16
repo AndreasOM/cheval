@@ -4,7 +4,7 @@ use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 
-use crate::variable::Variable;
+use crate::bakedexpression::BakedExpression;
 
 use async_trait::async_trait;
 
@@ -69,6 +69,27 @@ impl ElementConfig {
 		}
 	}
 
+	pub fn get_bakedexpression( &self, name: &str, default: &str ) -> BakedExpression {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			_ => BakedExpression::from_str( default ),
+		}
+	}
+
+	pub fn get_bakedexpression_u32( &self, name: &str, default: u32 ) -> BakedExpression {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			_ => BakedExpression::from_u32( default ),
+		}
+	}
+
+	pub fn get_bakedexpression_f32( &self, name: &str, default: f32 ) -> BakedExpression {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			_ => BakedExpression::from_f32( default ),
+		}
+	}
+/*
 	pub fn get_variable_or( &self, name: &str, default: &Variable ) -> Variable {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::U32( v ) ) => Variable::from_u32( *v ),
@@ -76,7 +97,7 @@ impl ElementConfig {
 			_ => default.clone(),
 		}
 	}
-
+*/
 	pub fn get_string_or( &self, name: &str, default: &str ) -> String {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( s ) ) => s.clone(),

@@ -4,8 +4,6 @@ use regex::Regex;
 use expresso::expression::Expression;
 use expresso::machine::Machine;
 
-use crate::variable::{Original, Variable};
-
 #[derive(Debug)]
 pub struct Context {
 	time_step: f64,
@@ -33,12 +31,25 @@ impl Context {
 	}
 
 	pub fn set_string( &mut self, name: &str, value: &str ) {
+//		dbg!(&name, &value);
 		self.machine.get_mut_variable_storage().set( name, expresso::variables::Variable::String( value.to_string() ) );
+	}
+
+	pub fn set_f32( &mut self, name: &str, value: f32 ) {
+//		dbg!(&name, &value);
+		self.machine.get_mut_variable_storage().set( name, expresso::variables::Variable::F32( value ) );
 	}
 
 	pub fn get_string( &self, name: &str ) -> Option< &str > {
 		match self.machine.get_variable_storage().get( name ) {
 			Some( expresso::variables::Variable::String( s ) ) => Some( s ),
+			o => todo!("{:?}", &o),
+		}
+	}
+
+	pub fn get_f32( &self, name: &str ) -> Option< f32 > {
+		match self.machine.get_variable_storage().get( name ) {
+			Some( expresso::variables::Variable::F32( f ) ) => Some( *f ),
 			o => todo!("{:?}", &o),
 		}
 	}
@@ -107,7 +118,7 @@ impl Context {
 			default
 		}
 	}
-
+/*
 	pub fn 	expand_var_to_u32_or( &mut self, v: &Variable, default: u32 ) -> u32 {
 		match v.original() {
 			Original::U32( u ) => {
@@ -148,5 +159,6 @@ impl Context {
 			_ => default,
 		}
 	}
+*/	
 
 }

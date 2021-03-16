@@ -1,3 +1,5 @@
+/*
+// Note: This has beend superseded by BakedExpression
 use crate::context::Context;
 
 use std::convert::From;
@@ -81,6 +83,8 @@ impl Variable {
 		}
 	}
 }
+*/
+
 // :IDEA: use From/Into trait
 /*
 impl From<Variable> for f32 {

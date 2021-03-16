@@ -1,4 +1,9 @@
 variable_filename: text_test_variables.yaml
+variable_defaults:
+  - countdown_x: 1920
+  - countdown_x_scale: 150.0
+  - text_pos_y: 340
+
 elements:
   - name: Black Background Block
     type: block
@@ -18,7 +23,7 @@ elements:
       width: 960
       height: 150
       size: 90
-      text: "${clock_string}"
+      text: "$clock_string"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -30,19 +35,19 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "${frametime_string}"
+      text: "$frametime_string"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Time Since Start
     type: text
     parameters:
-      pos_x: $[1290+100*sin(0.5*3.14+$time*0.5)]
-      pos_y: $[250+100*sin($time*0.5)]
+      pos_x: "1290+100*sin(0.5*3.14+$time*0.5)"
+      pos_y: "250+100*sin($time*0.5)"
       width: 960
       height: 150
       size: 40
-      text: "$[10*sin($time*0.1)]"
+      text: "10*sin($time*0.1)"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -329,7 +334,7 @@ elements:
       hide_on_zero: false
       repeat: true
       initial_value: 1100
-      scale: "${countdown_x_scale:150}"
+      scale: "$countdown_x_scale"
 
   - name: Text Pos Y Variable 
     type: variable
@@ -342,8 +347,8 @@ elements:
     type: text
     disabled: false
     parameters:
-      pos_x: "${countdown_x}"
-      pos_y: "${text_pos_y:340}"
+      pos_x: "$countdown_x"
+      pos_y: "$text_pos_y"
       width: 960
       height: 150
       size: 120
@@ -376,6 +381,6 @@ elements:
     parameters:
       pos_x: 0
       pos_y: 500
-      width: "${countdown_x:1920}"
+      width: "$countdown_x"
       height: 80
       color: "0x0000ffff"

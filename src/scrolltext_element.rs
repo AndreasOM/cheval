@@ -1,3 +1,4 @@
+use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::pixel::Pixel;
 use crate::context::Context;
@@ -9,8 +10,6 @@ use crate::axisalignedrectangle::AxisAlignedRectangle;
 use std::fs::File;
 use std::io::Read;
 // use rusttype::{point, Font, Scale};
-
-use crate::variable::Variable;
 
 #[derive(Debug)]
 pub struct ScrollTextElement {
@@ -42,8 +41,8 @@ impl Element for ScrollTextElement {
 		let mut bb = AxisAlignedRectangle::new();
 
 		let junk = 0;
-		bb.x = config.get_variable_or( "bounding_box_pos_x", &Variable::from_u32( 0 ) );
-		bb.y = config.get_variable_or( "bounding_box_pos_y", &Variable::from_u32( 0 ) );
+		bb.x = config.get_bakedexpression_u32( "bounding_box_pos_x", 0 );
+		bb.y = config.get_bakedexpression_u32( "bounding_box_pos_y", 0 );
 		bb.width = config.get_u32_or( "bounding_box_width", junk );
 		bb.height = config.get_u32_or( "bounding_box_height", junk );
 
@@ -67,6 +66,8 @@ impl Element for ScrollTextElement {
 		if self.offset < -600.0 {
 			self.offset += 600.0 + 500.0;
 		}
+
+		// :TODO: bake bounding box?
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {

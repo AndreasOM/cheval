@@ -337,7 +337,13 @@ impl Cheval {
 
 		if let Some( variable_filename ) = &config.variable_filename {
 			self.variable_filename = Some( variable_filename.clone() );
-			self.context.get_mut_machine().load_variable_storage( &variable_filename );
+			match self.context.get_mut_machine().load_variable_storage( &variable_filename ) {
+				Ok( _ ) => {},
+				r => todo!("{:?}", r),
+			};
+
+			println!( "Loaded variables from {}", &variable_filename );
+			dbg!( self.context.get_mut_machine() );
 		}
 
 		// :HACK:

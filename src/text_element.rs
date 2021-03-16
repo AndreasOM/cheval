@@ -1,3 +1,4 @@
+use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::pixel::Pixel;
 use crate::context::Context;
@@ -10,13 +11,11 @@ use std::fs::File;
 use std::io::Read;
 use rusttype::{point, Font, Scale};
 
-use crate::variable::Variable;
-
 #[derive(Debug)]
 pub struct TextElement {
 	name: String,
-	x: Variable,
-	y: Variable,
+	x: BakedExpression,
+	y: BakedExpression,
 	width: u32,
 	height: u32,
 	color: u32,
@@ -48,8 +47,8 @@ impl TextElement {
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 //		self.x      = config.get_u32_or( "pos_x", 0 );
-		self.x      = config.get_variable_or( "pos_x", &Variable::from_u32( 0 ) );
-		self.y      = config.get_variable_or( "pos_y", &Variable::from_u32( 0 ) );
+		self.x      = config.get_bakedexpression_u32( "pos_x", 0 );
+		self.y      = config.get_bakedexpression_u32( "pos_y", 0);
 		self.width  = config.get_u32_or( "width", 0 );
 		self.height = config.get_u32_or( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
@@ -61,9 +60,10 @@ impl Element for TextElement {
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
 
-		let junk = 0;
-		bb.x = config.get_variable_or( "bounding_box_pos_x", &self.x );
-		bb.y = config.get_variable_or( "bounding_box_pos_y", &self.y );
+		let junk = BakedExpression::from_u32( 0 );
+		// :TODO: add fallback for bounding box
+		bb.x = config.get_bakedexpression_u32( "bounding_box_pos_x", 0 );
+		bb.y = config.get_bakedexpression_u32( "bounding_box_pos_y", 0 );
 		bb.width = config.get_u32_or( "bounding_box_width", self.width );
 		bb.height = config.get_u32_or( "bounding_box_height", self.height );
 
@@ -126,8 +126,8 @@ impl TextElementFactory {
 	pub fn create() -> TextElement {
 		TextElement {
 			name: "".to_string(),
-			x: Variable::from_u32( 0 ),
-			y: Variable::from_u32( 0 ),
+			x: BakedExpression::from_u32( 0 ),
+			y: BakedExpression::from_u32( 0 ),
 			width: 0,
 			height: 0,
 			color: 0xff00ffff,

@@ -3,6 +3,7 @@ pub mod element;
 
 
 pub mod axisalignedrectangle;
+pub mod bakedexpression;
 
 pub mod variable;
 
