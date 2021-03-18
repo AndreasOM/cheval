@@ -4,8 +4,11 @@ TODO: This file is not up to date. Sorry.
 ## In Progress
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
+config
+	- [x] Use BakedExpression for text
 
 ## TODO
+- [ ] Fix http interface to allow setting of f32, and u32
 - [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
@@ -38,6 +41,7 @@ TODO: This file is not up to date. Sorry.
 
 
 ## DONE
+- [x] Add support for default variable values from 
 - [x] Add BakedExpression
 - [x] Add bounding box support for text rendering
 - [x] Add timer element

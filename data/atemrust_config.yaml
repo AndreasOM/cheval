@@ -1,3 +1,10 @@
+variable_filename: atemrust_variables.yaml
+variable_defaults:
+  countdown_width: 0
+  banner_content_0: ""
+  banner_content_1: ""
+  banner_content_2: ""
+
 elements:
   - name: Black Background Block
     type: block

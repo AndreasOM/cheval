@@ -97,6 +97,7 @@ fn default_bool_true() -> bool {
 struct Config {
 	default_page: Option< usize >,
 	variable_filename: Option< String >,
+	variable_defaults: Option< HashMap< String, String > >,
 	pages: Option< Vec< ConfigPage > >,
 	elements: Option< Vec< ConfigElement > >,
 }
@@ -335,16 +336,40 @@ impl Cheval {
 
 		let config: Config = serde_yaml::from_reader( cf )?;
 
+//		dbg!(&config);
+
 		if let Some( variable_filename ) = &config.variable_filename {
 			self.variable_filename = Some( variable_filename.clone() );
 			match self.context.get_mut_machine().load_variable_storage( &variable_filename ) {
 				Ok( _ ) => {},
-				r => todo!("{:?}", r),
+				Err( _ ) => {
+
+				},
+//				r => todo!("{:?}", r),
 			};
 
 			println!( "Loaded variables from {}", &variable_filename );
 			dbg!( self.context.get_mut_machine() );
 		}
+
+		// :HACK: load variable default
+		if let Some( defaults ) = &config.variable_defaults {
+			for (key, val) in defaults.iter() {
+				dbg!(&key, &val);
+				let vs = self.context.get_mut_machine().get_mut_variable_storage();
+				if vs.get( &key ).is_none() {
+					println!("Variable {} not found using default {}", &key, &val );
+					// :TODO: handle more variable types
+					if let Ok( v ) = val.parse::<i32>() {
+						vs.set( &key, expresso::variables::Variable::I32( v ) );
+					} else if let Ok( v ) = val.parse::<f32>() {
+						vs.set( &key, expresso::variables::Variable::F32( v ) );
+					} else {
+						vs.set( &key, expresso::variables::Variable::String( val.clone() ) );
+					}
+				};
+			};
+		};
 
 		// :HACK:
 		let function_table = self.context.get_mut_machine().get_mut_function_table();
