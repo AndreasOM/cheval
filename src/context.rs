@@ -50,6 +50,7 @@ impl Context {
 	pub fn get_f32( &self, name: &str ) -> Option< f32 > {
 		match self.machine.get_variable_storage().get( name ) {
 			Some( expresso::variables::Variable::F32( f ) ) => Some( *f ),
+			None => None,	// Why not???
 			o => todo!("{:?}", &o),
 		}
 	}

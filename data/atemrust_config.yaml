@@ -201,7 +201,7 @@ elements:
     parameters:
       pos_x: 710
       pos_y: 0
-      width: "${countdown_width}"
+      width: "$countdown_width"
       height: 54
       color: "0xff0088aa"
 

@@ -25,7 +25,7 @@ clap = "2.33.3"
 actix-web = "3.2.0"
 hhmmss = "0.1"
 
-expresso = "0.1.2"
+expresso = "0.2"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 minifb = "0.18.0"

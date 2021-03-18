@@ -86,7 +86,15 @@ impl BakedExpression {
 				Some( Variable::I32( i ) ) => {	// :HACK: :TODO: at least add a range check
 					self.baked = Baked::U32( *i as u32 );
 				},
-				t => todo!("Result type not handled {:?} {:?} {:?}", t, r, e ),
+				Some( Variable::ERROR( e ) ) => {
+					// :TODO: make error visible to caller/user
+					println!("Error baking {:?} got stack {:?} using default {}", &self, &r, &default );
+					self.baked = Baked::U32( default );
+				},
+				t => {
+					dbg!( &self );
+					todo!("Result type not handled {:?} {:?} {:?}", t, r, e )
+				},
 			}
 		} else {
 			match self.baked {
