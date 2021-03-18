@@ -363,7 +363,7 @@ elements:
 
   - name: Scroll Test
     type: scrolltext
-    disabled: true
+    disabled: false
     parameters:
       speed: 50.0
       size: 120

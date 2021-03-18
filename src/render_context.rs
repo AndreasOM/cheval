@@ -63,7 +63,7 @@ impl RenderContext{
 		color: u32,
 	) -> anyhow::Result<()> {
 		self.draw_frame( render_buffer, pos_x, pos_y, width, height, 0xff44ee44 );
-		self.draw_frame( render_buffer, bounding_box.x.as_u32(), bounding_box.y.as_u32(), bounding_box.width, bounding_box.height, 0xffff4444 );
+		self.draw_frame( render_buffer, bounding_box.x.as_u32(), bounding_box.y.as_u32(), bounding_box.width.as_u32(), bounding_box.height.as_u32(), 0xffff4444 );
 
 		if let Some( fontfile ) = &self.current_font {
 			if let Some( font ) = &self.fonts.get( fontfile ) {
@@ -76,8 +76,8 @@ impl RenderContext{
 
 					let start_x = bounding_box.x.as_u32();
 					let start_y = bounding_box.y.as_u32();
-					let end_x = bounding_box.x.as_u32() + bounding_box.width; // pos_x + width;
-					let end_y = bounding_box.y.as_u32() + bounding_box.height; // pos_y + height;
+					let end_x = bounding_box.x.as_u32() + bounding_box.width.as_u32(); // pos_x + width;
+					let end_y = bounding_box.y.as_u32() + bounding_box.height.as_u32(); // pos_y + height;
 
 					let mut visible_glyphs = Vec::new();
 
@@ -85,7 +85,7 @@ impl RenderContext{
 						let bb = g.pixel_bounding_box();
 						match bb {
 							Some( r ) => {
-								if r.max.x >= bounding_box.x.as_u32() as i32 && r.min.x < ( bounding_box.x.as_u32() + bounding_box.width ) as i32 {
+								if r.max.x >= bounding_box.x.as_u32() as i32 && r.min.x < ( bounding_box.x.as_u32() + bounding_box.width.as_u32() ) as i32 {
 //									self.draw_frame( render_buffer, r.min.x as u32, r.min.y as u32, ( r.max.x - r.min.x ) as u32, ( r.max.y - r.min.y ) as u32, 0xffaaaaee );
 									visible_glyphs.push( g );
 								}

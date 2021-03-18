@@ -72,13 +72,26 @@ impl ElementConfig {
 	pub fn get_bakedexpression( &self, name: &str, default: &str ) -> BakedExpression {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
+			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
 			_ => BakedExpression::from_str( default ),
+		}
+	}
+
+	pub fn get_bakedexpression_empty( &self, name: &str ) -> BakedExpression {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
+			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
+			_ => BakedExpression::new(),
 		}
 	}
 
 	pub fn get_bakedexpression_u32( &self, name: &str, default: u32 ) -> BakedExpression {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
+			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
 			_ => BakedExpression::from_u32( default ),
 		}
 	}
@@ -86,6 +99,8 @@ impl ElementConfig {
 	pub fn get_bakedexpression_f32( &self, name: &str, default: f32 ) -> BakedExpression {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
+			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
+			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
 			_ => BakedExpression::from_f32( default ),
 		}
 	}

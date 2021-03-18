@@ -14,10 +14,7 @@ use rusttype::{point, Font, Scale};
 #[derive(Debug)]
 pub struct TextElement {
 	name: String,
-	x: BakedExpression,
-	y: BakedExpression,
-	width: u32,
-	height: u32,
+	ar: AxisAlignedRectangle,
 	color: u32,
 	text: String,
 	fontfile: String,
@@ -47,10 +44,10 @@ impl TextElement {
 impl Element for TextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 //		self.x      = config.get_u32_or( "pos_x", 0 );
-		self.x      = config.get_bakedexpression_u32( "pos_x", 0 );
-		self.y      = config.get_bakedexpression_u32( "pos_y", 0);
-		self.width  = config.get_u32_or( "width", 0 );
-		self.height = config.get_u32_or( "height", 0 );
+		self.ar.x      = config.get_bakedexpression_u32( "pos_x", 0 );
+		self.ar.y      = config.get_bakedexpression_u32( "pos_y", 0);
+		self.ar.width  = config.get_bakedexpression_u32( "width", 0 );
+		self.ar.height = config.get_bakedexpression_u32( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 		self.text	= config.get_string_or( "text", "" );
 		self.fontfile	= config.get_string_or( "font", "" );
@@ -60,16 +57,14 @@ impl Element for TextElement {
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
 
-		let junk = BakedExpression::from_u32( 0 );
-		// :TODO: add fallback for bounding box
-		bb.x = config.get_bakedexpression_u32( "bounding_box_pos_x", 0 );
-		bb.y = config.get_bakedexpression_u32( "bounding_box_pos_y", 0 );
-		bb.width = config.get_u32_or( "bounding_box_width", self.width );
-		bb.height = config.get_u32_or( "bounding_box_height", self.height );
+		bb.x = config.get_bakedexpression_empty( "bounding_box_pos_x" );
+		bb.y = config.get_bakedexpression_empty( "bounding_box_pos_y" );
+		bb.width = config.get_bakedexpression_empty( "bounding_box_width" );
+		bb.height = config.get_bakedexpression_empty( "bounding_box_height" );
 
 		self.bounding_box = bb;
 
-		dbg!(&self);
+//		dbg!(&self);
 	}
 
 	fn shutdown( &mut self ) {
@@ -83,9 +78,12 @@ impl Element for TextElement {
 
 	fn update( &mut self, context: &mut Context ) {
 		self.display_text = context.expand_string_or( &self.text, "" );
-		self.x.bake_u32_or( context, 0 );
-		self.y.bake_u32_or( context, 0 );
-		self.bounding_box.bake( context );
+		// Note: we could just bake ar
+		self.ar.x.bake_u32_or( context, 0 );
+		self.ar.y.bake_u32_or( context, 0 );
+		self.ar.width.bake_u32_or( context, 0 );
+		self.ar.height.bake_u32_or( context, 0 );
+		self.bounding_box.bake_or( context, &self.ar );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -99,8 +97,8 @@ impl Element for TextElement {
 		render_context.draw_text(
 			render_buffer,
 			&self.display_text,
-			self.x.as_u32(), self.y.as_u32(),
-			self.width, self.height,
+			self.ar.x.as_u32(), self.ar.y.as_u32(),
+			self.ar.width.as_u32(), self.ar.height.as_u32(),
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color
@@ -126,10 +124,7 @@ impl TextElementFactory {
 	pub fn create() -> TextElement {
 		TextElement {
 			name: "".to_string(),
-			x: BakedExpression::from_u32( 0 ),
-			y: BakedExpression::from_u32( 0 ),
-			width: 0,
-			height: 0,
+			ar: AxisAlignedRectangle::new(),
 			color: 0xff00ffff,
 			text: "".to_string(),
 			fontfile: "".to_string(),

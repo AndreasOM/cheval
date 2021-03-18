@@ -37,17 +37,14 @@ impl Element for ScrollTextElement {
 		self.size			= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
      
-		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
 
-		let junk = 0;
-		bb.x = config.get_bakedexpression_u32( "bounding_box_pos_x", 0 );
-		bb.y = config.get_bakedexpression_u32( "bounding_box_pos_y", 0 );
-		bb.width = config.get_u32_or( "bounding_box_width", junk );
-		bb.height = config.get_u32_or( "bounding_box_height", junk );
+		bb.x = config.get_bakedexpression_empty( "bounding_box_pos_x" );
+		bb.y = config.get_bakedexpression_empty( "bounding_box_pos_y" );
+		bb.width = config.get_bakedexpression_empty( "bounding_box_width" );
+		bb.height = config.get_bakedexpression_empty( "bounding_box_height" );
 
 		self.bounding_box = bb;
-
 	}
 
 	fn shutdown( &mut self ) {
@@ -67,7 +64,8 @@ impl Element for ScrollTextElement {
 			self.offset += 600.0 + 500.0;
 		}
 
-		// :TODO: bake bounding box?
+		// :TODO: bake with default
+		self.bounding_box.bake( context );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -79,7 +77,7 @@ impl Element for ScrollTextElement {
 			render_buffer,
 			&self.display_text,
 			pos_x as u32, self.bounding_box.y.as_u32(),
-			self.bounding_box.width, self.bounding_box.height,
+			self.bounding_box.width.as_u32(), self.bounding_box.height.as_u32(),
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color

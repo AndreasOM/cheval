@@ -2,13 +2,14 @@ TODO: This file is not up to date. Sorry.
 
 
 ## In Progress
-- [ ] Extract shared rendering functions
+- [ ] Use BakedExpression where sensible
+	- [x] Use BakedExpression for text position, and bounding box
 
 ## TODO
+- [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
 - [ ] Fix default for bounding boxes
-- [ ] Use BakedExpression where sensible
 - [ ] Change config format
 	- [ ] Add general config section
 	- [ ] Add support for multiple "pages"
