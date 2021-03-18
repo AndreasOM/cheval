@@ -4,6 +4,7 @@ variable_defaults:
   countdown_x_scale: 150.0
   text_pos_y: 340
   test_text: "this is a test text"
+  scroll_text: "Scroll Me!!!"
 
 elements:
   - name: Black Background Block
@@ -34,7 +35,7 @@ elements:
       pos_x: 1540
       pos_y: 90
       width: 960
-      height: 50
+      height: 150
       size: 90
       text: "$frametime_string"
       font: data/FiraCode-Medium.ttf
@@ -60,7 +61,7 @@ elements:
       width: 960
       height: 150
       size: 90
-      text: "DummY!"
+      text: "$test_text"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -70,7 +71,7 @@ elements:
       pos_x: 20
       pos_y: 30
       width: 960
-      height: 50
+      height: 150
       size: 90
       text: "DummY!"
       font: data/FiraCode-Medium.ttf
@@ -346,7 +347,7 @@ elements:
 
   - name: Overflow Test
     type: text
-    disabled: false
+    disabled: true
     parameters:
       pos_x: "$countdown_x"
       pos_y: "$text_pos_y"
@@ -358,7 +359,7 @@ elements:
       bounding_box_pos_y: 340
       bounding_box_width: 500
       bounding_box_height: 150
-      text: "Scroll Me!"
+      text: "$scroll_text"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -372,7 +373,7 @@ elements:
       bounding_box_pos_y: 340
       bounding_box_width: 500
       bounding_box_height: 150
-      text: "Scroll Me!"
+      text: "$scroll_text"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 

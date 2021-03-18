@@ -16,7 +16,7 @@ pub struct TextElement {
 	name: String,
 	ar: AxisAlignedRectangle,
 	color: u32,
-	text: String,
+	text: BakedExpression,
 	fontfile: String,
 	size: u32,
 	font: Option< Font<'static> >,
@@ -49,7 +49,7 @@ impl Element for TextElement {
 		self.ar.width  = config.get_bakedexpression_u32( "width", 0 );
 		self.ar.height = config.get_bakedexpression_u32( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
-		self.text	= config.get_string_or( "text", "" );
+		self.text	= config.get_bakedexpression_string( "text", "" );
 		self.fontfile	= config.get_string_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
@@ -77,13 +77,15 @@ impl Element for TextElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
-		self.display_text = context.expand_string_or( &self.text, "" );
+//		self.display_text = context.expand_string_or( &self.text, "" );
 		// Note: we could just bake ar
 		self.ar.x.bake_u32_or( context, 0 );
 		self.ar.y.bake_u32_or( context, 0 );
 		self.ar.width.bake_u32_or( context, 0 );
 		self.ar.height.bake_u32_or( context, 0 );
 		self.bounding_box.bake_or( context, &self.ar );
+
+		self.text.bake_string_or( context, "" );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -96,7 +98,7 @@ impl Element for TextElement {
 		render_context.use_font( &self.fontfile );
 		render_context.draw_text(
 			render_buffer,
-			&self.display_text,
+			&self.text.as_string(),
 			self.ar.x.as_u32(), self.ar.y.as_u32(),
 			self.ar.width.as_u32(), self.ar.height.as_u32(),
 			&self.bounding_box,
@@ -126,7 +128,7 @@ impl TextElementFactory {
 			name: "".to_string(),
 			ar: AxisAlignedRectangle::new(),
 			color: 0xff00ffff,
-			text: "".to_string(),
+			text: BakedExpression::from_str(""),
 			fontfile: "".to_string(),
 			size: 20,
 			font: None,

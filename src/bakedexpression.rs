@@ -15,6 +15,7 @@ pub enum Baked {
 	EMPTY,
 	F32(f32),
 	U32(u32),
+	STRING(String),
 }
 
 impl BakedExpression {
@@ -29,6 +30,7 @@ impl BakedExpression {
 
 	pub fn from_str( v: &str ) -> Self {
 		let mut expression = Expression::new();
+		expression.enable_upgrade_of_literals_to_strings();
 		expression.from_str( v );
 
 		Self {
@@ -104,6 +106,33 @@ impl BakedExpression {
 		}
 	}
 
+	pub fn bake_string_or( &mut self, context: &mut Context, default: &str ) {
+		if let Some( e ) = &self.expression {
+			let r = e.run( context.get_mut_machine() );
+			match r.top() {
+				Some( Variable::F32( f ) ) => {
+					self.baked = Baked::STRING( format!("{}", f).to_string() );
+				},
+				Some( Variable::String( s ) ) => {
+					self.baked = Baked::STRING( s.to_string() );
+				},
+				Some( Variable::ERROR( e ) ) => {
+					println!("Error baking {:?} in {:?}", self, context );
+					self.baked = Baked::STRING( default.to_string() );
+				},
+				None => {
+					self.baked = Baked::STRING( default.to_string() );	
+				},
+				t => todo!("Result type not handled {:?} {:?} {:?}", t, r, e ),
+			}
+		} else {
+			match self.baked {
+				Baked::F32( _ ) => {}, // just keep the baked value
+				_ => self.baked = Baked::STRING( default.to_string() ),
+			}
+		}
+	}
+
 	pub fn as_f32( &self ) -> f32 {
 		match self.baked {
 			Baked::F32( f ) => f,
@@ -117,6 +146,15 @@ impl BakedExpression {
 			Baked::U32( u ) => u,
 			Baked::F32( f ) => f as u32,
 			_ => 0,	// :TODO: report error in "trace" mode
+		}
+	}
+
+	pub fn as_string( &self ) -> String {
+		match &self.baked {
+			Baked::STRING( s ) => s.clone(),
+			Baked::U32( u ) => format!( "{}", u ).to_string(),
+			Baked::F32( f ) => format!( "{}", f ).to_string(),
+			_ => String::new(),	// :TODO: report error in "trace" mode
 		}
 	}
 }
