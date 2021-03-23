@@ -19,6 +19,7 @@ use crate::timer_element::TimerElementFactory;
 use crate::page::Page;
 
 use chrono::{DateTime, Utc};
+use hhmmss::Hhmmss;
 use std::sync::mpsc;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -385,6 +386,21 @@ impl Cheval {
 
 				variable_stack.push( expresso::variables::Variable::F32( r ) );
 				true
+			}
+		);
+
+		function_table.register(
+			"printHHMMSS",
+			|argc, variable_stack, _variable_storage| {
+				if argc == 1 {
+					let f = variable_stack.pop_as_f32();
+					let duration = std::time::Duration::new( f as u64, 0);
+
+					variable_stack.push( expresso::variables::Variable::String( duration.hhmmss() ) );
+ 					true
+				} else {
+					false
+				}
 			}
 		);
 		// -- :HACK:		

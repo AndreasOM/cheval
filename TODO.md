@@ -9,19 +9,18 @@ config
 	- [x] Use BakedExpression for text
 
 ## TODO
+- [ ] Add support for animated images
 - [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
 - [ ] Fix default for bounding boxes
 - [ ] Change config format
 	- [ ] Add general config section
-	- [ ] Add support for multiple "pages"
-	- [ ] Add support for default values for variables
-- [ ] Add visual countdown example
+	- [x] Add support for multiple "pages"
+	- [x] Add support for default values for variables
 - [ ] Add more position modes, e.g negative values for "from bottom/right"
 - [ ] Add clipping at buffer edges
 	- [x] Add clipping for text
-- [ ] Add support for animated images
 - [ ] Auto reloading on config
 - [ ] Make config loading more robust
 - [ ] Improve Debug and/or Display traits for elements
@@ -42,6 +41,7 @@ config
 
 
 ## DONE
+- [x] Add visual countdown example
 - [x] Fix http interface to allow setting of f32
 - [x] Add support for default variable values from 
 - [x] Add BakedExpression

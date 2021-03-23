@@ -39,8 +39,11 @@ impl Element for TimerElement {
 			"StopWatch" => Mode::StopWatch,
 			_ => Mode::Countdown,
 		};
-		self.initial_value	= config.get_bakedexpression_u32( "initial_value", 0 );
+		self.initial_value	= config.get_bakedexpression_f32( "initial_value", 0.0 );
 		self.scale			= config.get_bakedexpression_f32( "scale", 1.0 );
+
+//		dbg!(&self);
+//		todo!("die");
 	}
 
 	async fn run( &mut self ) -> anyhow::Result<()> {
@@ -73,6 +76,7 @@ impl Element for TimerElement {
 //					let v = if v > 0.0 { v } else { 0.0 };
 //					let duration = std::time::Duration::new( v as u64, 0);
 				let v = if v < 0.0 {
+//					dbg!(&self);
 					if self.repeat {
 						self.initial_value.bake_f32_or( context, 0.0 );
 						let initial_value = self.initial_value.as_f32();

@@ -91,7 +91,8 @@ impl ElementConfig {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
 			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
-			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
+			// :TODO: do we want to allow x.0 here
+//			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
 			_ => BakedExpression::from_u32( default ),
 		}
 	}
@@ -99,7 +100,7 @@ impl ElementConfig {
 	pub fn get_bakedexpression_f32( &self, name: &str, default: f32 ) -> BakedExpression {
 		match self.entries.get( name ) {
 			Some( ElementConfigEntry::STRING( v ) ) => BakedExpression::from_str( v ),
-			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_u32( *u ),
+			Some( ElementConfigEntry::U32( u ) ) => BakedExpression::from_f32( *u as f32 ),
 			Some( ElementConfigEntry::F32( f ) ) => BakedExpression::from_f32( *f ),
 			_ => BakedExpression::from_f32( default ),
 		}

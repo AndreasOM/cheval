@@ -1,0 +1,72 @@
+variable_filename: countdown_variables.yaml
+variable_defaults:
+  title: "Countdown Example"
+  countdown_width: 860
+  countdown_initial_value: 100.0
+
+elements:
+  - name: Title
+    type: text
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 860
+      height: 80
+      size: 50
+      text: "$title"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Countdown
+    type: timer
+    parameters:
+      mode: Countdown
+      variable: countdown_1
+      text_variable: countdown_1_text
+      hide_on_zero: false
+      repeat: true
+      initial_value: "$countdown_initial_value"
+      scale: 1.0
+
+  - name: Countdown Text
+    type: text
+    parameters:
+      pos_x: 0
+      pos_y: 80
+      width: 860
+      height: 80
+      size: 50
+      text: "printHHMMSS($countdown_1)"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Countdown Initial Value Text
+    type: text
+    parameters:
+      pos_x: 240
+      pos_y: 80
+      width: 860
+      height: 80
+      size: 50
+      text: "printHHMMSS($countdown_initial_value)"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Countdown Bar Background
+    type: block
+    parameters:
+      pos_x: 0
+      pos_y: 160
+      width: "$countdown_width"
+      height: 80
+      color: "0xffaa99ee"
+
+  - name: Countdown Bar
+    type: block
+    parameters:
+      pos_x: 10
+      pos_y: 170
+      width: "$countdown_1 * (($countdown_width-20.0)/$countdown_initial_value)"
+      height: 60
+      color: "0xff226622"
+
