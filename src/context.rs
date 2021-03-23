@@ -51,7 +51,11 @@ impl Context {
 		match self.machine.get_variable_storage().get( name ) {
 			Some( expresso::variables::Variable::F32( f ) ) => Some( *f ),
 			None => None,	// Why not???
-			o => todo!("{:?}", &o),
+			o => {
+//				todo!("{:?}", &o)
+				println!("Error: Can not get as f32: {:?} using 0.0", &o);
+				Some( 0.0 )
+			},
 		}
 	}
 

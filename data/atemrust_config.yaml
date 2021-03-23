@@ -184,7 +184,7 @@ elements:
       width: 960
       height: 100
       size: 90
-      text: "${countdown_text}"
+      text: "$countdown_text"
       font: data/OpenDyslexic_Bold.ttf
       color: "0xff9999cc"
 
@@ -257,7 +257,7 @@ elements:
       bounding_box_pos_x: 20
       bounding_box_pos_y: 870
       bounding_box_width: 960
-      text: "${banner_content_0}"
+      text: "$banner_content_0"
       font: data/OpenDyslexic_Bold.ttf
       color: "0xffffffff"
 
@@ -269,7 +269,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "${banner_content_1}"
+      text: "$banner_content_1"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -281,7 +281,7 @@ elements:
       width: 960
       height: 50
       size: 40
-      text: "${banner_content_2}"
+      text: "$banner_content_2"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -294,7 +294,7 @@ elements:
       width: 960
       height: 100
       size: 90
-      text: "${clock_string}"
+      text: "$clock_string"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 
@@ -307,7 +307,7 @@ elements:
       width: 960
       height: 50
       size: 90
-      text: "${clock_string}"
+      text: "$clock_string"
       font: data/FiraCode-Medium.ttf
       color: "0xffffffff"
 

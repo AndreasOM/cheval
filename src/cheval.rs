@@ -559,7 +559,13 @@ impl Cheval {
 					match msg {
 						Message::SetVariable( name, value ) => {
 							dbg!( "set variable", &name, &value );
-							self.context.set_string( &name, &value );
+							if let Ok( v ) = value.parse::<u32>() {
+								self.context.set_f32( &name, v as f32 );
+							} else if let Ok( v ) = value.parse::<f32>() {
+								self.context.set_f32( &name, v );
+							} else  {
+								self.context.set_string( &name, &value );
+							};
 							dbg!(&self.context);
 						}
 						Message::SetElementVisibilityByName( name, visible ) => {

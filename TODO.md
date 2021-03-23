@@ -2,13 +2,13 @@ TODO: This file is not up to date. Sorry.
 
 
 ## In Progress
+
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
 config
 	- [x] Use BakedExpression for text
 
 ## TODO
-- [ ] Fix http interface to allow setting of f32, and u32
 - [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
@@ -35,12 +35,14 @@ config
 - [ ] Check file watcher (seems to be broken sometimes)
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Allow using css names for colors
+- [ ] Handle strings with whitespace in expressions
 
 ## Obsolete
 ~ - [#] Refactor Variable to allow baking of value ~
 
 
 ## DONE
+- [x] Fix http interface to allow setting of f32
 - [x] Add support for default variable values from 
 - [x] Add BakedExpression
 - [x] Add bounding box support for text rendering
