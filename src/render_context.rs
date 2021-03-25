@@ -62,9 +62,11 @@ impl RenderContext{
 		size: u32,
 		color: u32,
 	) -> anyhow::Result<()> {
+		/*
+		// :TODO: enable via command line
 		self.draw_frame( render_buffer, pos_x, pos_y, width, height, 0xff44ee44 );
 		self.draw_frame( render_buffer, bounding_box.x.as_u32(), bounding_box.y.as_u32(), bounding_box.width.as_u32(), bounding_box.height.as_u32(), 0xffff4444 );
-
+		*/
 		if let Some( fontfile ) = &self.current_font {
 			if let Some( font ) = &self.fonts.get( fontfile ) {
 				if let Some( font ) = &font {

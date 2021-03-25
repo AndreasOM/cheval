@@ -9,6 +9,7 @@ config
 	- [x] Use BakedExpression for text
 
 ## TODO
+- [ ] Persist variables in regular intervals
 - [ ] Enable debug frames bia command line 
 - [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
