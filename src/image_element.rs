@@ -1,3 +1,4 @@
+use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
@@ -9,6 +10,8 @@ use image::DynamicImage;
 use image::GenericImageView;
 use crate::pixel::Pixel;
 
+use glob::glob;
+
 pub struct ImageElement {
 	name: String,
 	x: u32,
@@ -17,7 +20,9 @@ pub struct ImageElement {
 	height: u32,
 	color: u32,
 	filename: String,
-	image: Option< DynamicImage >,
+	images: Vec< DynamicImage >,
+	fps: BakedExpression,
+	current_image: f64,
 }
 
 impl std::fmt::Debug for ImageElement {
@@ -27,6 +32,22 @@ impl std::fmt::Debug for ImageElement {
 }
 
 impl ImageElement {
+	fn add_image( &mut self, filename: &str ) -> bool {
+		println!( "Trying to load image {:?}", &filename );
+		match image::open(&filename) {
+		    Ok( img ) => {
+		    	self.width = img.dimensions().0;
+			    self.height = img.dimensions().1;
+			    self.images.push( img );
+			    true
+			},
+			Err( e ) => {
+				println!( "Couldn't load image {} {:?}", &filename, e );
+//				self.images = Vec::new();
+				false
+			}
+		}
+	}
 }
 
 #[async_trait]
@@ -39,11 +60,21 @@ impl Element for ImageElement {
 		self.color  = config.get_u32_or( "color", 0xff00ffff );
 		self.filename  = config.get_string_or( "filename", "" );
 		if self.filename != "" {
-			    let img = image::open(&self.filename).unwrap();
-			    self.width = img.dimensions().0;
-			    self.height = img.dimensions().1;
-			    self.image = Some( img );
+			self.images = Vec::new();
+
+			let fileglob = self.filename.clone();
+
+			for entry in glob( &fileglob ).expect("Failed to read glob pattern") {
+			    match entry {
+			        Ok(path) => {
+			        	dbg!(&path);
+			        	self.add_image( &path.to_string_lossy() );
+			        },
+			        Err(e) => println!("{:?}", e),
+			    }
+			}
 		}
+		self.fps = config.get_bakedexpression_f32( "fps", 0.0 );
 	}
 
 	fn shutdown( &mut self ) {
@@ -55,12 +86,27 @@ impl Element for ImageElement {
 	}
 
 
-	fn update( &mut self, _context: &mut Context ) {
+	fn update( &mut self, context: &mut Context ) {
+		self.fps.bake_f32_or( context, 0.0 );
+		//dbg!(&self.fps);
+		let fps = self.fps.as_f32() as f64;
+		if fps > 0.0 {
+			let time_step = context.time_step();
+			self.current_image += fps*time_step;
+			self.current_image = self.current_image % ( self.images.len() as f64 );
+//			dbg!(&self.current_image);
+			/*
+			if self.current_image >= self.images.len() as f64 {
+				self.current_image -= self.images.len() as f64;
+			};
+			*/
+		}
+
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
-		match &self.image {
+		match &self.images.get( self.current_image.trunc() as usize ) {
 			None => {
 				render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height, |_,_,_,_,p: &mut u32| {
 					*p = self.color;
@@ -145,7 +191,9 @@ impl ImageElementFactory {
 			height: 0,
 			color: 0xff00ffff,
 			filename: "".to_string(),
-			image: None,
+			images: Vec::new(),
+			fps: BakedExpression::from_f32( 0.0 ),
+			current_image: 0.0,
 		}
 	}
 }

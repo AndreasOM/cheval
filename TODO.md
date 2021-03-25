@@ -9,7 +9,7 @@ config
 	- [x] Use BakedExpression for text
 
 ## TODO
-- [ ] Add support for animated images
+- [ ] Enable debug frames bia command line 
 - [ ] Extract shared rendering functions
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
@@ -41,6 +41,7 @@ config
 
 
 ## DONE
+- [x] Add support for animated images
 - [x] Add visual countdown example
 - [x] Fix http interface to allow setting of f32
 - [x] Add support for default variable values from 

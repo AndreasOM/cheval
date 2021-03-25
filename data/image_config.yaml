@@ -1,0 +1,40 @@
+variable_filename: image_variables.yaml
+variable_defaults:
+  title: "Image Example"
+  fps: 25.0
+
+elements:
+  - name: Title
+    type: text
+    parameters:
+      pos_x: 0
+      pos_y: 0
+      width: 860
+      height: 80
+      size: 50
+      text: "$title"
+      font: data/FiraCode-Medium.ttf
+      color: "0xffffffff"
+
+  - name: Image 1
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 100
+      filename: data/one.png
+
+  - name: Image 2
+    type: image
+    parameters:
+      pos_x: 10
+      pos_y: 400
+      filename: data/two.png
+
+  - name: Image Animated
+    type: image
+    parameters:
+      pos_x: 860
+      pos_y: 400
+      filename: data/counter_anim/*.png
+      fps: "$fps"
+
