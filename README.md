@@ -1,5 +1,8 @@
 # cheval
-Framebuffer device based info renderer in rust.
+Info renderer in rust targeting
+- png
+- framebuffer
+- window
 
 
 ## Examples

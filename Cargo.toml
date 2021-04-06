@@ -5,6 +5,13 @@ authors = ["Andreas Neukoetter <andreas@omni-mad.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "A tool to render stream overlays, or smart mirror content, or just images."
+readme = "README.md"
+homepage = "https://github.com/AndreasOM/cheval"
+repository = "https://github.com/AndreasOM/cheval"
+keywords = ["tools", "overlay", "streaming"]
+categories = ["graphics"]
 
 [[bin]]
 name="cheval"
