@@ -7,6 +7,11 @@ use crate::window::WindowFactory;
 use cheval::render_buffer::RenderBuffer;
 use std::fs::File;
 
+
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use std::io::{Write, stdin};
+
 fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 {
 /*	
@@ -117,9 +122,24 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 /* :TODO: hide behind feature flag	
 	let guard = pprof::ProfilerGuard::new(100).unwrap();
 */
-	while !window.done() {
+//	let mut stdin = std::io::stdin().into_raw_mode().unwrap();
+
+	let mut stdout = std::io::stdout().into_raw_mode().unwrap();
+    // Use asynchronous stdin
+    let mut stdin = termion::async_stdin().keys();
+
+	while !window.done() && !cheval.done() {
 		while let Some( key ) = window.get_key() {
 			cheval.add_key( key );
+		}
+		for c in stdin.next() {
+			match c {
+				Ok( termion::event::Key::Esc ) => cheval.add_key( 27 ),	// ASCII ESC
+				Ok( termion::event::Key::Left ) => cheval.add_key( 63234 ),
+				Ok( termion::event::Key::Right ) => cheval.add_key( 63235 ),
+				Ok( termion::event::Key::Char( c ) ) => cheval.add_key( c as u32 ),
+				_ => {},
+			}
 		}
 		cheval.update();
 		window.render_frame( &mut render_frame, &mut cheval );
@@ -128,6 +148,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 		if frames > 0 && frame_count >= frames {
 			break;
 		}
+
 	}
 /* :TODO: hide behind feature flag	
 	if let Ok(report) = guard.report().build() {

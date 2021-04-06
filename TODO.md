@@ -38,10 +38,13 @@ config
 - [ ] Handle strings with whitespace in expressions
 
 ## Obsolete
+
 ~ - [#] Refactor Variable to allow baking of value ~
 
 
 ## DONE
+
+- [x] Allow keyboard input from console
 - [x] Add support for animated images
 - [x] Add visual countdown example
 - [x] Fix http interface to allow setting of f32

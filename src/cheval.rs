@@ -66,6 +66,7 @@ pub struct Cheval {
 	http_enabled: bool,
 	http_server: Option< actix_web::dev::Server >,
 	http_receiver: Option< mpsc::Receiver< Message > >,
+	done: bool,
 }
 
 
@@ -273,7 +274,12 @@ impl Cheval {
 			http_enabled: false,
 			http_server: None,
 			http_receiver: None,
+			done: false,
 		}
+	}
+
+	pub fn done( &self ) -> bool {
+		self.done
 	}
 
 	pub fn enable_http( &mut self ) {
@@ -657,6 +663,9 @@ impl Cheval {
 	pub fn add_key( &mut self, key: u32 ) {
 		// :TODO: add keys to queue, and handle in update
 		match key {
+			27 => {
+				self.done = true;
+			},
 			63234 => {	// Cursor Left
 				self.goto_prev_page();
 			},
