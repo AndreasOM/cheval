@@ -3,6 +3,7 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
 config
@@ -46,6 +47,7 @@ config
 
 ## DONE
 
+- [x] Check for config.yaml if config parameter is a directory
 - [x] Make filepath in config file relative to config file
 - [x] Allow keyboard input from console
 - [x] Add support for animated images

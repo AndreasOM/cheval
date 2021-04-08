@@ -343,19 +343,44 @@ impl Cheval {
 	}
 
 	pub async fn load( &mut self, config_file_name: &str ) -> Result<(), Box< dyn std::error::Error > > {
+		dbg!(&config_file_name);
 		// make path absolute
 		let cwd = std::env::current_dir().unwrap();
 		let config_file_name = Path::new( &config_file_name );
 		let config_file_name = cwd.join( config_file_name );
-		let config_file_name = config_file_name.canonicalize()?;
+		let config_file_name = match config_file_name.canonicalize() {
+			Ok( c ) => c,
+			Err( e ) =>panic!( "Error canonicalizing config file {:?} -> {:?}", &config_file_name, &e ),
+		};
+
+		let config_file_name = if config_file_name.is_dir() {
+			let mut cfn = config_file_name.clone();
+			cfn.push( "config.yaml" );
+			if cfn.is_file() {
+				cfn
+			} else {
+				todo!("Search config file ... maybe");
+			}
+		} else {
+			config_file_name
+		};
 
 		if let Some( config_path ) = config_file_name.parent() {
 			self.config_path = PathBuf::from( &config_path );
 		};
 
-		let cf = std::fs::File::open( config_file_name )?;
 
-		let config: Config = serde_yaml::from_reader( cf )?;
+		let cf = match std::fs::File::open( &config_file_name ) {
+			Ok( f ) => f,
+			Err( e ) => panic!("Error opening config file {:?} -> {:?}", &config_file_name, &e ),
+		};
+
+		dbg!(&cf);
+
+		let config: Config = match serde_yaml::from_reader( &cf ) {
+			Ok( c ) => c,
+			Err( e ) => panic!("Error deserializing config file {:?} -> {:?}", &cf, &e ),
+		};
 
 //		dbg!(&config);
 
