@@ -85,7 +85,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 						)
 						.get_matches();
 
-	let config = matches.value_of("config").unwrap_or("example_config.yaml").to_string();
+	let config = matches.value_of("config").unwrap_or(".").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
 	let frames = matches.value_of("frames").unwrap_or("0").to_string();
 	let enable_http = matches.occurrences_of("enable-http") > 0;
