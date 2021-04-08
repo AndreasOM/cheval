@@ -47,8 +47,11 @@ fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 #[actix_web::main]
 async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
+	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+	let version = format!("{}",VERSION);
+
 	let matches = App::new("cheval")
-						.version("0.1")
+						.version(version.as_ref())
 						.author("Andreas N. <andreas@omni-mad.com>")
 						.arg( Arg::with_name("config")
 							.long("config")
