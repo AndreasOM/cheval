@@ -11,6 +11,7 @@ config
 
 ## TODO
 
+- [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
 - [ ] Persist variables in regular intervals
 - [ ] Enable debug frames bia command line 
@@ -47,6 +48,7 @@ config
 
 ## DONE
 
+- [x] Use \*config.yaml if exactly one matches
 - [x] Check for config.yaml if config parameter is a directory
 - [x] Make filepath in config file relative to config file
 - [x] Allow keyboard input from console

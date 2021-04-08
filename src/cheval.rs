@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use std::path::{ Path, PathBuf };
+use glob::Paths;
 
 use serde::Deserialize;
 use serde_yaml;
@@ -359,7 +360,22 @@ impl Cheval {
 			if cfn.is_file() {
 				cfn
 			} else {
-				todo!("Search config file ... maybe");
+				let mut glob = config_file_name.clone();
+				glob.push("*config.yaml");
+				let glob = glob.to_string_lossy().to_string();
+				let mut result = glob::glob( &glob ).expect("Failed to read glob pattern");
+
+				// :TODO: check if something like take(2).to_vec() result in more readable code
+
+				match result.next() {
+					None => todo!("no config found"),
+					Some( fr ) => {
+						match result.next() {
+							None => fr.unwrap(),
+							Some( _ ) => todo!("More than one config found")
+						}
+					},
+				}
 			}
 		} else {
 			config_file_name
