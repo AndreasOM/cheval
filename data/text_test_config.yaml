@@ -26,7 +26,7 @@ elements:
       height: 150
       size: 90
       text: "$clock_string"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: FrameTime
@@ -38,7 +38,7 @@ elements:
       height: 150
       size: 90
       text: "$frametime_string"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Time Since Start
@@ -50,7 +50,7 @@ elements:
       height: 150
       size: 40
       text: "10*sin($time*0.1)"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -62,7 +62,7 @@ elements:
       height: 150
       size: 90
       text: "$test_text"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -74,7 +74,7 @@ elements:
       height: 150
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -86,7 +86,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -98,7 +98,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -110,7 +110,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -122,7 +122,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -134,7 +134,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -146,7 +146,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -158,7 +158,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -170,7 +170,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -182,7 +182,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -194,7 +194,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -206,7 +206,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -218,7 +218,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -230,7 +230,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -242,7 +242,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -254,7 +254,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -266,7 +266,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -278,7 +278,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -290,7 +290,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -302,7 +302,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -314,7 +314,7 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name : Overflow Test Background
@@ -360,7 +360,7 @@ elements:
       bounding_box_width: 500
       bounding_box_height: 150
       text: "$scroll_text"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Scroll Test
@@ -374,7 +374,7 @@ elements:
       bounding_box_width: 500
       bounding_box_height: 150
       text: "$scroll_text"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Cyan Block

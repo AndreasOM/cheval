@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use std::path::{ Path, PathBuf };
+
 use serde::Deserialize;
 use serde_yaml;
 
@@ -67,6 +69,7 @@ pub struct Cheval {
 	http_server: Option< actix_web::dev::Server >,
 	http_receiver: Option< mpsc::Receiver< Message > >,
 	done: bool,
+	config_path: PathBuf,
 }
 
 
@@ -275,6 +278,7 @@ impl Cheval {
 			http_server: None,
 			http_receiver: None,
 			done: false,
+			config_path: PathBuf::new(),
 		}
 	}
 
@@ -286,7 +290,7 @@ impl Cheval {
 		self.http_enabled = true;
 	}
 
-	async fn load_elements_for_page( page: &mut Page, config_page_elements: &Vec< ConfigElement > ) -> anyhow::Result<()> {
+	async fn load_elements_for_page( &self, page: &mut Page, config_page_elements: &Vec< ConfigElement > ) -> anyhow::Result<()> {
 		for e in config_page_elements {
 			if e.disabled {
 				continue;
@@ -308,7 +312,7 @@ impl Cheval {
 			
 			element.set_name( &e.name );
 
-			let mut element_config = ElementConfig::new();
+			let mut element_config = ElementConfig::new( &self.config_path.as_path() );
 
 			for p in &e.parameters {
 				element_config.set( &p.0, &p.1 );
@@ -339,6 +343,16 @@ impl Cheval {
 	}
 
 	pub async fn load( &mut self, config_file_name: &str ) -> Result<(), Box< dyn std::error::Error > > {
+		// make path absolute
+		let cwd = std::env::current_dir().unwrap();
+		let config_file_name = Path::new( &config_file_name );
+		let config_file_name = cwd.join( config_file_name );
+		let config_file_name = config_file_name.canonicalize()?;
+
+		if let Some( config_path ) = config_file_name.parent() {
+			self.config_path = PathBuf::from( &config_path );
+		};
+
 		let cf = std::fs::File::open( config_file_name )?;
 
 		let config: Config = serde_yaml::from_reader( cf )?;
@@ -419,7 +433,7 @@ impl Cheval {
 		if let Some( elements ) = &config.elements {
 			let mut page = Page::new();	// global/top page
 
-			Cheval::load_elements_for_page( &mut page, &elements ).await?;
+			self.load_elements_for_page( &mut page, &elements ).await?;
 
 			page.show();
 			self.page = Some( page );
@@ -431,7 +445,7 @@ impl Cheval {
 			for active_page_config in pages {
 				let mut page = Page::new();	// sub page
 
-				Cheval::load_elements_for_page( &mut page, &active_page_config.elements ).await?;
+				self.load_elements_for_page( &mut page, &active_page_config.elements ).await?;
 
 				dbg!(self.pages.len(), &self.active_page);
 				if self.pages.len() == self.active_page {

@@ -93,14 +93,14 @@ elements:
     parameters:
       pos_x: 10
       pos_y: 870
-      filename: data/banner.png
+      filename: banner.png
 
   - name: Banner Background
     type: image
     parameters:
       pos_x: 10
       pos_y: 870
-      filename: data/banner_title.png
+      filename: banner_title.png
 
   - name: Banner Title
     type: image
@@ -108,7 +108,7 @@ elements:
     parameters:
       pos_x: 10
       pos_y: 650
-      filename: data/banner-title.png
+      filename: banner-title.png
 
   - name: Banner Background Test
     type: image
@@ -116,30 +116,30 @@ elements:
     parameters:
       pos_x: 480
       pos_y: 490
-      filename: data/banner-test.png
+      filename: banner-test.png
 
   - name: Banner Title Loader
     type: loadtext
     parameters:
-      filename: data/banner_title.txt
+      filename: banner_title.txt
       variable: banner_title
 
   - name: Banner Line 0 Loader
     type: loadtext
     parameters:
-      filename: data/banner_line_0.txt
+      filename: banner_line_0.txt
       variable: banner_line_0
 
   - name: Banner Line 1 Loader
     type: loadtext
     parameters:
-      filename: data/banner_line_1.txt
+      filename: banner_line_1.txt
       variable: banner_line_1
 
   - name: Banner Content Loader
     type: loadtext
     parameters:
-      filename: data/atemrust_banner_content.txt
+      filename: atemrust_banner_content.txt
       variable: banner_content_{}
       split_lines: true
 
@@ -153,7 +153,7 @@ elements:
       height: 50
       size: 90
       text: "${banner_title}"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xa0ff2266"
 
   - name: Countdown
@@ -173,7 +173,7 @@ elements:
       height: 100
       size: 90
       text: "${countdown_text}"
-      font: data/OpenDyslexic_Bold.ttf
+      font: OpenDyslexic_Bold.ttf
       color: "0x80ddddff"
 
   - name: Countdown Text
@@ -185,7 +185,7 @@ elements:
       height: 100
       size: 90
       text: "$countdown_text"
-      font: data/OpenDyslexic_Bold.ttf
+      font: OpenDyslexic_Bold.ttf
       color: "0xff9999cc"
 
   - name: Countdown Bar Width Expression
@@ -231,7 +231,7 @@ elements:
       height: 100
       size: 90
       text: "${stopwatch_text}"
-      font: data/OpenDyslexic_Bold.ttf
+      font: OpenDyslexic_Bold.ttf
       color: "0xa09999cc"
 
   - name: Banner Title
@@ -243,7 +243,7 @@ elements:
       height: 100
       size: 90
       text: "${banner_content_0}"
-      font: data/OpenDyslexic_Bold.ttf
+      font: OpenDyslexic_Bold.ttf
       color: "0xa0222266"
 
   - name: Banner Title
@@ -258,7 +258,7 @@ elements:
       bounding_box_pos_y: 870
       bounding_box_width: 960
       text: "$banner_content_0"
-      font: data/OpenDyslexic_Bold.ttf
+      font: OpenDyslexic_Bold.ttf
       color: "0xffffffff"
 
   - name: Banner Text 1
@@ -270,7 +270,7 @@ elements:
       height: 50
       size: 40
       text: "$banner_content_1"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Banner Text 2
@@ -282,7 +282,7 @@ elements:
       height: 50
       size: 40
       text: "$banner_content_2"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Clock
@@ -295,7 +295,7 @@ elements:
       height: 100
       size: 90
       text: "$clock_string"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: Broken Clock
@@ -308,7 +308,7 @@ elements:
       height: 50
       size: 90
       text: "$clock_string"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
 

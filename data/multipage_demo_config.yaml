@@ -30,7 +30,7 @@ pages:
           height: 120
           size: 90
           text: "Page Green"
-          font: data/FiraCode-Medium.ttf
+          font: FiraCode-Medium.ttf
           color: "0xffffffff"
   - name: Page Blue Block
     elements:
@@ -52,7 +52,7 @@ pages:
           height: 120
           size: 90
           text: "Page Blue"
-          font: data/FiraCode-Medium.ttf
+          font: FiraCode-Medium.ttf
           color: "0xffffffff"
 
   - name: Page Purple Block
@@ -75,5 +75,5 @@ pages:
           height: 120
           size: 90
           text: "Page Purple"
-          font: data/FiraCode-Medium.ttf
+          font: FiraCode-Medium.ttf
           color: "0xffffffff"

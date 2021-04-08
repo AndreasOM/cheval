@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use std::path::{Path,PathBuf};
+
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
@@ -19,12 +21,14 @@ pub enum ElementConfigEntry {
 #[derive(Debug)]
 pub struct ElementConfig {
 	entries: HashMap<String, ElementConfigEntry>,
+	config_path: PathBuf,
 }
 
 impl ElementConfig {
-	pub fn new() -> Self {
+	pub fn new( config_path: &Path ) -> Self {
 		Self {
 			entries: HashMap::new(),
+			config_path: PathBuf::from( config_path ),
 		}
 	}
 
@@ -130,6 +134,19 @@ impl ElementConfig {
 			Some( ElementConfigEntry::F32( v ) ) => format!("{}", v),
 			_ => default.to_string(),
 		}
+	}
+
+	// :TODO: return Path instead of String
+	pub fn get_path_or( &self, name: &str, default: &str ) -> String {
+		let filename = self.get_string_or( name, default );
+		let filename = Path::new( &filename );
+		let filename = self.config_path.join( filename );
+		let filename = match filename.canonicalize() {
+			Ok( f ) => f,
+			_ => panic!("File not found {:?}", &filename ),
+		};
+
+		filename.to_string_lossy().to_string()
 	}
 
 	pub fn get_bool_or( &self, name: &str, default: bool ) -> bool {

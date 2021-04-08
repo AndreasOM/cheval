@@ -58,7 +58,7 @@ impl Element for ImageElement {
 		self.width  = config.get_u32_or( "width", 800 );
 		self.height = config.get_u32_or( "height", 200 );
 		self.color  = config.get_u32_or( "color", 0xff00ffff );
-		self.filename  = config.get_string_or( "filename", "" );
+		self.filename  = config.get_path_or( "filename", "" );
 		if self.filename != "" {
 			self.images = Vec::new();
 

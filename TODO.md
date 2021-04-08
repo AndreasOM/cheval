@@ -9,6 +9,8 @@ config
 	- [x] Use BakedExpression for text
 
 ## TODO
+
+- [ ] Make Windows work
 - [ ] Persist variables in regular intervals
 - [ ] Enable debug frames bia command line 
 - [ ] Extract shared rendering functions
@@ -44,6 +46,7 @@ config
 
 ## DONE
 
+- [x] Make filepath in config file relative to config file
 - [x] Allow keyboard input from console
 - [x] Add support for animated images
 - [x] Add visual countdown example

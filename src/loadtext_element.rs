@@ -41,7 +41,7 @@ unsafe impl Send for LoadTextElement {}
 #[async_trait]
 impl Element for LoadTextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
-		self.filename = config.get_string_or( "filename", "" );
+		self.filename = config.get_path_or( "filename", "" );
 		self.variable = config.get_string_or( "variable", "" );
 		self.split_lines = config.get_bool_or( "split_lines", false );
 	}

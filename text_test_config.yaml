@@ -17,7 +17,7 @@ elements:
       height: 50
       size: 90
       text: "${clock_string}"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: FrameTime
@@ -29,7 +29,7 @@ elements:
       height: 50
       size: 90
       text: "${frametime_string}"
-      font: data/FiraCode-Medium.ttf
+      font: FiraCode-Medium.ttf
       color: "0xffffffff"
 
   - name: DummyText
@@ -41,5 +41,4 @@ elements:
       height: 50
       size: 90
       text: "DummY!"
-      font: data/FiraCode-Medium.ttf
       color: "0xffffffff"

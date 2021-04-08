@@ -50,7 +50,7 @@ impl Element for TextElement {
 		self.ar.height = config.get_bakedexpression_u32( "height", 0 );
 		self.color  = config.get_u32_or( "color", 0xffff00ff );
 		self.text	= config.get_bakedexpression_string( "text", "" );
-		self.fontfile	= config.get_string_or( "font", "" );
+		self.fontfile	= config.get_path_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
 

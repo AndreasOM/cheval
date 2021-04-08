@@ -31,7 +31,7 @@ impl Element for ScrollTextElement {
 	fn configure( &mut self, config: &ElementConfig ) {
 		self.color  		= config.get_u32_or( "color", 0xffff00ff );
 		self.text			= config.get_bakedexpression_string( "text", "" );
-		self.fontfile		= config.get_string_or( "font", "" );
+		self.fontfile		= config.get_path_or( "font", "" );
 		self.speed  		= config.get_f32_or( "speed", 0.0 );
 		self.size			= config.get_u32_or( "size", 20 );
      
