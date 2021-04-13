@@ -14,8 +14,8 @@ use glob::glob;
 
 pub struct ImageElement {
 	name: String,
-	x: u32,
-	y: u32,
+	x: BakedExpression,
+	y: BakedExpression,
 	width: u32,
 	height: u32,
 	color: u32,
@@ -53,8 +53,8 @@ impl ImageElement {
 #[async_trait]
 impl Element for ImageElement {
 	fn configure( &mut self, config: &ElementConfig ) {
-		self.x      = config.get_u32_or( "pos_x", 0 );
-		self.y      = config.get_u32_or( "pos_y", 0 );
+		self.x      = config.get_bakedexpression_u32( "pos_x", 0 );
+		self.y      = config.get_bakedexpression_u32( "pos_y", 0 );
 		self.width  = config.get_u32_or( "width", 800 );
 		self.height = config.get_u32_or( "height", 200 );
 		self.color  = config.get_u32_or( "color", 0xff00ffff );
@@ -87,6 +87,8 @@ impl Element for ImageElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
+		self.x.bake_u32_or( context, 0 );
+		self.y.bake_u32_or( context, 0 );
 		self.fps.bake_f32_or( context, 0.0 );
 		//dbg!(&self.fps);
 		let fps = self.fps.as_f32() as f64;
@@ -108,12 +110,12 @@ impl Element for ImageElement {
 //		dbg!(&self);
 		match &self.images.get( self.current_image.trunc() as usize ) {
 			None => {
-				render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height, |_,_,_,_,p: &mut u32| {
+				render_buffer.for_pixel_in_block( self.x.as_u32(), self.y.as_u32(), self.width, self.height, |_,_,_,_,p: &mut u32| {
 					*p = self.color;
 				});
 			},
 			Some( img ) => {
-				render_buffer.for_pixel_in_block( self.x, self.y, self.width, self.height,
+				render_buffer.for_pixel_in_block( self.x.as_u32(), self.y.as_u32(), self.width, self.height,
 					|_sx, _sy, x, y, p: &mut u32| {
 						let old_pixel = *p;
 
@@ -185,8 +187,8 @@ impl ImageElementFactory {
 	pub fn create() -> ImageElement {
 		ImageElement {
 			name: "".to_string(),
-			x: 0,
-			y: 0,
+			x: BakedExpression::from_u32( 0 ),
+			y: BakedExpression::from_u32( 0 ),
 			width: 0,
 			height: 0,
 			color: 0xff00ffff,

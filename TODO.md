@@ -11,6 +11,8 @@ config
 ## TODO
 
 - [ ] Improve reporting of broken config files
+- [ ] Fix crash when moving right without pages
+- [ ] Fix missing initialization of active page for multi page configs
 
 - [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
