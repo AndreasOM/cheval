@@ -143,7 +143,7 @@ impl ElementConfig {
 		let filename = self.config_path.join( filename );
 		let filename = match filename.canonicalize() {
 			Ok( f ) => f,
-			_ => panic!("File not found {:?}", &filename ),
+			_ => filename, //panic!("File not found {:?}", &filename ),
 		};
 
 		filename.to_string_lossy().to_string()

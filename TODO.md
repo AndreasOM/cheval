@@ -10,6 +10,8 @@ config
 
 ## TODO
 
+- [ ] Improve reporting of broken config files
+
 - [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
 - [ ] Persist variables in regular intervals
