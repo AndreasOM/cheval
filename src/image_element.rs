@@ -129,7 +129,7 @@ impl Element for ImageElement {
 
 						let pixel = Pixel::from_u32( pixel );
 						let old_pixel = Pixel::from_u32( old_pixel );
-						let pixel = Pixel::blend_with_alpha( pixel, old_pixel );
+						let pixel = Pixel::blend_with_alpha( &pixel, &old_pixel );
 
 						*p = pixel.to_u32();
 					}

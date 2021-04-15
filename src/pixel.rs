@@ -1,4 +1,5 @@
 
+//#[derive(Debug,Copy,Clone)]
 pub struct Pixel {
 	color: u32,
 }
@@ -16,7 +17,21 @@ impl Pixel {
 		self.color
 	}
 
-	pub fn blend_with_alpha( a: Pixel, b: Pixel ) -> Pixel {
+	pub fn apply_alpha( &mut self, alpha: f32 ) {
+		let a = ( ( self.color >> 24 )&0x000000ff ) as f32;
+		let r = ( ( self.color >> 16 )&0x000000ff ) as f32;
+		let g = ( ( self.color >>  8 )&0x000000ff ) as f32;
+		let b = ( ( self.color >>  0 )&0x000000ff ) as f32;
+
+		let a = ( a * alpha ) as u32;
+		let r = ( r * alpha ) as u32;
+		let g = ( g * alpha ) as u32;
+		let b = ( b * alpha ) as u32;
+
+		self.color = ( a << 24 )|( r << 16 )|( g << 8 )|b;
+	}
+
+	pub fn blend_with_alpha( a: &Pixel, b: &Pixel ) -> Pixel {
 		let a = a.color;
 		let b = b.color;
 

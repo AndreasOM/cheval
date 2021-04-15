@@ -3,7 +3,6 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Fix alpha blending for blocks
 
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
@@ -52,6 +51,7 @@ config
 
 ## DONE
 
+- [x] Fix alpha blending for blocks
 - [x] Allow using css names for colors
 - [x] Default to current directory for configuration
 - [x] Use \*config.yaml if exactly one matches

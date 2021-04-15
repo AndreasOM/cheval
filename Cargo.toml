@@ -1,6 +1,6 @@
 [package]
 name = "cheval"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Andreas Neukoetter <andreas@omni-mad.com>"]
 edition = "2018"
 
