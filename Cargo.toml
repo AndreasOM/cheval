@@ -35,6 +35,7 @@ hhmmss = "0.1"
 expresso = "0.2"
 glob = "0.3.0"
 termion = "1.5.6"
+css-color = "0.1.1"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 minifb = "0.18.0"

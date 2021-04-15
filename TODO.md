@@ -3,6 +3,8 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Fix alpha blending for blocks
+
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
 config
@@ -41,7 +43,6 @@ config
 - [ ] Add audio support
 - [ ] Check file watcher (seems to be broken sometimes)
 - [ ] Allow elements to register for http (or just sign them up all)
-- [ ] Allow using css names for colors
 - [ ] Handle strings with whitespace in expressions
 
 ## Obsolete
@@ -51,6 +52,7 @@ config
 
 ## DONE
 
+- [x] Allow using css names for colors
 - [x] Default to current directory for configuration
 - [x] Use \*config.yaml if exactly one matches
 - [x] Check for config.yaml if config parameter is a directory

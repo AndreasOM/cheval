@@ -136,6 +136,30 @@ impl ElementConfig {
 		}
 	}
 
+	pub fn get_color_or( &self, name: &str, default: u32 ) -> u32 {
+		match self.entries.get( name ) {
+			Some( ElementConfigEntry::STRING( s ) ) => {
+				match s.parse() {
+					Ok( css_color::Rgba{ red, green, blue, alpha } ) => {
+						let r = ( red   * 255.0 ) as u32;
+						let g = ( green * 255.0 ) as u32;
+						let b = ( blue  * 255.0 ) as u32;
+						let a = ( alpha * 255.0 ) as u32;
+						
+						  a << 24
+						| r << 16
+						| g <<  8
+						| b
+					},
+					Err( _ ) => default,
+				}
+			},
+			Some( ElementConfigEntry::U32( v ) ) => *v,
+//			Some( ElementConfigEntry::F32( v ) ) => format!("{}", v),
+			_ => default,
+		}
+	}
+
 	// :TODO: return Path instead of String
 	pub fn get_path_or( &self, name: &str, default: &str ) -> String {
 		let filename = self.get_string_or( name, default );
