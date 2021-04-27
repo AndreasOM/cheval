@@ -6,28 +6,22 @@ pub struct WindowFactory {
 }
 
 impl WindowFactory {
-	#[cfg(target_arch = "x86_64")]
 	pub fn get_default_window_type( ) -> String {
-		"minifb".to_string()
+		if cfg!( minifb ) {
+			"minifb".to_string()
+		} else if cfg!( framebuffer ) {
+			"framebuffer".to_string()
+		} else {
+			"png".to_string()
+		}
 	}
-	#[cfg(target_arch = "aarch64")]
-	pub fn get_default_window_type( ) -> String {
-		"minifb".to_string()
-	}
-	#[cfg(target_arch = "arm")]
-	pub fn get_default_window_type( ) -> String {
-		"framebuffer".to_string()
-	}
-
 
 	pub fn create( window_type: &str, scaling: f32 ) -> Box< dyn Window >{
 		match window_type {
 			"png" => Box::new( WindowPng::new( scaling ) ),
-	#[cfg(target_arch = "x86_64")]
+	#[cfg( minifb )]
 			"minifb" => Box::new( WindowMinifb::new() ),
-	#[cfg(target_arch = "aarch64")]
-			"minifb" => Box::new( WindowMinifb::new() ),
-	#[cfg(target_arch = "arm")]
+	#[cfg( framebuffer )]
 			"framebuffer" => Box::new( WindowFramebuffer::new() ),
 			_ => panic!("window type not supported {:?}", &window_type ),
 		}
@@ -41,20 +35,14 @@ pub trait Window {
 	fn get_key( &mut self ) -> Option< u32 >;
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg( minifb )]
 mod window_minifb;
-#[cfg(target_arch = "x86_64")]
+#[cfg( minifb )]
 use window_minifb::WindowMinifb;
 
-#[cfg(target_arch = "aarch64")]
-mod window_minifb;
-#[cfg(target_arch = "aarch64")]
-use window_minifb::WindowMinifb;
-
-
-#[cfg(target_arch = "arm")]
+#[cfg( framebuffer )]
 mod window_framebuffer;
-#[cfg(target_arch = "arm")]
+#[cfg( framebuffer )]
 pub use window_framebuffer::WindowFramebuffer;
 
 mod window_png;
