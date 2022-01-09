@@ -13,6 +13,7 @@ use crate::lissajous_element::LissajousElementFactory;
 use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
 use crate::scrolltext_element::ScrollTextElementFactory;
+use crate::soundbank_element::SoundbankElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::element::{Element,ElementConfig};
 use crate::context::Context;
@@ -90,6 +91,7 @@ struct ConfigElement {
 struct ConfigPage {
 	name: String,
 	elements: Vec< ConfigElement >,	
+	parameters: Option< HashMap< String, String > >
 }
 fn default_bool_false() -> bool {
     false
@@ -304,6 +306,7 @@ impl Cheval {
 				"image"			=> Box::new( ImageElementFactory::create() ),
 				"text"			=> Box::new( TextElementFactory::create() ),
 				"scrolltext"	=> Box::new( ScrollTextElementFactory::create() ),
+				"soundbank"		=> Box::new( SoundbankElementFactory::create() ),
 //				_ => panic!("Unsupported element type {}", e.the_type ),
 				_ => {
 					println!("Skipping unsupported element type {}", e.the_type);
@@ -486,6 +489,22 @@ impl Cheval {
 			for active_page_config in pages {
 				let mut page = Page::new();	// sub page
 
+				if let Some( parameters ) = &active_page_config.parameters {
+					let mut page_config = ElementConfig::new( &self.config_path.as_path() );
+
+					for p in parameters.iter() {
+						page_config.set( &p.0, &p.1 );
+					}
+
+					dbg!(&page_config);
+
+					page.configure( &page_config );
+
+					dbg!(&page);
+
+//					todo!("die");
+				}
+
 				self.load_elements_for_page( &mut page, &active_page_config.elements ).await?;
 
 				dbg!(self.pages.len(), &self.active_page);
@@ -627,6 +646,11 @@ impl Cheval {
 		}
 		for p in &mut self.pages {
 			p.update( &mut self.context );
+		}
+
+		let ts = self.context.time_step();
+		if let soundbank = &mut self.context.get_soundbank_mut() {
+			soundbank.update( ts );
 		}
 
 		if let Some( http_receiver ) = &self.http_receiver {

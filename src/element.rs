@@ -179,6 +179,10 @@ impl ElementConfig {
 			_ => default,
 		}
 	}
+
+	pub fn config_path( &self ) -> &PathBuf {
+		&self.config_path
+	}
 }
 
 #[async_trait]

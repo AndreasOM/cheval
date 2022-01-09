@@ -4,9 +4,12 @@ use regex::Regex;
 use expresso::expression::Expression;
 use expresso::machine::Machine;
 
+use oml_audio::SoundBank;
+
 #[derive(Debug)]
 pub struct Context {
 	time_step: f64,
+	soundbank: SoundBank,
 	machine: Machine,
 }
 
@@ -14,10 +17,20 @@ impl Context {
 	pub fn new() -> Self {
 		Self {
 			time_step: 1.0/60.0,
+			soundbank: SoundBank::new(),
 			machine: Machine::new(),
 		}
 	}
 
+	pub fn play_sound( &mut self, id: &str ) {
+		println!("play_sound: {:?}", id);
+		self.soundbank.enable_debug();
+		self.soundbank.play( id );
+	}
+
+	pub fn get_soundbank_mut( &mut self ) -> &mut SoundBank {
+		&mut self.soundbank
+	}
 	pub fn get_mut_machine( &mut self ) -> &mut Machine {
 		&mut self.machine
 	}

@@ -3,13 +3,18 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Add sound effect support
+	- [ ] Fix time expire sound to be more precise
+## TODO
+
+- [ ] Add event system
+- [ ] Soundbank element should own it's soundbank, and react to events
+- [ ] Extract ElementConfig parameters
 
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box
 config
 	- [x] Use BakedExpression for text
-
-## TODO
 
 - [ ] Improve reporting of broken config files
 - [ ] Fix crash when moving right without pages

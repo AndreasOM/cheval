@@ -12,4 +12,10 @@ fn main() {
         minifb: { all(macos, not(wasm)) },
         framebuffer: { all(linux, not(wasm)) },
     }
+
+    if std::env::var("TARGET").unwrap().contains("-apple") {
+        println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=AVFAudio");
+    }
+ 
 }

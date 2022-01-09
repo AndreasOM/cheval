@@ -23,6 +23,8 @@ pub struct TimerElement {
 	mode: Mode,
 	initial_value: BakedExpression,
 	scale: BakedExpression,
+	sound_on_zero: BakedExpression,
+	played_sound_on_zero: bool,
 }
 
 impl TimerElement {
@@ -41,7 +43,8 @@ impl Element for TimerElement {
 		};
 		self.initial_value	= config.get_bakedexpression_f32( "initial_value", 0.0 );
 		self.scale			= config.get_bakedexpression_f32( "scale", 1.0 );
-
+		self.sound_on_zero	= config.get_bakedexpression_string( "sound_on_zero", "" );
+		self.played_sound_on_zero = true;
 //		dbg!(&self);
 //		todo!("die");
 	}
@@ -103,13 +106,23 @@ impl Element for TimerElement {
 		// format
 		match ov {
 			Some( v ) => {
-				if v <= 1.0 && self.hide_on_zero {
-					context.set_string( &self.text_variable, "" );
+				if v <= 1.0 {
+					if self.hide_on_zero {
+						context.set_string( &self.text_variable, "" );
+					}
+					self.sound_on_zero.bake_string_or( context, "" );
+					let soundname = self.sound_on_zero.as_string();
+					if soundname.len() > 0 && ! self.played_sound_on_zero {
+						context.play_sound( &soundname );
+						self.played_sound_on_zero = true;
+					}
 				} else if v <= 86400.0 {
 					let duration = std::time::Duration::new( v as u64, 0);
 					context.set_string( &self.text_variable, &duration.hhmmss() );
+					self.played_sound_on_zero = false;
 				} else {
 					context.set_string( &self.text_variable, ":TODO: >24h" );
+					self.played_sound_on_zero = false;
 				}
 			},
 			None => {
@@ -146,6 +159,8 @@ impl TimerElementFactory {
 			mode: Mode::Countdown,
 			initial_value: BakedExpression::from_u32( 0 ),
 			scale: BakedExpression::from_f32( 1.0 ),
+			sound_on_zero:			BakedExpression::from_str( "" ),
+			played_sound_on_zero:	true,
 		}
 	}
 }
