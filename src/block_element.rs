@@ -58,6 +58,24 @@ impl Element for BlockElement {
 		if a < 1.0 && a >= 0.0 {
 			pixel.apply_alpha( a );
 		}
+/* :TEST:
+		let mut a = 0.0;
+		while a <= 1.01 {
+			let mut pixel = Pixel::from_u32( self.color );
+			if a < 1.0 && a >= 0.0 {
+				pixel.apply_alpha( a );
+			}
+			println!( "{} -> {:?}", a, &pixel );
+			a += 0.1;
+		}
+
+		todo!("die");
+*/
+		if a > 1.0 || a < 0.0 {
+			panic!("Invalid alpha {}", a );
+		}
+
+//		let mut pixel = Pixel::from_u32( 0x80808080 );
 
 
 		render_buffer.for_pixel_in_block(
@@ -65,9 +83,12 @@ impl Element for BlockElement {
 			|_x,_y,_bx,_by,p: &mut u32| {
 				let old_pixel = *p;
 				let old_pixel = Pixel::from_u32( old_pixel );
+//				let old_pixel = Pixel::from_u32( 0 );
 				let blended_pixel = Pixel::blend_with_alpha( &pixel, &old_pixel );
 
+//				dbg!(&blended_pixel);
 				*p = blended_pixel.to_u32();
+//				*p = 0xffffffff;
 			}
 		);
 	}

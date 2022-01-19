@@ -3,6 +3,7 @@
 use cheval::cheval::Cheval;
 use clap::{App, Arg};
 use crate::window::WindowFactory;
+use crate::window::WindowMode;
 //use crate::window::WindowTrait;
 use cheval::render_buffer::RenderBuffer;
 use std::fs::File;
@@ -67,6 +68,12 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the window type to use.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("window-mode")
+							.long("window-mode")
+							.value_name("WINDOW-MODE")
+							.help("Set the window mode to use.")
+							.takes_value(true)
+						)
 						.arg( Arg::with_name("frames")
 							.long("frames")
 							.short("f")
@@ -90,6 +97,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	let config = matches.value_of("config").unwrap_or(".").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
+	let window_mode = matches.value_of("window-mode").unwrap_or("RGB").to_string();
 	let frames = matches.value_of("frames").unwrap_or("0").to_string();
 	let enable_http = matches.occurrences_of("enable-http") > 0;
 
@@ -105,11 +113,14 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 		Err( _ ) => panic!("Invalid scaling {:?}", scaling ),
 	};
 
+	let window_mode: &str = &window_mode;
+	let window_mode: WindowMode = window_mode.into();
 	dbg!(&config);
 	dbg!(&window_type);
+	dbg!(&window_mode);
 	dbg!(&enable_http);
 
-	let mut window = WindowFactory::create( &window_type, scaling );
+	let mut window = WindowFactory::create( &window_type, &window_mode, scaling );
 
 	let mut cheval = Cheval::new();
 
