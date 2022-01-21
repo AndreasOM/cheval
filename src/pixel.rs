@@ -86,29 +86,38 @@ impl Pixel {
 		}
 	}
 
-	pub fn blend_with_alpha_and_opacity( a: Pixel, b: Pixel, o: f32 ) -> Pixel {
-		let a = a.color;
-		let b = b.color;
+	pub fn blend_with_alpha_and_opacity( n: &Pixel, o: &Pixel, op: f32 ) -> Pixel {
+//		dbg!(n, o);
+		let a = n.color;
+		let b = o.color;
 
 		let aa = ( ( a >> 24 )&0x000000ff ) as u8;
+//		let aa = 0xff;
 		let ra = ( ( a >> 16 )&0x000000ff ) as u8;
 		let ga = ( ( a >>  8 )&0x000000ff ) as u8;
 		let ba = ( ( a >>  0 )&0x000000ff ) as u8;
 
-//		let ab = ( ( b >> 24 )&0x000000ff ) as u8;
+		let ab = ( ( b >> 24 )&0x000000ff ) as u8;
+//		let ab = 0xff;
 		let rb = ( ( b >> 16 )&0x000000ff ) as u8;
 		let gb = ( ( b >>  8 )&0x000000ff ) as u8;
 		let bb = ( ( b >>  0 )&0x000000ff ) as u8;
 
-		let aa = ( aa as f32 * o ) as u8;
+//		dbg!( aa, ab );
+//		let a = Pixel::mix_byte( aa, ab, aa ) as u32;
+//		let a = ( aa + ab ) as u32;	// no blending of alpha, we "overlay"/add alpha
+		let aa = ( aa as f32 * op ) as u8;	// :TODO: round?
+		let a = aa.saturating_add( ab ) as u32;	// no blending of alpha, we "overlay"/add alpha
 		let r = Pixel::mix_byte( ra, rb, aa ) as u32;
 		let g = Pixel::mix_byte( ga, gb, aa ) as u32;
 		let b = Pixel::mix_byte( ba, bb, aa ) as u32;
 
+//		let a = 0x80;
 		let argb = ( a << 24 )|( r << 16 )|( g << 8 )|b;
 
 		Pixel {
 			color: argb,
+			//color: n.color,
 		}
 	}
 
