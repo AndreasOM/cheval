@@ -69,7 +69,6 @@ impl WindowMinifb {
 		let fh = h/ds;
 		let render_buffer = RenderBuffer::new( w, h );
 		let keybuffer = KeyVec::new(RefCell::new(Vec::new()));
-		let input = Box::new( Input::new( &keybuffer ) );
 
 		let mut s = Self {
 			render_buffer,
@@ -77,7 +76,7 @@ impl WindowMinifb {
 			frame:		vec![0u32; fw * fh],
 			window_rgb:	None,
 			window_a:	None,
-    		keybuffer:	keybuffer,
+    		keybuffer:	keybuffer.clone(),
 		};
 
 		// :TODO: loop for all windows
@@ -93,6 +92,7 @@ impl WindowMinifb {
 			let name = "RGB";
 			let mut w = WindowWithFrame::new( &name, fw, fh );
 			w.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+			let input = Box::new( Input::new( &keybuffer ) );
 			w.window.set_input_callback(input);
 			s.window_rgb = Some( w );
 		}
@@ -101,7 +101,8 @@ impl WindowMinifb {
 			let name = "A";
 			let mut w = WindowWithFrame::new( &name, fw, fh );
 			w.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-// /			w.window.set_input_callback(input);
+			let input = Box::new( Input::new( &keybuffer ) );
+			w.window.set_input_callback(input);
 			s.window_a = Some( w );
 		}
 		s
