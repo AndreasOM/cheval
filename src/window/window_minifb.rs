@@ -3,9 +3,13 @@ use minifb;
 use cheval::cheval::Cheval;
 use crate::window::Window;
 use crate::window::WindowMode;
+use crate::window::WindowLayout;
+use crate::window::WindowLayoutWindowConfig;
+
 use cheval::render_buffer::RenderBuffer;
 
 use std::cell::RefCell;
+use std::path::Path;
 use std::rc::Rc;
 
 type KeyVec = Rc<RefCell<Vec<u32>>>;
@@ -30,6 +34,14 @@ struct WindowWithFrame {
 	pub name:	String,
 	pub window: minifb::Window,
 	pub frame:	Vec<u32>,
+}
+
+impl std::fmt::Debug for WindowWithFrame {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WindowWithFrame")
+         .field( "name", &self.name )
+         .finish()
+    }
 }
 
 impl WindowWithFrame {
@@ -88,12 +100,16 @@ impl WindowMinifb {
 				e					=> todo!("WindowMode {:?} not implemented", e),
 		};
 
+		let ( mut x, mut y ) = ( 100, 100 );
 		if need_rgb {
 			let name = "RGB";
 			let mut w = WindowWithFrame::new( &name, fw, fh );
 			w.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 			let input = Box::new( Input::new( &keybuffer ) );
 			w.window.set_input_callback(input);
+			w.window.set_position( x, y );
+			x += 50;
+			y += 50;
 			s.window_rgb = Some( w );
 		}
 
@@ -103,6 +119,9 @@ impl WindowMinifb {
 			w.window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 			let input = Box::new( Input::new( &keybuffer ) );
 			w.window.set_input_callback(input);
+			w.window.set_position( x, y );
+			x += 50;
+			y += 50;
 			s.window_a = Some( w );
 		}
 		s
@@ -247,6 +266,42 @@ impl Window for WindowMinifb {
 		} else {
 			Some( keys.remove( 0 ) )
 		}
+	}
+	fn restore_positions( &mut self, filename: &str ) {
+		let mut c = WindowLayout::default();
+
+		if let Ok( _ ) = c.load( &Path::new( &filename ) ) {
+			if let Some( wc ) = c.window_rgb {
+				if let Some( w ) = &mut self.window_rgb {
+					w.window.set_position( wc.pos_x as isize, wc.pos_y as isize );
+				}
+			}
+			if let Some( wc ) = c.window_a {
+				if let Some( w ) = &mut self.window_a {
+					w.window.set_position( wc.pos_x as isize, wc.pos_y as isize );
+				}
+			}
+		}
+	}
+
+	fn store_positions( &self, filename: &str ) {
+		let mut layout = WindowLayout::default();
+		if let Some( w ) = &self.window_rgb {
+			let (x, y) = w.window.get_position();
+			let mut wc = WindowLayoutWindowConfig::default();
+			wc.pos_x = x as u32;
+			wc.pos_y = y as u32;
+			layout.window_rgb = Some( wc );
+		}
+		if let Some( w ) = &self.window_a {
+			let (x, y) = w.window.get_position();
+			let mut wc = WindowLayoutWindowConfig::default();
+			wc.pos_x = x as u32;
+			wc.pos_y = y as u32;
+			layout.window_a = Some( wc );
+		}
+
+		layout.save( &Path::new( &filename ) );
 	}
 }
 

@@ -74,6 +74,12 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.help("Set the window mode to use.")
 							.takes_value(true)
 						)
+						.arg( Arg::with_name("window-layout")
+							.long("window-layout")
+							.value_name("WINDOW-LAYOUT")
+							.help("Set the file to keep the window layout.")
+							.takes_value(true)
+						)
 						.arg( Arg::with_name("frames")
 							.long("frames")
 							.short("f")
@@ -98,6 +104,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	let config = matches.value_of("config").unwrap_or(".").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
 	let window_mode = matches.value_of("window-mode").unwrap_or("RGB").to_string();
+	let window_layout = matches.value_of("window-layout").unwrap_or("").to_string();
 	let frames = matches.value_of("frames").unwrap_or("0").to_string();
 	let enable_http = matches.occurrences_of("enable-http") > 0;
 
@@ -118,9 +125,14 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	dbg!(&config);
 	dbg!(&window_type);
 	dbg!(&window_mode);
+	dbg!(&window_layout);
 	dbg!(&enable_http);
 
 	let mut window = WindowFactory::create( &window_type, &window_mode, scaling );
+
+	if window_layout.len() > 0 {
+		window.restore_positions( &window_layout );
+	}
 
 	let mut cheval = Cheval::new();
 
@@ -163,6 +175,10 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 			break;
 		}
 
+	}
+
+	if window_layout.len() > 0 {
+		window.store_positions( &window_layout );
 	}
 /* :TODO: hide behind feature flag	
 	if let Ok(report) = guard.report().build() {
