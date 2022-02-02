@@ -127,6 +127,7 @@ impl WindowMinifb {
 		s
 	}
 
+	#[inline(never)]	// needed for clean flamegraphs ... :sigh:
 	fn render_frame_rgb_a( source: &RenderBuffer, width: usize, height: usize, dest_rgb: &mut Vec< u32 >, dest_a: &mut Vec< u32 > ) {
 		let ds = 2; // :TODO: 2x downscale is the only supported mode for now, fix once needed.
 
