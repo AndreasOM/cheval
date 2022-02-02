@@ -22,3 +22,5 @@ data/fira/
 
 *_layout.yaml
 
+*.DS_Store
+
