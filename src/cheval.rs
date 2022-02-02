@@ -27,6 +27,7 @@ use std::sync::mpsc;
 
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, rt::System};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 enum Message {
 	None,
@@ -38,6 +39,7 @@ enum Message {
 	GotoPage( mpsc::Sender< Response >, usize ),
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 enum Response {
 	None,
@@ -84,6 +86,7 @@ struct ConfigElement {
 	parameters: HashMap< String, String >
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct ConfigPage {
 	name: String,
@@ -98,6 +101,7 @@ fn default_bool_true() -> bool {
     true
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct Config {
 	default_page: Option< usize >,
@@ -255,11 +259,6 @@ struct Config {
 		};
 
 		format!("{{}}")
-	}
-
-	async fn greet(req: HttpRequest) -> impl Responder {
-	    let name = req.match_info().get("name").unwrap_or("World");
-	    format!("Hello {}!", &name)
 	}
 
 impl Cheval {
@@ -438,7 +437,7 @@ impl Cheval {
 
 		function_table.register(
 			"sin",
-			|argc, variable_stack, _variable_storage| {
+			|_argc, variable_stack, _variable_storage| {
 				// :TODO: handle wrong argc
 
 				let fv = variable_stack.pop_as_f32();
@@ -596,7 +595,6 @@ impl Cheval {
 									.route("/page/next", web::get().to(goto_next_page))
 									.route("/page/prev", web::get().to(goto_prev_page))
 									.route("/page/number/{number}", web::get().to(goto_page_number))
-//									.route("/", web::get().to(greet))
 							})
 							.bind("0.0.0.0:8080")?
 							.run();
@@ -646,9 +644,8 @@ impl Cheval {
 		}
 
 		let ts = self.context.time_step();
-		if let soundbank = &mut self.context.get_soundbank_mut() {
-			soundbank.update( ts );
-		}
+		let soundbank = &mut self.context.get_soundbank_mut();
+		soundbank.update( ts );
 
 		if let Some( http_receiver ) = &self.http_receiver {
 			match http_receiver.try_recv() {
@@ -708,10 +705,16 @@ impl Cheval {
 						},
 					}
 				}
-				Empty => {
-
-				},
-				_ => {},
+				Err( e ) => {
+					match e {
+						mpsc::TryRecvError::Empty => {
+							// empty is fine
+						},
+						mpsc::TryRecvError::Disconnected => {
+							// disconnected is also fine, for now
+						},
+					}
+				}
 			}
 		}
 	}
@@ -758,7 +761,7 @@ impl Cheval {
 		}
 	}
 
-	pub fn shutdown( &mut self ) {
+	pub fn shutdown( &mut self ) -> anyhow::Result<()> {
 		for p in self.pages.iter_mut() {
 			p.shutdown();
 		}
@@ -766,7 +769,11 @@ impl Cheval {
 			p.shutdown();
 		}
 		if let Some( variable_filename ) = &self.variable_filename {
-			self.context.get_mut_machine().save_variable_storage( &variable_filename );
-		}		
+			match self.context.get_mut_machine().save_variable_storage( &variable_filename ) {
+				Ok( _ ) => {},
+				Err( e ) => return Err(anyhow::anyhow!("Error shutting down: {:?}", e )),
+			}
+		}
+		Ok(())
 	}
 }
