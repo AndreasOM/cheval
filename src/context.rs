@@ -106,7 +106,10 @@ impl Context {
 			}
 		} else if let Some( caps ) = re2.captures( &s ) {
 			let mut expression = Expression::new();
-			expression.from_str( &caps[ 1 ] );
+			match expression.from_str( &caps[ 1 ] ) {
+				// :TODO: error reporting
+				_ => {},
+			};
 //			println!("{}", expression);
 			let mut r = expression.run( &mut self.machine );
 			match r.pop() {
