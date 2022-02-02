@@ -1,6 +1,6 @@
 
 use crate::context::Context;
-use crate::element::{Element,ElementConfig};
+use crate::element::Element;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 

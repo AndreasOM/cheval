@@ -106,7 +106,7 @@ impl Element for ImageElement {
 
 	}
 
-	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {
 //		dbg!(&self);
 		match &self.images.get( self.current_image.trunc() as usize ) {
 			None => {

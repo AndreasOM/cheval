@@ -44,14 +44,9 @@ impl Element for BlockElement {
 		self.alpha.bake_f32_or( context, 1.0 );
 	}
 
-	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {
 //		dbg!(&self);
 //		dbg!(&render_context);
-/*
-		for( x, y, block_x, block_y, pixel) in render_buffer.enumerate_pixel_in_block_mut( self.x, self.y, self.width, self.height ) {
-			*pixel = self.color;
-		}
-*/
 
 		let mut pixel = Pixel::from_u32( self.color );
 		let a = self.alpha.as_f32();
@@ -75,20 +70,14 @@ impl Element for BlockElement {
 			panic!("Invalid alpha {}", a );
 		}
 
-//		let mut pixel = Pixel::from_u32( 0x80808080 );
-
-
 		render_buffer.for_pixel_in_block(
 			self.x.as_u32(), self.y.as_u32(), self.width.as_u32(), self.height.as_u32(),
 			|_x,_y,_bx,_by,p: &mut u32| {
 				let old_pixel = *p;
 				let old_pixel = Pixel::from_u32( old_pixel );
-//				let old_pixel = Pixel::from_u32( 0 );
 				let blended_pixel = Pixel::blend_with_alpha( &pixel, &old_pixel );
 
-//				dbg!(&blended_pixel);
 				*p = blended_pixel.to_u32();
-//				*p = 0xffffffff;
 			}
 		);
 	}

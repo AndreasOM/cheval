@@ -1,15 +1,12 @@
 use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
-use crate::pixel::Pixel;
 use crate::context::Context;
 use async_trait::async_trait;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 use crate::axisalignedrectangle::AxisAlignedRectangle;
 
-use std::fs::File;
-use std::io::Read;
-use rusttype::{point, Font, Scale};
+use rusttype::Font;
 
 #[derive(Debug)]
 pub struct TextElement {
@@ -95,8 +92,11 @@ impl Element for TextElement {
 		}
 */
 //		dbg!(&self);
-		render_context.use_font( &self.fontfile );
-		render_context.draw_text(
+		match render_context.use_font( &self.fontfile ) {
+			// :TODO: handle error
+			_ => {},			
+		}
+		match render_context.draw_text(
 			render_buffer,
 			&self.text.as_string(),
 			self.ar.x.as_u32(), self.ar.y.as_u32(),
@@ -104,7 +104,10 @@ impl Element for TextElement {
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color
-		);
+		) {
+			// :TODO: handle error
+			_ => {},			
+		}
 	}
 	fn name( &self ) -> &str {
 		&self.name
