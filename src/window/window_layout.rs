@@ -4,9 +4,7 @@ use serde::{
 };
 use serde_yaml;
 
-use std::path::{ Path, PathBuf };
-use std::io::prelude::*;
-use std::fs::File;
+use std::path::Path;
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct WindowLayoutWindowConfig {

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use regex::Regex;
 
 use expresso::expression::Expression;
