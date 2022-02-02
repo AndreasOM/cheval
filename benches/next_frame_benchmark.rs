@@ -1,4 +1,9 @@
+#[macro_use]
+extern crate criterion;
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+use pprof::criterion::{Output, PProfProfiler};
 
 use cheval::render_buffer::RenderBuffer;
 use cheval::window::window_minifb::WindowMinifb;
@@ -22,5 +27,10 @@ fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("render RGB_A", |b| b.iter(|| render_frame_rgb_a( &source, width, height, &mut dest_rgb, &mut dest_a )));
 }
 
-criterion_group!(benches, criterion_benchmark);
+//criterion_group!(benches, criterion_benchmark);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
+    targets = criterion_benchmark
+}
 criterion_main!(benches);
