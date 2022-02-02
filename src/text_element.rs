@@ -9,6 +9,7 @@ use crate::axisalignedrectangle::AxisAlignedRectangle;
 use rusttype::Font;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct TextElement {
 	name: String,
 	ar: AxisAlignedRectangle,
