@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 
 use pprof::criterion::{Output, PProfProfiler};
 

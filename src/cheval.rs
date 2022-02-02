@@ -176,10 +176,12 @@ struct Config {
 						dbg!( &e );
 					}
 				}
-				format!("elements ->")
+				//format!("elements ->")
+				"elements ->".to_string()
 			},
 			_ => {
-				format!("{{}}")
+				//format!("{{}}")
+				"{}".to_string()
 			},
 		}
 	}
@@ -209,7 +211,7 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
+		"{}".to_string()
 	}
 
 	async fn goto_prev_page(
@@ -237,7 +239,7 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
+		"{}".to_string()
 	}
 
 	async fn goto_page_number(
@@ -266,7 +268,7 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
+		"{}".to_string()
 	}
 
 impl Cheval {
@@ -612,7 +614,10 @@ impl Cheval {
 
 				let _ = tx.send( server.clone() );
 
-				sys.block_on( server );
+				match sys.block_on( server ) {
+					// :TODO: handle errors
+					_ => {},
+				}
     		});//.join().expect("Thread panicked");
 
 			self.server_thread = Some( server_thread );

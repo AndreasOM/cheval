@@ -49,7 +49,7 @@ fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
 	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-	let version = format!("{}",VERSION);
+	let version = VERSION.to_string(); //format!("{}",VERSION);
 
 	let matches = App::new("cheval")
 						.version(version.as_ref())

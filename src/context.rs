@@ -118,7 +118,7 @@ impl Context {
 				Some( expresso::variables::Variable::F32( f ) ) => {
 					format!("{}", f )
 				},
-				None => format!("No result" ),
+				None => "No result".to_string(),
 				r => todo!("Result is not printable {:?}", r ),
 			}
 
