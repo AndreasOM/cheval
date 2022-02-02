@@ -135,7 +135,7 @@ impl Pixel {
 
 //		dbg!( a, b );
 
-		let ab = ( a + b );// / ( 255 * 255 );
+		let ab = a + b;// / ( 255 * 255 );
 
 //		dbg!( ab );
 
