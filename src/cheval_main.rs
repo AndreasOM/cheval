@@ -9,8 +9,12 @@ use cheval::render_buffer::RenderBuffer;
 use std::fs::File;
 
 
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
+#[cfg(all(feature = "with_termion"))]
+use termion::{
+	input::TermRead,
+	raw::IntoRawMode,
+};
+
 use std::io::{Write, stdin};
 
 fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
@@ -150,14 +154,17 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 */
 //	let mut stdin = std::io::stdin().into_raw_mode().unwrap();
 
+	#[cfg(all(feature = "with_termion"))]
 	let mut stdout = std::io::stdout().into_raw_mode().unwrap();
     // Use asynchronous stdin
+	#[cfg(all(feature = "with_termion"))]
     let mut stdin = termion::async_stdin().keys();
 
 	while !window.done() && !cheval.done() {
 		while let Some( key ) = window.get_key() {
 			cheval.add_key( key );
 		}
+			#[cfg(all(feature = "with_termion"))]
 		for c in stdin.next() {
 			match c {
 				Ok( termion::event::Key::Esc ) => cheval.add_key( 27 ),	// ASCII ESC
