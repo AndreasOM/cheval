@@ -4,9 +4,7 @@ use cheval::cheval::Cheval;
 use clap::{App, Arg};
 use cheval::window::WindowFactory;
 use cheval::window::WindowMode;
-//use crate::window::WindowTrait;
 use cheval::render_buffer::RenderBuffer;
-use std::fs::File;
 
 
 #[cfg(all(feature = "with_termion"))]
@@ -14,8 +12,6 @@ use termion::{
 	input::TermRead,
 	raw::IntoRawMode,
 };
-
-use std::io::{Write, stdin};
 
 fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 {
@@ -145,7 +141,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	}
 
 	cheval.load( &config ).await?;
-	cheval.initialize();
+	cheval.initialize()?;
 
 	dbg!( &cheval );
 	let mut frame_count = 0;
