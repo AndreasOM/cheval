@@ -20,3 +20,5 @@ Cargo.lock
 data/FiraCode-Medium.ttf
 data/fira/
 
+*_layout.yaml
+
