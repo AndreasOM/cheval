@@ -1,6 +1,6 @@
-use cheval::cheval::Cheval;
+use crate::cheval::Cheval;
 use crate::window::Window;
-use cheval::render_buffer::RenderBuffer;
+use crate::render_buffer::RenderBuffer;
 
 pub struct WindowPng {
 	render_buffer: RenderBuffer,

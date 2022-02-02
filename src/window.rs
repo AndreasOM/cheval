@@ -1,6 +1,6 @@
 
-use cheval::cheval::Cheval;
-use cheval::render_buffer::RenderBuffer;
+use crate::cheval::Cheval;
+use crate::render_buffer::RenderBuffer;
 
 #[derive(Debug)]
 #[allow(non_camel_case_types)]
@@ -76,9 +76,9 @@ pub trait Window {
 }
 
 #[cfg( minifb )]
-mod window_minifb;
+pub mod window_minifb;
 #[cfg( minifb )]
-use window_minifb::WindowMinifb;
+pub use window_minifb::WindowMinifb;
 
 #[cfg( framebuffer )]
 mod window_framebuffer;

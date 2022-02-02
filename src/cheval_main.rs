@@ -2,8 +2,8 @@
 
 use cheval::cheval::Cheval;
 use clap::{App, Arg};
-use crate::window::WindowFactory;
-use crate::window::WindowMode;
+use cheval::window::WindowFactory;
+use cheval::window::WindowMode;
 //use crate::window::WindowTrait;
 use cheval::render_buffer::RenderBuffer;
 use std::fs::File;
@@ -192,4 +192,4 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-mod window;
+//mod window;
