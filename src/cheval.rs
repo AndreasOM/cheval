@@ -25,7 +25,14 @@ use chrono::{DateTime, Utc};
 use hhmmss::Hhmmss;
 use std::sync::mpsc;
 
-use actix_web::{web, App, HttpRequest, HttpServer, Responder, rt::System};
+use actix_web::{
+	web,
+	App,
+//	HttpRequest,
+	HttpServer,
+	Responder,
+	rt::System
+};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -71,6 +78,7 @@ pub struct Cheval {
 	http_receiver: Option< mpsc::Receiver< Message > >,
 	done: bool,
 	config_path: PathBuf,
+	server_thread: Option< std::thread::JoinHandle< () > >
 }
 
 
@@ -278,6 +286,7 @@ impl Cheval {
 			http_receiver: None,
 			done: false,
 			config_path: PathBuf::new(),
+			server_thread: None,
 		}
 	}
 
@@ -598,13 +607,15 @@ impl Cheval {
 							})
 							.bind("0.0.0.0:8080")?
 							.run();
-			std::thread::spawn(move || {
+			let server_thread = std::thread::spawn(move || {
 				let mut sys = System::new("test");
 
 				let _ = tx.send( server.clone() );
 
 				sys.block_on( server );
     		});//.join().expect("Thread panicked");
+
+			self.server_thread = Some( server_thread );
     		dbg!(&self.http_enabled);
 
     		let server = rx.recv().unwrap();
@@ -771,9 +782,18 @@ impl Cheval {
 		if let Some( variable_filename ) = &self.variable_filename {
 			match self.context.get_mut_machine().save_variable_storage( &variable_filename ) {
 				Ok( _ ) => {},
-				Err( e ) => return Err(anyhow::anyhow!("Error shutting down: {:?}", e )),
+				Err( e ) => return Err(anyhow::anyhow!("Error saving variables: {:?}", e )),
 			}
 		}
+		// :TODO:
+		/*
+		if let Some( server_thread ) = self.server_thread.take() {
+			match server_thread.join() {
+				Ok( _ ) => {},
+				Err( e ) => return Err(anyhow::anyhow!("Error joining server thread: {:?}", e )),
+			}
+		}
+		*/
 		Ok(())
 	}
 }
