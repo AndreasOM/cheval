@@ -126,6 +126,81 @@ impl WindowMinifb {
 		}
 		s
 	}
+
+	fn render_frame_rgb_a( source: &RenderBuffer, width: usize, height: usize, dest_rgb: &mut Vec< u32 >, dest_a: &mut Vec< u32 > ) {
+		let ds = 2; // :TODO: 2x downscale is the only supported mode for now, fix once needed.
+
+		let mut argb = vec![0u32;4];
+		for y in 0..height {
+				for x in 0..width {
+					argb[ 0 ] = 0;
+					argb[ 1 ] = 0;
+					argb[ 2 ] = 0;
+					argb[ 3 ] = 0;
+
+					let so = ( y * ds ) * source.width + ( x * ds );
+					let pixel = source.buffer[ so ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+
+					let pixel = source.buffer[ so + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+
+					let pixel = source.buffer[ so + source.width ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+
+					let pixel = source.buffer[ so + source.width + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+
+					argb[ 0 ] /= 4;
+					argb[ 1 ] /= 4;
+					argb[ 2 ] /= 4;
+					argb[ 3 ] /= 4;
+
+					let pixel = 
+						( ( argb[ 1 ] & 0xff ) << 16 )
+						| ( ( argb[ 2 ] & 0xff ) <<  8 )
+						| ( ( argb[ 3 ] & 0xff ) <<  0 );
+
+	//				let pixel = pixel + self.buffer[ so + 1 ];
+	//				let pixel = pixel / 2;
+					let fo = y * width + x;
+	//				if y >= 270 { dbg!(&x, &fo); }
+//					if have_rgb {
+						dest_rgb[ fo ] = pixel;
+//					};
+//					if have_a {
+						/* :TEST:
+						let yyy = y.wrapping_rem( 256 ) as u32;
+						let xxx = x.wrapping_rem( 256 ) as u32;
+						let zzz = ( x + y).wrapping_rem( 256 ) as u32;
+						let pixel_a = 
+							( ( yyy & 0xff ) << 16 )
+							| ( ( xxx & 0xff ) <<  8 )
+							| ( ( zzz & 0xff ) <<  0 );
+						*/
+						let pixel_a = 
+							( ( argb[ 0 ] & 0xff ) << 16 )
+							| ( ( argb[ 0 ] & 0xff ) <<  8 )
+							| ( ( argb[ 0 ] & 0xff ) <<  0 );
+
+						dest_a[ fo ] = pixel_a;
+//					};
+				}
+			}
+
+	}
 }
 
 impl Window for WindowMinifb {
@@ -178,73 +253,79 @@ impl Window for WindowMinifb {
 
 //		let mut frame = &mut window.frame;
 
-		for y in 0..fh {
-			for x in 0..fw {
-				argb[ 0 ] = 0;
-				argb[ 1 ] = 0;
-				argb[ 2 ] = 0;
-				argb[ 3 ] = 0;
+		if have_rgb && have_a {
+			WindowMinifb::render_frame_rgb_a( &self.render_buffer, fw, fh, &mut frame_rgb, &mut frame_a );
+		} else {
 
-				let so = ( y * ds ) * self.render_buffer.width + ( x * ds );
-				let pixel = self.render_buffer.buffer[ so ];
-				argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+			for y in 0..fh {
+				for x in 0..fw {
+					argb[ 0 ] = 0;
+					argb[ 1 ] = 0;
+					argb[ 2 ] = 0;
+					argb[ 3 ] = 0;
 
-				let pixel = self.render_buffer.buffer[ so + 1 ];
-				argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+					let so = ( y * ds ) * self.render_buffer.width + ( x * ds );
+					let pixel = self.render_buffer.buffer[ so ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
-				argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+					let pixel = self.render_buffer.buffer[ so + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
-				argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
-				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
-				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
-				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
+					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				argb[ 0 ] /= 4;
-				argb[ 1 ] /= 4;
-				argb[ 2 ] /= 4;
-				argb[ 3 ] /= 4;
+					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
+					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
+					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
+					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
-				let pixel = 
-					( ( argb[ 1 ] & 0xff ) << 16 )
-					| ( ( argb[ 2 ] & 0xff ) <<  8 )
-					| ( ( argb[ 3 ] & 0xff ) <<  0 );
+					argb[ 0 ] /= 4;
+					argb[ 1 ] /= 4;
+					argb[ 2 ] /= 4;
+					argb[ 3 ] /= 4;
 
-//				let pixel = pixel + self.buffer[ so + 1 ];
-//				let pixel = pixel / 2;
-				let fo = y * fw + x;
-//				if y >= 270 { dbg!(&x, &fo); }
-				if have_rgb {
-					frame_rgb[ fo ] = pixel;
-				};
-				if have_a {
-					/* :TEST:
-					let yyy = y.wrapping_rem( 256 ) as u32;
-					let xxx = x.wrapping_rem( 256 ) as u32;
-					let zzz = ( x + y).wrapping_rem( 256 ) as u32;
-					let pixel_a = 
-						( ( yyy & 0xff ) << 16 )
-						| ( ( xxx & 0xff ) <<  8 )
-						| ( ( zzz & 0xff ) <<  0 );
-					*/
-					let pixel_a = 
-						( ( argb[ 0 ] & 0xff ) << 16 )
-						| ( ( argb[ 0 ] & 0xff ) <<  8 )
-						| ( ( argb[ 0 ] & 0xff ) <<  0 );
+					let pixel = 
+						( ( argb[ 1 ] & 0xff ) << 16 )
+						| ( ( argb[ 2 ] & 0xff ) <<  8 )
+						| ( ( argb[ 3 ] & 0xff ) <<  0 );
 
-					frame_a[ fo ] = pixel_a;
-				};
+	//				let pixel = pixel + self.buffer[ so + 1 ];
+	//				let pixel = pixel / 2;
+					let fo = y * fw + x;
+	//				if y >= 270 { dbg!(&x, &fo); }
+					if have_rgb {
+						frame_rgb[ fo ] = pixel;
+					};
+					if have_a {
+						/* :TEST:
+						let yyy = y.wrapping_rem( 256 ) as u32;
+						let xxx = x.wrapping_rem( 256 ) as u32;
+						let zzz = ( x + y).wrapping_rem( 256 ) as u32;
+						let pixel_a = 
+							( ( yyy & 0xff ) << 16 )
+							| ( ( xxx & 0xff ) <<  8 )
+							| ( ( zzz & 0xff ) <<  0 );
+						*/
+						let pixel_a = 
+							( ( argb[ 0 ] & 0xff ) << 16 )
+							| ( ( argb[ 0 ] & 0xff ) <<  8 )
+							| ( ( argb[ 0 ] & 0xff ) <<  0 );
+
+						frame_a[ fo ] = pixel_a;
+					};
+				}
 			}
+
 		}
 		if let Some( window_rgb ) = &mut self.window_rgb {
 			window_rgb.window
