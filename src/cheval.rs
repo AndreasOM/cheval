@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use std::path::{ Path, PathBuf };
-use glob::Paths;
 
 use serde::Deserialize;
 use serde_yaml;
@@ -25,8 +24,6 @@ use crate::page::Page;
 use chrono::{DateTime, Utc};
 use hhmmss::Hhmmss;
 use std::sync::mpsc;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, rt::System};
 
@@ -127,7 +124,7 @@ struct Config {
 
 	async fn show_by_name(
 		state: web::Data<HttpState>,		
-		web::Path((name)): web::Path<(String)>
+		web::Path( name ): web::Path< String >
 	) -> impl Responder {
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), true ) ) {
 			_ => {},
@@ -137,7 +134,7 @@ struct Config {
 
 	async fn hide_by_name(
 		state: web::Data<HttpState>,		
-		web::Path((name)): web::Path<(String)>
+		web::Path( name ): web::Path< String >
 	) -> impl Responder {
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), false ) ) {
 			_ => {},
@@ -233,7 +230,7 @@ struct Config {
 
 	async fn goto_page_number(
 		state: web::Data<HttpState>,
-		web::Path((page_no)): web::Path<(usize)>
+		web::Path( page_no ): web::Path< usize >
 	) -> impl Responder {
 		let (sender, receiver) = mpsc::channel();
 		match state.http_sender.send( Message::GotoPage( sender, page_no ) ) {
