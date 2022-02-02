@@ -30,6 +30,7 @@ impl minifb::InputCallback for Input {
     }
 }
 
+#[allow(dead_code)]
 struct WindowWithFrame {
 	pub name:	String,
 	pub window: minifb::Window,
@@ -62,6 +63,7 @@ impl WindowWithFrame {
 	}
 }
 
+#[allow(dead_code)]
 pub struct WindowMinifb {
 	render_buffer: RenderBuffer,
 	downscale: usize, 
@@ -93,7 +95,7 @@ impl WindowMinifb {
 
 		// :TODO: loop for all windows
 
-		let ( need_r, need_g, need_b, need_a, need_rgb, need_rgba ) = match window_mode {
+		let ( _need_r, _need_g, _need_b, need_a, need_rgb, _need_rgba ) = match window_mode {
 				WindowMode::RGB		=> ( false,	false,	false,	false,	true,	false ),
 				WindowMode::RGB_A	=> ( false,	false,	false,	true,	true,	false ),
 				WindowMode::A		=> ( false,	false,	false,	true,	false,	false ),
@@ -124,6 +126,7 @@ impl WindowMinifb {
 			y += 50;
 			s.window_a = Some( w );
 		}
+		dbg!(x, y);
 		s
 	}
 
@@ -240,13 +243,13 @@ impl Window for WindowMinifb {
 		let mut have_a = false;
 		let mut frame_a = vec![0u32;4];
 
-		if let Some( window_rgb ) = &mut self.window_rgb {
+		if self.window_rgb.is_some() {
 			have_rgb = true;
 //			frame_rgb = &mut window_rgb.frame;
 			frame_rgb =	vec![0u32; fw * fh];
 		}
 
-		if let Some( window_a ) = &mut self.window_a {
+		if self.window_a.is_some() {
 			have_a = true;
 //			frame_rgb = &mut window_rgb.frame;
 			frame_a =	vec![0u32; fw * fh];
@@ -383,7 +386,10 @@ impl Window for WindowMinifb {
 			layout.window_a = Some( wc );
 		}
 
-		layout.save( &Path::new( &filename ) );
+		match layout.save( &Path::new( &filename ) ) {
+			// :TODO: handle errors
+			_ => {},
+		}
 	}
 }
 
