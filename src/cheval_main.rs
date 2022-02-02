@@ -190,7 +190,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
     	report.flamegraph(file).unwrap();		
 	};
 */
-	cheval.shutdown();
+	cheval.shutdown()?;
 
 	Ok(())
 }
