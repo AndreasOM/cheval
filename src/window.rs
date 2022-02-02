@@ -69,9 +69,9 @@ pub trait Window {
 	fn render_frame( &mut self, func: &mut dyn FnMut( &mut RenderBuffer, &mut Cheval ), cheval: &mut Cheval  );
 	fn next_frame( &mut self );
 	fn get_key( &mut self ) -> Option< u32 >;
-	fn restore_positions( &mut self, filename: &str ) {		
+	fn restore_positions( &mut self, _filename: &str ) {		
 	}
-	fn store_positions( &self, filename: &str ) {		
+	fn store_positions( &self, _filename: &str ) {		
 	}
 }
 
