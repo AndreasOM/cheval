@@ -21,12 +21,17 @@ use crate::render_buffer::RenderBuffer;
 use crate::timer_element::TimerElementFactory;
 use crate::page::Page;
 
+use derivative::Derivative;
+
 use chrono::{DateTime, Utc};
 use hhmmss::Hhmmss;
 use std::sync::mpsc;
 
 use actix_web::{
-	web,
+	web::{
+		self,
+		Data,
+	},
 	App,
 //	HttpRequest,
 	HttpServer,
@@ -62,7 +67,8 @@ struct HttpState {
 	http_sender: mpsc::Sender< Message >,
 }
 
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Cheval {
 //	element_instances: Vec< ElementInstance >,
 	page: Option< Page >,
@@ -74,7 +80,8 @@ pub struct Cheval {
 	start_time: DateTime<Utc>,
 	render_context: RenderContext,
 	http_enabled: bool,
-	http_server: Option< actix_web::dev::Server >,
+//	#[derivative(Debug="ignore")]
+//	http_server: Option< actix_web::dev::Server >,
 	http_receiver: Option< mpsc::Receiver< Message > >,
 	done: bool,
 	config_path: PathBuf,
@@ -122,22 +129,24 @@ struct Config {
 //	async fn set_variable( web::Path((name, value)): web::Path<(String, String)>, tx: mpsc::Receiver< Message > ) -> impl Responder {
 	async fn set_variable(
 		state: web::Data<HttpState>,		
-		web::Path((name, value)): web::Path<(String, String)>
+		path : web::Path<(String, String)>
 	) -> impl Responder {
-
+		let (name, value) = path.into_inner();
 		
 		match state.http_sender.send( Message::SetVariable( name.clone(), value.clone() ) ) {
 			_ => {},
 		};
 
-//		dbg!(&name, &value);
+		dbg!(&name, &value);
 		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
 	}
 
 	async fn show_by_name(
 		state: web::Data<HttpState>,		
-		web::Path( name ): web::Path< String >
+		path: web::Path< String >
 	) -> impl Responder {
+		let name = path.into_inner();
+
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), true ) ) {
 			_ => {},
 		};
@@ -146,8 +155,10 @@ struct Config {
 
 	async fn hide_by_name(
 		state: web::Data<HttpState>,		
-		web::Path( name ): web::Path< String >
+		path: web::Path< String >
 	) -> impl Responder {
+		let name = path.into_inner();
+
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), false ) ) {
 			_ => {},
 		};
@@ -244,8 +255,9 @@ struct Config {
 
 	async fn goto_page_number(
 		state: web::Data<HttpState>,
-		web::Path( page_no ): web::Path< usize >
+		path: web::Path< usize >
 	) -> impl Responder {
+		let page_no = path.into_inner();
 		let (sender, receiver) = mpsc::channel();
 		match state.http_sender.send( Message::GotoPage( sender, page_no ) ) {
 			Ok( _ ) => {
@@ -284,7 +296,7 @@ impl Cheval {
 			start_time: Utc::now(),
 			render_context: RenderContext::new(),
 			http_enabled: false,
-			http_server: None,
+//			http_server: None,
 			http_receiver: None,
 			done: false,
 			config_path: PathBuf::new(),
@@ -583,7 +595,7 @@ impl Cheval {
 
 	pub fn initialize( &mut self ) -> anyhow::Result<()> {
 		if self.http_enabled {
-			let (tx, rx) = mpsc::channel();
+//			let (tx, rx) = mpsc::channel();
 
 			let (tx2, rx2) = mpsc::channel();
 
@@ -595,8 +607,10 @@ impl Cheval {
 					id: "default".to_string(),
 					http_sender: tx2.clone(),
 				};
+				let http_state = Data::new( http_state );
 								App::new()
-									.data( http_state )
+//									.data( http_state )
+									.app_data( http_state )
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
 									.route("/show/name/{name}", web::get().to(show_by_name))
 									.route("/hide/name/{name}", web::get().to(hide_by_name))
@@ -610,9 +624,9 @@ impl Cheval {
 							.bind("0.0.0.0:8080")?
 							.run();
 			let server_thread = std::thread::spawn(move || {
-				let mut sys = System::new("test");
+				let sys = System::new(/*"test"*/);
 
-				let _ = tx.send( server.clone() );
+//				let _ = tx.send( server.clone() );
 
 				match sys.block_on( server ) {
 					// :TODO: handle errors
@@ -622,11 +636,11 @@ impl Cheval {
 
 			self.server_thread = Some( server_thread );
     		dbg!(&self.http_enabled);
-
+/*
     		let server = rx.recv().unwrap();
     		self.http_server = Some( server );
-
-    		dbg!(&self.http_server);
+*/
+//    		dbg!(&self.http_server);
 
 			// :TODO: cleanup server on shutdown
 		}
