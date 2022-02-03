@@ -1,3 +1,5 @@
+// #![recursion_limit = "256"]
+
 use cfg_aliases::cfg_aliases;
 
 fn main() {
@@ -8,8 +10,14 @@ fn main() {
         android: { target_os = "android" },
         macos: { target_os = "macos" },
         linux: { target_os = "linux" },
+        windows: { target_os = "windows" },
         // window providers
-        minifb: { all(macos, not(wasm)) },
+        minifb: { 
+            any(
+                all(macos, not(wasm)),
+                all(windows, not(wasm))
+            ) 
+        },
         framebuffer: { all(linux, not(wasm)) },
     }
 
