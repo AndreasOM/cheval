@@ -51,7 +51,12 @@ impl WindowWithFrame {
 				name,
 				w,
 				h,
-				minifb::WindowOptions::default()
+				minifb::WindowOptions {
+//					resize: true,
+//					scale: minifb::Scale::X2,
+//					scale_mode: ScaleMode::AspectRatioStretch,
+					..minifb::WindowOptions::default()
+				},
 			).unwrap_or_else(|e| {
         		panic!("{}", e);
     		});
@@ -133,7 +138,7 @@ impl WindowMinifb {
 	#[inline(never)]	// needed for clean flamegraphs ... :sigh:
 	pub fn render_frame_rgb_a( source: &RenderBuffer, width: usize, height: usize, dest_rgb: &mut Vec< u32 >, dest_a: &mut Vec< u32 > ) {
 		let ds = 2; // :TODO: 2x downscale is the only supported mode for now, fix once needed.
-
+		let ds = 1;
 		let mut argb = vec![0u32;4];
 		let range = source.buffer.as_ptr_range();
 		let s_start = range.start;
@@ -154,7 +159,7 @@ impl WindowMinifb {
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
-
+/*
 					let pixel = source.buffer[ so + 1 ];
 //					let pixel = unsafe { &*s_start.add( so+1 ) };
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
@@ -180,7 +185,7 @@ impl WindowMinifb {
 					argb[ 1 ] /= 4;
 					argb[ 2 ] /= 4;
 					argb[ 3 ] /= 4;
-
+*/
 					let pixel = 
 						( ( argb[ 1 ] & 0xff ) << 16 )
 						| ( ( argb[ 2 ] & 0xff ) <<  8 )
@@ -239,6 +244,7 @@ impl Window for WindowMinifb {
 		// :TODO: handle multisampling for downscaling
 		// :TODO: actually use downscaling factor for multisampling
 		let ds = self.downscale;
+		let ds = 1;
 		let fw = self.render_buffer.width / ds;
 		let fh = self.render_buffer.height / ds;
 
