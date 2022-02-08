@@ -135,6 +135,10 @@ impl WindowMinifb {
 		let ds = 2; // :TODO: 2x downscale is the only supported mode for now, fix once needed.
 
 		let mut argb = vec![0u32;4];
+		let range = source.buffer.as_ptr_range();
+		let s_start = range.start;
+		let s_end = range.end;
+
 		for y in 0..height {
 				for x in 0..width {
 					argb[ 0 ] = 0;
@@ -143,25 +147,30 @@ impl WindowMinifb {
 					argb[ 3 ] = 0;
 
 					let so = ( y * ds ) * source.width + ( x * ds );
+
 					let pixel = source.buffer[ so ];
+//					let pixel = unsafe { &*s_start.add( so ) };
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 					let pixel = source.buffer[ so + 1 ];
+//					let pixel = unsafe { &*s_start.add( so+1 ) };
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 					let pixel = source.buffer[ so + source.width ];
+//					let pixel = unsafe { &*s_start.add( so + source.width ) };
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 					let pixel = source.buffer[ so + source.width + 1 ];
+//					let pixel = unsafe { &*s_start.add( so + source.width + 1 ) };
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;

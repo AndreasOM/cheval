@@ -50,6 +50,7 @@ minifb = "0.20.0"
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 minifb = "0.20.0"
+pprof = { version = "0.6.2", features = ["flamegraph", "criterion"] }
 
 
 [target.'cfg(target_arch = "arm")'.dependencies]
