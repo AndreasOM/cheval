@@ -9,4 +9,6 @@ Info renderer in rust targeting
 
 ![Example stream overlay](docs/window.png)
 
-Example configurations can be found on [github](https://github.com/AndreasOM/cheval-example-configs).
+![Animated stripes with alpha](docs/alpha_stripes.png)
+
+More example configurations can be found on [github](https://github.com/AndreasOM/cheval-example-configs).

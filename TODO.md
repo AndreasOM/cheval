@@ -5,8 +5,10 @@ TODO: This file is not up to date. Sorry.
 
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise
+	
 ## TODO
 
+- [ ] Rename `master` branch to `main`
 - [ ] Add event system
 - [ ] Soundbank element should own it's soundbank, and react to events
 - [ ] Extract ElementConfig parameters
