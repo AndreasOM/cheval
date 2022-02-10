@@ -289,7 +289,7 @@ impl Window for WindowMinifb {
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
-
+/* no downscaling for now, let minifb handle it
 					let pixel = self.render_buffer.buffer[ so + 1 ];
 					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
@@ -312,7 +312,7 @@ impl Window for WindowMinifb {
 					argb[ 1 ] /= 4;
 					argb[ 2 ] /= 4;
 					argb[ 3 ] /= 4;
-
+*/
 					let pixel = 
 						( ( argb[ 1 ] & 0xff ) << 16 )
 						| ( ( argb[ 2 ] & 0xff ) <<  8 )
