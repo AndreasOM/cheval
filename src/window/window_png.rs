@@ -7,6 +7,8 @@ pub struct WindowPng {
 	downscale: usize, 
 	frame: Vec<u32>,
 	filename: Option<String>,
+	filename_template: Option< String >,
+	frame_count: usize,
 }
 
 impl WindowPng {
@@ -28,6 +30,9 @@ impl WindowPng {
 			downscale: ds,
 			frame: vec![0u32; fw * fh],
 			filename: Some( "window.png".to_string() ), //None,
+		//	filename_template: None,
+			filename_template: Some( "window_%04d.png".to_string() ),
+			frame_count: 0,
 		}
 	}	
 }
@@ -94,6 +99,16 @@ impl Window for WindowPng {
 				self.frame[ fo ] = pixel;
 			}
 		}
+
+		if let Some( filename_template ) = &self.filename_template {
+			let frame_4d = format!("{:0>4}", self.frame_count);
+			dbg!(&frame_4d);
+			let f = filename_template.replace(&"%04d", &frame_4d);
+			dbg!(&f);
+			self.filename = Some( f );
+//			let f = format!(&filename_template, frame);
+		};
+
 		if let Some( filename ) = &self.filename { 
 			// :TODO: write to png
 			let mut imgbuf = image::ImageBuffer::new( fw as u32, fh as u32 );
@@ -118,6 +133,7 @@ impl Window for WindowPng {
 				_ => {},
 			}
 		}
+		self.frame_count += 1;
 	}
 
 	fn get_key( &mut self ) -> Option< u32 > {
