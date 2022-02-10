@@ -51,33 +51,39 @@ impl Window for WindowPng {
 				let so = ( y * ds ) * self.render_buffer.width + ( x * ds );
 				let mut argb = vec![0u32;4];
 				let pixel = self.render_buffer.buffer[ so ];
+				argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 				argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 				argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 				argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 				if ds == 2 {
 					let pixel = self.render_buffer.buffer[ so + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
 					let pixel = self.render_buffer.buffer[ so + self.render_buffer.width + 1 ];
+					argb[ 0 ] += ( ( pixel >> 24 ) & 0xff ) as u32;
 					argb[ 1 ] += ( ( pixel >> 16 ) & 0xff ) as u32;
 					argb[ 2 ] += ( ( pixel >>  8 ) & 0xff ) as u32;
 					argb[ 3 ] += ( ( pixel >>  0 ) & 0xff ) as u32;
 
+					argb[ 0 ] /= 4;
 					argb[ 1 ] /= 4;
 					argb[ 2 ] /= 4;
 					argb[ 3 ] /= 4;
 				}
 
 				let pixel = 
-					( ( argb[ 1 ] & 0xff ) << 16 )
+					( ( argb[ 0 ] & 0xff ) << 24 )
+					| ( ( argb[ 1 ] & 0xff ) << 16 )
 					| ( ( argb[ 2 ] & 0xff ) <<  8 )
 					| ( ( argb[ 3 ] & 0xff ) <<  0 );
 
@@ -100,7 +106,7 @@ impl Window for WindowPng {
 				rgba[ 1 ] += ( ( pix >>  8 ) & 0xff ) as u8;
 				rgba[ 2 ] += ( ( pix >>  0 ) & 0xff ) as u8;
 				rgba[ 3 ] += ( ( pix >> 24 ) & 0xff ) as u8;
-				rgba[ 3 ] = 0xff;
+//				rgba[ 3 ] = 0xff;
 
 				*pixel = image::Rgba(rgba);
 			};
