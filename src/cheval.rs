@@ -45,6 +45,8 @@ use actix_web::{
 #[derive(Debug)]
 enum Message {
 	None,
+	SelectNextVariable( mpsc::Sender< Response >, Option< String > ), // optional prefix
+	IncrementSelectedVariable( mpsc::Sender< Response >, i32 ),
 	SetVariable( mpsc::Sender< Response >, String, String ),
 	IncrementVariable( mpsc::Sender< Response >, String, i32 ),
 	SetElementVisibilityByName( String, bool ),
@@ -61,6 +63,7 @@ enum Response {
 	NotImplemented( String ),
 	ElementInstanceList( String ),
 	PageChanged( Option< usize >, Option< usize > ),	// new page #, old page #
+	VariableSelected( String ),
 	VariableChanged( String, f32 ),
 	VariableU32Changed( String, u32 ),
 	VariableF32Changed( String, f32 ),
@@ -137,6 +140,9 @@ struct Config {
 		match rx.recv() {
 			Ok( r ) => {
 				match r {
+					Response::VariableSelected( name ) => {
+						format!("variable selected: {}", &name ) // :TODO: decide on formatting
+					},
 					Response::VariableChanged( name, v ) => {
 						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
 					},
@@ -157,7 +163,31 @@ struct Config {
 			Err( e ) => format!("Error: {:?}", &e ), // :TODO: format as json
 		}
 	}
-//	async fn set_variable( web::Path((name, value)): web::Path<(String, String)>, tx: mpsc::Receiver< Message > ) -> impl Responder {
+
+	async fn select_next_variable(
+		state: web::Data<HttpState>,
+	) -> impl Responder {
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SelectNextVariable( tx, None ) ) {
+			_ => {},
+		};
+
+		handle_response( rx )
+	}
+
+	async fn select_next_variable_with_prefix(
+		state: web::Data<HttpState>,
+		path: web::Path<String>
+	) -> impl Responder {
+		let prefix = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SelectNextVariable( tx, Some( prefix ) ) ) {
+			_ => {},
+		};
+
+		handle_response( rx )
+	}
+
 	async fn set_variable(
 		state: web::Data<HttpState>,		
 		path : web::Path<(String, String)>
@@ -191,6 +221,30 @@ struct Config {
 		let v: i32 = delta.try_into().unwrap();
 		let (tx,rx) = std::sync::mpsc::channel();
 		match state.http_sender.send( Message::IncrementVariable( tx, name.clone(), -v ) ) {
+			_ => {},
+		};
+		handle_response( rx )
+	}
+
+	async fn inc_selected_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<u32>
+	) -> impl Responder {
+		let delta = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementSelectedVariable( tx, delta.try_into().unwrap() ) ) {
+			_ => {},
+		};
+		handle_response( rx )
+	}
+	async fn dec_selected_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<u32>
+	) -> impl Responder {
+		let delta = path.into_inner();
+		let v: i32 = delta.try_into().unwrap();		
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementSelectedVariable( tx, -v ) ) {
 			_ => {},
 		};
 		handle_response( rx )
@@ -666,6 +720,10 @@ impl Cheval {
 								App::new()
 //									.data( http_state )
 									.app_data( http_state )
+									.route("/selectNextVariable", web::get().to(select_next_variable))
+									.route("/selectNextVariableWithPrefix/{prefix}", web::get().to(select_next_variable_with_prefix))
+									.route("/incSelectedVariable/{value}", web::get().to(inc_selected_variable))
+									.route("/decSelectedVariable/{value}", web::get().to(dec_selected_variable))
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
 									.route("/incVariable/{name}/{delta}", web::get().to(inc_variable))
 									.route("/decVariable/{name}/{delta}", web::get().to(dec_variable))
@@ -739,6 +797,12 @@ impl Cheval {
 				Ok( msg ) => {
 //					dbg!("http_receiver got message", &msg);
 					match msg {
+						Message::SelectNextVariable( result_sender, maybe_prefix ) => {
+							let name = self.context.select_next_variable( maybe_prefix );
+							match result_sender.send( Response::VariableSelected( name.to_string() ) ) {
+								_ => {},
+							};
+						}
 						Message::SetVariable( result_sender, name, value ) => {
 							dbg!( "set variable", &name, &value );
 							if let Ok( v ) = value.parse::<u32>() {
@@ -765,6 +829,19 @@ impl Cheval {
 								let new = old + delta as f32;
 								self.context.set_f32( &name, new );
 								match result_sender.send( Response::VariableChanged( name.clone(), new) ) {
+									_ => {},
+								};
+							}
+
+							dbg!(&self.context);
+						}
+						Message::IncrementSelectedVariable( result_sender, delta ) => {
+							let name = self.context.selected_variable().to_string();
+							dbg!( "inc selected variable", &name, delta);
+							if let Some( old ) = self.context.get_f32( &name ) {
+								let new = old + delta as f32;
+								self.context.set_f32( &name, new );
+								match result_sender.send( Response::VariableChanged( name, new) ) {
 									_ => {},
 								};
 							}

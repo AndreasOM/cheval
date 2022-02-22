@@ -62,6 +62,7 @@ config
 
 ## DONE
 
+- [x] Allow selecting of variable, and inc/dec of that selected variable
 - [x] Fix set/inc/dec variable api to respond with resulting value (and name)
 - [x] Allow incrementing & decrementing variable via http api
 - [x] Fix alpha blending for blocks

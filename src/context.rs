@@ -10,6 +10,7 @@ pub struct Context {
 	time_step: f64,
 	soundbank: SoundBank,
 	machine: Machine,
+	selected_variable: String,
 }
 
 impl Context {
@@ -18,6 +19,7 @@ impl Context {
 			time_step: 1.0/60.0,
 			soundbank: SoundBank::new(),
 			machine: Machine::new(),
+			selected_variable: String::new(),
 		}
 	}
 
@@ -40,6 +42,69 @@ impl Context {
 
 	pub fn time_step( &self ) -> f64 {
 		self.time_step
+	}
+
+	pub fn selected_variable( &self ) -> &str {
+		&self.selected_variable
+	}
+
+	fn wrapping_next<'a>( &self, current_name: &str, names: &'a Vec< String > ) -> &'a str {
+		let mut maybe_next_name = None;
+		for (i, n) in names.iter().enumerate() {
+			if *n == current_name {
+				if i+1 >= names.len() {
+					maybe_next_name = Some( &names[0] );
+				} else {
+					maybe_next_name = Some( &names[ i+1 ] );
+				}
+				break;
+			};
+		};
+
+		if let Some( next_name ) = maybe_next_name {
+			&next_name
+		} else {
+			&names[ 0 ]
+		}
+	}
+
+	pub fn select_next_variable( &mut self, prefix: Option< String > ) -> &str {
+		let vs = self.machine.get_variable_storage();
+
+		let mut names = Vec::new();
+
+		for n in vs.names() {
+			names.push( n.clone() );
+		}
+
+		let mut current_name = self.selected_variable.to_string();
+
+		loop {
+			let next_name = self.wrapping_next( &current_name, &names );
+			if let Some( prefix ) = &prefix {
+				if next_name.starts_with( prefix ) {
+					self.selected_variable = next_name.to_string();
+					break;
+				} else {
+					if next_name == self.selected_variable {
+						// didn't find a match
+						// :TODO: maybe unselect here?
+						break;
+					}
+				}
+			} else {
+				self.selected_variable = next_name.to_string();
+				break;
+			}
+
+			current_name = next_name.to_string();
+		}
+
+//		self.selected_variable = next_name.to_string();
+
+		dbg!(&self.selected_variable);
+
+		&self.selected_variable
 	}
 
 	pub fn set_string( &mut self, name: &str, value: &str ) {
