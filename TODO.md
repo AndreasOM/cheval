@@ -62,6 +62,7 @@ config
 
 ## DONE
 
+- [x] Fix set/inc/dec variable api to respond with resulting value (and name)
 - [x] Allow incrementing & decrementing variable via http api
 - [x] Fix alpha blending for blocks
 - [x] Allow using css names for colors

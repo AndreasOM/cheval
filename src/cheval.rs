@@ -45,8 +45,8 @@ use actix_web::{
 #[derive(Debug)]
 enum Message {
 	None,
-	SetVariable( String, String ),
-	IncrementVariable( String, i32 ),
+	SetVariable( mpsc::Sender< Response >, String, String ),
+	IncrementVariable( mpsc::Sender< Response >, String, i32 ),
 	SetElementVisibilityByName( String, bool ),
 	ListElementInstances( mpsc::Sender< Response > ),
 	GotoNextPage( mpsc::Sender< Response > ),
@@ -61,6 +61,10 @@ enum Response {
 	NotImplemented( String ),
 	ElementInstanceList( String ),
 	PageChanged( Option< usize >, Option< usize > ),	// new page #, old page #
+	VariableChanged( String, f32 ),
+	VariableU32Changed( String, u32 ),
+	VariableF32Changed( String, f32 ),
+	VariableStringChanged( String, String ),
 }
 
 
@@ -129,19 +133,42 @@ struct Config {
 	elements: Option< Vec< ConfigElement > >,
 }
 
+	fn handle_response( rx: mpsc::Receiver< Response >) -> impl Responder {
+		match rx.recv() {
+			Ok( r ) => {
+				match r {
+					Response::VariableChanged( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableU32Changed( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableF32Changed( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableStringChanged( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": \"{}\"}}]}}", &name, &v)
+					},
+					o => {
+						format!("Unhandled response: {:?}", &o ) // :TODO: format as json			
+					},
+				}
+			},
+			Err( e ) => format!("Error: {:?}", &e ), // :TODO: format as json
+		}
+	}
 //	async fn set_variable( web::Path((name, value)): web::Path<(String, String)>, tx: mpsc::Receiver< Message > ) -> impl Responder {
 	async fn set_variable(
 		state: web::Data<HttpState>,		
 		path : web::Path<(String, String)>
 	) -> impl Responder {
 		let (name, value) = path.into_inner();
-		
-		match state.http_sender.send( Message::SetVariable( name.clone(), value.clone() ) ) {
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SetVariable( tx, name.clone(), value.clone() ) ) {
 			_ => {},
 		};
 
-		dbg!(&name, &value);
-		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
+		handle_response( rx )
 	}
 
 	async fn inc_variable(
@@ -149,12 +176,11 @@ struct Config {
 		path: web::Path<(String, u32)>
 	) -> impl Responder {
 		let (name,delta) = path.into_inner();
-		match state.http_sender.send( Message::IncrementVariable( name.clone(), delta.try_into().unwrap() ) ) {
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementVariable( tx, name.clone(), delta.try_into().unwrap() ) ) {
 			_ => {},
 		};
-
-		dbg!(&name, &delta);
-		format!("incVariable ({}) {} by {}", &state.id, &name, &delta)
+		handle_response( rx )
 	}
 
 	async fn dec_variable(
@@ -163,12 +189,11 @@ struct Config {
 	) -> impl Responder {
 		let (name,delta) = path.into_inner();
 		let v: i32 = delta.try_into().unwrap();
-		match state.http_sender.send( Message::IncrementVariable( name.clone(), -v ) ) {
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementVariable( tx, name.clone(), -v ) ) {
 			_ => {},
 		};
-
-		dbg!(&name, &delta);
-		format!("decVariable ({}) {} by {}", &state.id, &name, &delta)
+		handle_response( rx )
 	}
 
 	async fn show_by_name(
@@ -714,22 +739,34 @@ impl Cheval {
 				Ok( msg ) => {
 //					dbg!("http_receiver got message", &msg);
 					match msg {
-						Message::SetVariable( name, value ) => {
+						Message::SetVariable( result_sender, name, value ) => {
 							dbg!( "set variable", &name, &value );
 							if let Ok( v ) = value.parse::<u32>() {
 								self.context.set_f32( &name, v as f32 );
+								match result_sender.send( Response::VariableU32Changed( name.clone(), v) ) {
+									_ => {},
+								};
 							} else if let Ok( v ) = value.parse::<f32>() {
 								self.context.set_f32( &name, v );
+								match result_sender.send( Response::VariableF32Changed( name.clone(), v) ) {
+									_ => {},
+								};
 							} else  {
 								self.context.set_string( &name, &value );
+								match result_sender.send( Response::VariableStringChanged( name.clone(), value.clone()) ) {
+									_ => {},
+								};
 							};
 							dbg!(&self.context);
 						}
-						Message::IncrementVariable( name, delta ) => {
+						Message::IncrementVariable( result_sender, name, delta ) => {
 							dbg!( "inc variable", &name, delta);
 							if let Some( old ) = self.context.get_f32( &name ) {
 								let new = old + delta as f32;
 								self.context.set_f32( &name, new );
+								match result_sender.send( Response::VariableChanged( name.clone(), new) ) {
+									_ => {},
+								};
 							}
 
 							dbg!(&self.context);
