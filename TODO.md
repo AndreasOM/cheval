@@ -3,10 +3,13 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Add sound effect support
-	- [ ] Fix time expire sound to be more precise
 
 ## TODO
+
+- [ ] Send actual resulting value back when changing variables via http
+
+- [ ] Add sound effect support
+	- [ ] Fix time expire sound to be more precise
 
 - [ ] Rename `master` branch to `main`
 - [ ] Allow writing of png sequences for window mode png
@@ -59,6 +62,7 @@ config
 
 ## DONE
 
+- [x] Allow incrementing & decrementing variable via http api
 - [x] Fix alpha blending for blocks
 - [x] Allow using css names for colors
 - [x] Default to current directory for configuration

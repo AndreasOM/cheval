@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use std::path::{ Path, PathBuf };
 
+use std::convert::TryInto;
+
 use serde::Deserialize;
 use serde_yaml;
 
@@ -44,6 +46,7 @@ use actix_web::{
 enum Message {
 	None,
 	SetVariable( String, String ),
+	IncrementVariable( String, i32 ),
 	SetElementVisibilityByName( String, bool ),
 	ListElementInstances( mpsc::Sender< Response > ),
 	GotoNextPage( mpsc::Sender< Response > ),
@@ -139,6 +142,33 @@ struct Config {
 
 		dbg!(&name, &value);
 		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
+	}
+
+	async fn inc_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<(String, u32)>
+	) -> impl Responder {
+		let (name,delta) = path.into_inner();
+		match state.http_sender.send( Message::IncrementVariable( name.clone(), delta.try_into().unwrap() ) ) {
+			_ => {},
+		};
+
+		dbg!(&name, &delta);
+		format!("incVariable ({}) {} by {}", &state.id, &name, &delta)
+	}
+
+	async fn dec_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<(String, u32)>
+	) -> impl Responder {
+		let (name,delta) = path.into_inner();
+		let v: i32 = delta.try_into().unwrap();
+		match state.http_sender.send( Message::IncrementVariable( name.clone(), -v ) ) {
+			_ => {},
+		};
+
+		dbg!(&name, &delta);
+		format!("decVariable ({}) {} by {}", &state.id, &name, &delta)
 	}
 
 	async fn show_by_name(
@@ -612,6 +642,8 @@ impl Cheval {
 //									.data( http_state )
 									.app_data( http_state )
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
+									.route("/incVariable/{name}/{delta}", web::get().to(inc_variable))
+									.route("/decVariable/{name}/{delta}", web::get().to(dec_variable))
 									.route("/show/name/{name}", web::get().to(show_by_name))
 									.route("/hide/name/{name}", web::get().to(hide_by_name))
 									// :TODO: implement list_pages
@@ -691,6 +723,15 @@ impl Cheval {
 							} else  {
 								self.context.set_string( &name, &value );
 							};
+							dbg!(&self.context);
+						}
+						Message::IncrementVariable( name, delta ) => {
+							dbg!( "inc variable", &name, delta);
+							if let Some( old ) = self.context.get_f32( &name ) {
+								let new = old + delta as f32;
+								self.context.set_f32( &name, new );
+							}
+
 							dbg!(&self.context);
 						}
 						Message::SetElementVisibilityByName( name, visible ) => {
