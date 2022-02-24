@@ -13,7 +13,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise
 
-- [ ] Rename `master` branch to `main`
 - [ ] Allow writing of png sequences for window mode png
 - [ ] Add event system
 - [ ] Soundbank element should own it's soundbank, and react to events
@@ -66,6 +65,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Rename `master` branch to `main`
 - [x] Merge `multi-window` branch
 - [x] Add text effects (shadow, glow?) to text element
 	- [x] Add text shadow
