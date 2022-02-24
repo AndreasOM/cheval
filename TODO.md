@@ -5,7 +5,9 @@ TODO: This file is not up to date. Sorry.
 
 
 ## TODO
-- [ ] Merge `multi-window` branch
+
+- [ ] Remember previous window positions for windows that are not currently used
+
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
 
 - [ ] Add sound effect support
@@ -64,6 +66,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Merge `multi-window` branch
 - [x] Add text effects (shadow, glow?) to text element
 	- [x] Add text shadow
 	- [x] Add text glow (:HACK:)
