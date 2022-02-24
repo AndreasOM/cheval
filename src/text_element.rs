@@ -23,6 +23,8 @@ pub struct TextElement {
 	shadow_color:		u32,
 	shadow_offset_x:	BakedExpression,
 	shadow_offset_y:	BakedExpression,
+	glow_color:			u32,
+	glow_size:			BakedExpression,
 }
 
 impl TextElement {
@@ -57,6 +59,9 @@ impl Element for TextElement {
 		self.shadow_color  		= config.get_u32_or( "shadow_color", 0xff11ffff );
 		self.shadow_offset_x	= config.get_bakedexpression_u32( "shadow_offset_x", 0 );
 		self.shadow_offset_y	= config.get_bakedexpression_u32( "shadow_offset_y", 0 );
+		self.glow_color  		= config.get_u32_or( "glow_color", 0xffffff11 );
+		self.glow_size			= config.get_bakedexpression_u32( "glow_size", 0 );
+
 
 
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
@@ -94,6 +99,7 @@ impl Element for TextElement {
 
 		self.shadow_offset_x.bake_u32_or( context, 0 );
 		self.shadow_offset_y.bake_u32_or( context, 0 );
+		self.glow_size.bake_u32_or( context, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -106,6 +112,28 @@ impl Element for TextElement {
 		match render_context.use_font( &self.fontfile ) {
 			// :TODO: handle error
 			_ => {},			
+		}
+		// :TODO: kids, don't do glow like this! ever!
+		let gs = self.glow_size.as_u32() as i32;
+		if gs != 0 {
+			for y in -gs..=gs {
+				for x in -gs..=gs {
+					if ! ( x == 0 && y == 0 ) {
+						match render_context.draw_text(
+							render_buffer,
+							&self.text.as_string(),
+							( self.ar.x.as_u32() as i32 + x ) as u32, ( self.ar.y.as_u32() as i32 + y ) as u32,
+							self.ar.width.as_u32(), self.ar.height.as_u32(),
+							&self.bounding_box,
+							self.size,					// :TODO: maybe move this to use font
+							self.glow_color
+						) {
+							// :TODO: handle error
+							_ => {},			
+						}
+					}
+				}
+			}
 		}
 		let (x,y) = ( self.shadow_offset_x.as_u32(), self.shadow_offset_y.as_u32() );
 		if ( x, y ) != ( 0, 0 ) {
@@ -166,6 +194,8 @@ impl TextElementFactory {
 			shadow_color:	0xff11ffff,
 			shadow_offset_x: BakedExpression::from_u32( 0 ),
 			shadow_offset_y: BakedExpression::from_u32( 0 ),
+			glow_color:		0xffffff11,
+			glow_size:		BakedExpression::from_u32( 0 ),
 		}
 	}
 }

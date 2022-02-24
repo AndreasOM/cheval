@@ -3,11 +3,10 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Add text effects (shadow, glow?) to text element
-	- [x] Add text shadow
-	- [ ] Add text glow
 
 ## TODO
+- [ ] Merge `multi-window` branch
+- [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
 
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise
@@ -19,9 +18,9 @@ TODO: This file is not up to date. Sorry.
 - [ ] Extract ElementConfig parameters
 
 - [ ] Use BakedExpression where sensible
-	- [x] Use BakedExpression for text position, and bounding box
-config
+	- [x] Use BakedExpression for text position, and bounding box config
 	- [x] Use BakedExpression for text
+	- [ ] Verify we use BakedExpressions everywhere
 
 - [ ] Improve reporting of broken config files
 - [ ] Fix crash when moving right without pages
@@ -30,8 +29,8 @@ config
 - [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
 - [ ] Persist variables in regular intervals
-- [ ] Enable debug frames bia command line 
-- [ ] Extract shared rendering functions
+- [ ] Enable debug frames via command line 
+- [ ] Extract shared rendering functions -> RenderBuffer package
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
 - [ ] Fix default for bounding boxes
@@ -51,10 +50,12 @@ config
 - [ ] Put profiling behind command line flag
 - [ ] Fix mutability of self in Cheval::render()
 - [ ] Add animations
-- [ ] Add audio support
+	- [ ] Use spline/bezier based files for values
+- [ ] Add audio support -> is started
 - [ ] Check file watcher (seems to be broken sometimes)
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Handle strings with whitespace in expressions
+- [ ] Replace :HACK: text effects with better version
 
 ## Obsolete
 
@@ -63,6 +64,9 @@ config
 
 ## DONE
 
+- [x] Add text effects (shadow, glow?) to text element
+	- [x] Add text shadow
+	- [x] Add text glow (:HACK:)
 - [x] Send actual resulting value back when changing variables via http
 - [x] Allow selecting of variable, and inc/dec of that selected variable
 - [x] Fix set/inc/dec variable api to respond with resulting value (and name)
