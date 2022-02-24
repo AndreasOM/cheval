@@ -44,21 +44,31 @@ impl Element for BlockElement {
 		self.alpha.bake_f32_or( context, 1.0 );
 	}
 
-	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {
 //		dbg!(&self);
 //		dbg!(&render_context);
-/*
-		for( x, y, block_x, block_y, pixel) in render_buffer.enumerate_pixel_in_block_mut( self.x, self.y, self.width, self.height ) {
-			*pixel = self.color;
-		}
-*/
 
 		let mut pixel = Pixel::from_u32( self.color );
 		let a = self.alpha.as_f32();
 		if a < 1.0 && a >= 0.0 {
 			pixel.apply_alpha( a );
 		}
+/* :TEST:
+		let mut a = 0.0;
+		while a <= 1.01 {
+			let mut pixel = Pixel::from_u32( self.color );
+			if a < 1.0 && a >= 0.0 {
+				pixel.apply_alpha( a );
+			}
+			println!( "{} -> {:?}", a, &pixel );
+			a += 0.1;
+		}
 
+		todo!("die");
+*/
+		if a > 1.0 || a < 0.0 {
+			panic!("Invalid alpha {}", a );
+		}
 
 		render_buffer.for_pixel_in_block(
 			self.x.as_u32(), self.y.as_u32(), self.width.as_u32(), self.height.as_u32(),

@@ -1,8 +1,6 @@
 use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
-use crate::render_context::RenderContext;
-use crate::render_buffer::RenderBuffer;
 
 use async_trait::async_trait;
 use hhmmss::Hhmmss;

@@ -56,8 +56,8 @@ impl RenderContext{
 		text: &str,
 		pos_x: u32,
 		pos_y: u32,
-		width: u32,
-		height: u32,
+		_width: u32,
+		_height: u32,
 		bounding_box: &AxisAlignedRectangle,
 		size: u32,
 		color: u32,
@@ -140,7 +140,7 @@ impl RenderContext{
 									if o < render_buffer.buffer.len() {
 										let old_pixel = Pixel::from_u32( render_buffer.buffer[ o ] );
 										let new_pixel = Pixel::from_u32( color );
-										let pixel = Pixel::blend_with_alpha_and_opacity( new_pixel, old_pixel, v );
+										let pixel = Pixel::blend_with_alpha_and_opacity( &new_pixel, &old_pixel, v );
 										render_buffer.buffer[ o ] = pixel.to_u32();
 									}
 								}

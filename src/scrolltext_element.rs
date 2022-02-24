@@ -1,15 +1,10 @@
 use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
-use crate::pixel::Pixel;
 use crate::context::Context;
 use async_trait::async_trait;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 use crate::axisalignedrectangle::AxisAlignedRectangle;
-
-use std::fs::File;
-use std::io::Read;
-// use rusttype::{point, Font, Scale};
 
 #[derive(Debug)]
 pub struct ScrollTextElement {
@@ -68,10 +63,13 @@ impl Element for ScrollTextElement {
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
 //		dbg!(&self);
-		render_context.use_font( &self.fontfile );
+		match render_context.use_font( &self.fontfile ) {
+			// :TODO: handle error
+			_ => {},
+		};
 		let pos_x = self.bounding_box.x.as_u32() as f32 + self.offset;
 
-		render_context.draw_text(
+		match render_context.draw_text(
 			render_buffer,
 			&self.text.as_string(),
 			pos_x as u32, self.bounding_box.y.as_u32(),
@@ -79,7 +77,10 @@ impl Element for ScrollTextElement {
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color
-		);
+		) {
+			// :TODO: handle error
+			_ => {},
+		}
 	}
 	fn name( &self ) -> &str {
 		&self.name

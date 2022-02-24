@@ -1,13 +1,11 @@
-use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
-use crate::pixel::Pixel;
 
 use oml_audio::fileloader::FileLoaderDisk;
 
-use std::path::{Path,PathBuf};
+use std::path::PathBuf;
 
 use async_trait::async_trait;
 
@@ -40,21 +38,20 @@ impl Element for SoundbankElement {
 
 		if let Some( soundbank_file ) = &self.soundbank_file {
 
-			if let soundbank = &mut context.get_soundbank_mut() {
-				let mut fileloader = FileLoaderDisk::new( &self.config_path.to_string_lossy() );
-				fileloader.enable_debug();
+			let soundbank = &mut context.get_soundbank_mut();
+			let mut fileloader = FileLoaderDisk::new( &self.config_path.to_string_lossy() );
+			fileloader.enable_debug();
 
-				soundbank.enable_debug();
-				soundbank.load( &mut fileloader, soundbank_file );
-//				dbg!(&soundbank);
-//				todo!("...");
-			}
+			soundbank.enable_debug();
+			soundbank.load( &mut fileloader, soundbank_file );
+//			dbg!(&soundbank);
+//			todo!("...");
 
 			self.soundbank_file = None;
 		}
 	}
 
-	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+	fn render( &self, _render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {
 	}
 	fn name( &self ) -> &str {
 		&self.name

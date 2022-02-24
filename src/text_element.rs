@@ -1,17 +1,15 @@
 use crate::bakedexpression::BakedExpression;
 use crate::element::{Element, ElementConfig};
-use crate::pixel::Pixel;
 use crate::context::Context;
 use async_trait::async_trait;
 use crate::render_context::RenderContext;
 use crate::render_buffer::RenderBuffer;
 use crate::axisalignedrectangle::AxisAlignedRectangle;
 
-use std::fs::File;
-use std::io::Read;
-use rusttype::{point, Font, Scale};
+use rusttype::Font;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct TextElement {
 	name: String,
 	ar: AxisAlignedRectangle,
@@ -22,6 +20,11 @@ pub struct TextElement {
 	font: Option< Font<'static> >,
 	display_text: String,
 	bounding_box: AxisAlignedRectangle,
+	shadow_color:		u32,
+	shadow_offset_x:	BakedExpression,
+	shadow_offset_y:	BakedExpression,
+	glow_color:			u32,
+	glow_size:			BakedExpression,
 }
 
 impl TextElement {
@@ -53,6 +56,13 @@ impl Element for TextElement {
 		self.fontfile	= config.get_path_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
+		self.shadow_color  		= config.get_u32_or( "shadow_color", 0xff11ffff );
+		self.shadow_offset_x	= config.get_bakedexpression_u32( "shadow_offset_x", 0 );
+		self.shadow_offset_y	= config.get_bakedexpression_u32( "shadow_offset_y", 0 );
+		self.glow_color  		= config.get_u32_or( "glow_color", 0xffffff11 );
+		self.glow_size			= config.get_bakedexpression_u32( "glow_size", 0 );
+
+
 
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
@@ -86,6 +96,10 @@ impl Element for TextElement {
 		self.bounding_box.bake_or( context, &self.ar );
 
 		self.text.bake_string_or( context, "" );
+
+		self.shadow_offset_x.bake_u32_or( context, 0 );
+		self.shadow_offset_y.bake_u32_or( context, 0 );
+		self.glow_size.bake_u32_or( context, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -95,8 +109,48 @@ impl Element for TextElement {
 		}
 */
 //		dbg!(&self);
-		render_context.use_font( &self.fontfile );
-		render_context.draw_text(
+		match render_context.use_font( &self.fontfile ) {
+			// :TODO: handle error
+			_ => {},			
+		}
+		// :TODO: kids, don't do glow like this! ever!
+		let gs = self.glow_size.as_u32() as i32;
+		if gs != 0 {
+			for y in -gs..=gs {
+				for x in -gs..=gs {
+					if ! ( x == 0 && y == 0 ) {
+						match render_context.draw_text(
+							render_buffer,
+							&self.text.as_string(),
+							( self.ar.x.as_u32() as i32 + x ) as u32, ( self.ar.y.as_u32() as i32 + y ) as u32,
+							self.ar.width.as_u32(), self.ar.height.as_u32(),
+							&self.bounding_box,
+							self.size,					// :TODO: maybe move this to use font
+							self.glow_color
+						) {
+							// :TODO: handle error
+							_ => {},			
+						}
+					}
+				}
+			}
+		}
+		let (x,y) = ( self.shadow_offset_x.as_u32(), self.shadow_offset_y.as_u32() );
+		if ( x, y ) != ( 0, 0 ) {
+			match render_context.draw_text(
+				render_buffer,
+				&self.text.as_string(),
+				self.ar.x.as_u32() + x, self.ar.y.as_u32() + y,
+				self.ar.width.as_u32(), self.ar.height.as_u32(),
+				&self.bounding_box,
+				self.size,					// :TODO: maybe move this to use font
+				self.shadow_color
+			) {
+				// :TODO: handle error
+				_ => {},			
+			}
+		}
+		match render_context.draw_text(
 			render_buffer,
 			&self.text.as_string(),
 			self.ar.x.as_u32(), self.ar.y.as_u32(),
@@ -104,7 +158,10 @@ impl Element for TextElement {
 			&self.bounding_box,
 			self.size,					// :TODO: maybe move this to use font
 			self.color
-		);
+		) {
+			// :TODO: handle error
+			_ => {},			
+		}
 	}
 	fn name( &self ) -> &str {
 		&self.name
@@ -134,6 +191,11 @@ impl TextElementFactory {
 			font: None,
 			display_text: "".to_string(),
 			bounding_box: AxisAlignedRectangle::new(),
+			shadow_color:	0xff11ffff,
+			shadow_offset_x: BakedExpression::from_u32( 0 ),
+			shadow_offset_y: BakedExpression::from_u32( 0 ),
+			glow_color:		0xffffff11,
+			glow_size:		BakedExpression::from_u32( 0 ),
 		}
 	}
 }

@@ -1,7 +1,5 @@
 use crate::element::{Element, ElementConfig};
 use crate::context::Context;
-use crate::render_context::RenderContext;
-use crate::render_buffer::RenderBuffer;
 
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use std::sync::mpsc::channel;

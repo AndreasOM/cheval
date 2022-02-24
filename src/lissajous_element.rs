@@ -45,7 +45,7 @@ impl Element for LissajousElement {
 		self.t += 0.1;
 	}
 	
-	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
+	fn render( &self, render_buffer: &mut RenderBuffer, _render_context: &mut RenderContext ) {
 		for c in 0..self.count {
 			let t = self.t + self.offset + 0.1 * c as f32;
 			let x = ( ( self.width as f32 * t.sin() ) as isize ).saturating_add( self.x as isize ) as i32;

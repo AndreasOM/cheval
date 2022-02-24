@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use std::path::{ Path, PathBuf };
-use glob::Paths;
+
+use std::convert::TryInto;
 
 use serde::Deserialize;
 use serde_yaml;
@@ -22,18 +23,32 @@ use crate::render_buffer::RenderBuffer;
 use crate::timer_element::TimerElementFactory;
 use crate::page::Page;
 
+use derivative::Derivative;
+
 use chrono::{DateTime, Utc};
 use hhmmss::Hhmmss;
 use std::sync::mpsc;
-use std::cell::RefCell;
-use std::rc::Rc;
 
-use actix_web::{web, App, HttpRequest, HttpServer, Responder, rt::System};
+use actix_web::{
+	web::{
+		self,
+		Data,
+	},
+	App,
+//	HttpRequest,
+	HttpServer,
+	Responder,
+	rt::System
+};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 enum Message {
 	None,
-	SetVariable( String, String ),
+	SelectNextVariable( mpsc::Sender< Response >, Option< String > ), // optional prefix
+	IncrementSelectedVariable( mpsc::Sender< Response >, i32 ),
+	SetVariable( mpsc::Sender< Response >, String, String ),
+	IncrementVariable( mpsc::Sender< Response >, String, i32 ),
 	SetElementVisibilityByName( String, bool ),
 	ListElementInstances( mpsc::Sender< Response > ),
 	GotoNextPage( mpsc::Sender< Response > ),
@@ -41,12 +56,18 @@ enum Message {
 	GotoPage( mpsc::Sender< Response >, usize ),
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 enum Response {
 	None,
 	NotImplemented( String ),
 	ElementInstanceList( String ),
 	PageChanged( Option< usize >, Option< usize > ),	// new page #, old page #
+	VariableSelected( String ),
+	VariableChanged( String, f32 ),
+	VariableU32Changed( String, u32 ),
+	VariableF32Changed( String, f32 ),
+	VariableStringChanged( String, String ),
 }
 
 
@@ -56,7 +77,8 @@ struct HttpState {
 	http_sender: mpsc::Sender< Message >,
 }
 
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Cheval {
 //	element_instances: Vec< ElementInstance >,
 	page: Option< Page >,
@@ -68,10 +90,12 @@ pub struct Cheval {
 	start_time: DateTime<Utc>,
 	render_context: RenderContext,
 	http_enabled: bool,
-	http_server: Option< actix_web::dev::Server >,
+//	#[derivative(Debug="ignore")]
+//	http_server: Option< actix_web::dev::Server >,
 	http_receiver: Option< mpsc::Receiver< Message > >,
 	done: bool,
 	config_path: PathBuf,
+	server_thread: Option< std::thread::JoinHandle< () > >
 }
 
 
@@ -87,6 +111,7 @@ struct ConfigElement {
 	parameters: HashMap< String, String >
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct ConfigPage {
 	name: String,
@@ -101,6 +126,7 @@ fn default_bool_true() -> bool {
     true
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct Config {
 	default_page: Option< usize >,
@@ -110,25 +136,126 @@ struct Config {
 	elements: Option< Vec< ConfigElement > >,
 }
 
-//	async fn set_variable( web::Path((name, value)): web::Path<(String, String)>, tx: mpsc::Receiver< Message > ) -> impl Responder {
-	async fn set_variable(
-		state: web::Data<HttpState>,		
-		web::Path((name, value)): web::Path<(String, String)>
-	) -> impl Responder {
+	fn handle_response( rx: mpsc::Receiver< Response >) -> impl Responder {
+		match rx.recv() {
+			Ok( r ) => {
+				match r {
+					Response::VariableSelected( name ) => {
+						format!("variable selected: {}", &name ) // :TODO: decide on formatting
+					},
+					Response::VariableChanged( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableU32Changed( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableF32Changed( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+					},
+					Response::VariableStringChanged( name, v ) => {
+						format!("{{\"variables\":[{{ \"{}\": \"{}\"}}]}}", &name, &v)
+					},
+					o => {
+						format!("Unhandled response: {:?}", &o ) // :TODO: format as json			
+					},
+				}
+			},
+			Err( e ) => format!("Error: {:?}", &e ), // :TODO: format as json
+		}
+	}
 
-		
-		match state.http_sender.send( Message::SetVariable( name.clone(), value.clone() ) ) {
+	async fn select_next_variable(
+		state: web::Data<HttpState>,
+	) -> impl Responder {
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SelectNextVariable( tx, None ) ) {
 			_ => {},
 		};
 
-//		dbg!(&name, &value);
-		format!("setVariable ({}) {} = {}", &state.id, &name, &value)
+		handle_response( rx )
+	}
+
+	async fn select_next_variable_with_prefix(
+		state: web::Data<HttpState>,
+		path: web::Path<String>
+	) -> impl Responder {
+		let prefix = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SelectNextVariable( tx, Some( prefix ) ) ) {
+			_ => {},
+		};
+
+		handle_response( rx )
+	}
+
+	async fn set_variable(
+		state: web::Data<HttpState>,		
+		path : web::Path<(String, String)>
+	) -> impl Responder {
+		let (name, value) = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();		
+		match state.http_sender.send( Message::SetVariable( tx, name.clone(), value.clone() ) ) {
+			_ => {},
+		};
+
+		handle_response( rx )
+	}
+
+	async fn inc_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<(String, u32)>
+	) -> impl Responder {
+		let (name,delta) = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementVariable( tx, name.clone(), delta.try_into().unwrap() ) ) {
+			_ => {},
+		};
+		handle_response( rx )
+	}
+
+	async fn dec_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<(String, u32)>
+	) -> impl Responder {
+		let (name,delta) = path.into_inner();
+		let v: i32 = delta.try_into().unwrap();
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementVariable( tx, name.clone(), -v ) ) {
+			_ => {},
+		};
+		handle_response( rx )
+	}
+
+	async fn inc_selected_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<u32>
+	) -> impl Responder {
+		let delta = path.into_inner();
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementSelectedVariable( tx, delta.try_into().unwrap() ) ) {
+			_ => {},
+		};
+		handle_response( rx )
+	}
+	async fn dec_selected_variable(
+		state: web::Data<HttpState>,
+		path: web::Path<u32>
+	) -> impl Responder {
+		let delta = path.into_inner();
+		let v: i32 = delta.try_into().unwrap();		
+		let (tx,rx) = std::sync::mpsc::channel();
+		match state.http_sender.send( Message::IncrementSelectedVariable( tx, -v ) ) {
+			_ => {},
+		};
+		handle_response( rx )
 	}
 
 	async fn show_by_name(
 		state: web::Data<HttpState>,		
-		web::Path((name)): web::Path<(String)>
+		path: web::Path< String >
 	) -> impl Responder {
+		let name = path.into_inner();
+
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), true ) ) {
 			_ => {},
 		};
@@ -137,8 +264,10 @@ struct Config {
 
 	async fn hide_by_name(
 		state: web::Data<HttpState>,		
-		web::Path((name)): web::Path<(String)>
+		path: web::Path< String >
 	) -> impl Responder {
+		let name = path.into_inner();
+
 		match state.http_sender.send( Message::SetElementVisibilityByName( name.clone(), false ) ) {
 			_ => {},
 		};
@@ -167,10 +296,12 @@ struct Config {
 						dbg!( &e );
 					}
 				}
-				format!("elements ->")
+				//format!("elements ->")
+				"elements ->".to_string()
 			},
 			_ => {
-				format!("{{}}")
+				//format!("{{}}")
+				"{}".to_string()
 			},
 		}
 	}
@@ -200,7 +331,7 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
+		"{}".to_string()
 	}
 
 	async fn goto_prev_page(
@@ -228,13 +359,14 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
+		"{}".to_string()
 	}
 
 	async fn goto_page_number(
 		state: web::Data<HttpState>,
-		web::Path((page_no)): web::Path<(usize)>
+		path: web::Path< usize >
 	) -> impl Responder {
+		let page_no = path.into_inner();
 		let (sender, receiver) = mpsc::channel();
 		match state.http_sender.send( Message::GotoPage( sender, page_no ) ) {
 			Ok( _ ) => {
@@ -257,12 +389,7 @@ struct Config {
 			_ => {},
 		};
 
-		format!("{{}}")
-	}
-
-	async fn greet(req: HttpRequest) -> impl Responder {
-	    let name = req.match_info().get("name").unwrap_or("World");
-	    format!("Hello {}!", &name)
+		"{}".to_string()
 	}
 
 impl Cheval {
@@ -278,10 +405,11 @@ impl Cheval {
 			start_time: Utc::now(),
 			render_context: RenderContext::new(),
 			http_enabled: false,
-			http_server: None,
+//			http_server: None,
 			http_receiver: None,
 			done: false,
 			config_path: PathBuf::new(),
+			server_thread: None,
 		}
 	}
 
@@ -441,7 +569,7 @@ impl Cheval {
 
 		function_table.register(
 			"sin",
-			|argc, variable_stack, _variable_storage| {
+			|_argc, variable_stack, _variable_storage| {
 				// :TODO: handle wrong argc
 
 				let fv = variable_stack.pop_as_f32();
@@ -576,7 +704,7 @@ impl Cheval {
 
 	pub fn initialize( &mut self ) -> anyhow::Result<()> {
 		if self.http_enabled {
-			let (tx, rx) = mpsc::channel();
+//			let (tx, rx) = mpsc::channel();
 
 			let (tx2, rx2) = mpsc::channel();
 
@@ -588,9 +716,17 @@ impl Cheval {
 					id: "default".to_string(),
 					http_sender: tx2.clone(),
 				};
+				let http_state = Data::new( http_state );
 								App::new()
-									.data( http_state )
+//									.data( http_state )
+									.app_data( http_state )
+									.route("/selectNextVariable", web::get().to(select_next_variable))
+									.route("/selectNextVariableWithPrefix/{prefix}", web::get().to(select_next_variable_with_prefix))
+									.route("/incSelectedVariable/{value}", web::get().to(inc_selected_variable))
+									.route("/decSelectedVariable/{value}", web::get().to(dec_selected_variable))
 									.route("/setVariable/{name}/{value}", web::get().to(set_variable))
+									.route("/incVariable/{name}/{delta}", web::get().to(inc_variable))
+									.route("/decVariable/{name}/{delta}", web::get().to(dec_variable))
 									.route("/show/name/{name}", web::get().to(show_by_name))
 									.route("/hide/name/{name}", web::get().to(hide_by_name))
 									// :TODO: implement list_pages
@@ -599,23 +735,27 @@ impl Cheval {
 									.route("/page/next", web::get().to(goto_next_page))
 									.route("/page/prev", web::get().to(goto_prev_page))
 									.route("/page/number/{number}", web::get().to(goto_page_number))
-//									.route("/", web::get().to(greet))
 							})
 							.bind("0.0.0.0:8080")?
 							.run();
-			std::thread::spawn(move || {
-				let mut sys = System::new("test");
+			let server_thread = std::thread::spawn(move || {
+				let sys = System::new(/*"test"*/);
 
-				let _ = tx.send( server.clone() );
+//				let _ = tx.send( server.clone() );
 
-				sys.block_on( server );
+				match sys.block_on( server ) {
+					// :TODO: handle errors
+					_ => {},
+				}
     		});//.join().expect("Thread panicked");
-    		dbg!(&self.http_enabled);
 
+			self.server_thread = Some( server_thread );
+    		dbg!(&self.http_enabled);
+/*
     		let server = rx.recv().unwrap();
     		self.http_server = Some( server );
-
-    		dbg!(&self.http_server);
+*/
+//    		dbg!(&self.http_server);
 
 			// :TODO: cleanup server on shutdown
 		}
@@ -649,24 +789,63 @@ impl Cheval {
 		}
 
 		let ts = self.context.time_step();
-		if let soundbank = &mut self.context.get_soundbank_mut() {
-			soundbank.update( ts );
-		}
+		let soundbank = &mut self.context.get_soundbank_mut();
+		soundbank.update( ts );
 
 		if let Some( http_receiver ) = &self.http_receiver {
 			match http_receiver.try_recv() {
 				Ok( msg ) => {
 //					dbg!("http_receiver got message", &msg);
 					match msg {
-						Message::SetVariable( name, value ) => {
+						Message::SelectNextVariable( result_sender, maybe_prefix ) => {
+							let name = self.context.select_next_variable( maybe_prefix.as_ref().map(String::as_str) );
+							match result_sender.send( Response::VariableSelected( name.to_string() ) ) {
+								_ => {},
+							};
+						}
+						Message::SetVariable( result_sender, name, value ) => {
 							dbg!( "set variable", &name, &value );
 							if let Ok( v ) = value.parse::<u32>() {
 								self.context.set_f32( &name, v as f32 );
+								match result_sender.send( Response::VariableU32Changed( name.clone(), v) ) {
+									_ => {},
+								};
 							} else if let Ok( v ) = value.parse::<f32>() {
 								self.context.set_f32( &name, v );
+								match result_sender.send( Response::VariableF32Changed( name.clone(), v) ) {
+									_ => {},
+								};
 							} else  {
 								self.context.set_string( &name, &value );
+								match result_sender.send( Response::VariableStringChanged( name.clone(), value.clone()) ) {
+									_ => {},
+								};
 							};
+							dbg!(&self.context);
+						}
+						Message::IncrementVariable( result_sender, name, delta ) => {
+							dbg!( "inc variable", &name, delta);
+							if let Some( old ) = self.context.get_f32( &name ) {
+								let new = old + delta as f32;
+								self.context.set_f32( &name, new );
+								match result_sender.send( Response::VariableChanged( name.clone(), new) ) {
+									_ => {},
+								};
+							}
+
+							dbg!(&self.context);
+						}
+						Message::IncrementSelectedVariable( result_sender, delta ) => {
+							let name = self.context.selected_variable().to_string();
+							dbg!( "inc selected variable", &name, delta);
+							if let Some( old ) = self.context.get_f32( &name ) {
+								let new = old + delta as f32;
+								self.context.set_f32( &name, new );
+								match result_sender.send( Response::VariableChanged( name, new) ) {
+									_ => {},
+								};
+							}
+
 							dbg!(&self.context);
 						}
 						Message::SetElementVisibilityByName( name, visible ) => {
@@ -711,10 +890,16 @@ impl Cheval {
 						},
 					}
 				}
-				Empty => {
-
-				},
-				_ => {},
+				Err( e ) => {
+					match e {
+						mpsc::TryRecvError::Empty => {
+							// empty is fine
+						},
+						mpsc::TryRecvError::Disconnected => {
+							// disconnected is also fine, for now
+						},
+					}
+				}
 			}
 		}
 	}
@@ -761,7 +946,7 @@ impl Cheval {
 		}
 	}
 
-	pub fn shutdown( &mut self ) {
+	pub fn shutdown( &mut self ) -> anyhow::Result<()> {
 		for p in self.pages.iter_mut() {
 			p.shutdown();
 		}
@@ -769,7 +954,20 @@ impl Cheval {
 			p.shutdown();
 		}
 		if let Some( variable_filename ) = &self.variable_filename {
-			self.context.get_mut_machine().save_variable_storage( &variable_filename );
-		}		
+			match self.context.get_mut_machine().save_variable_storage( &variable_filename ) {
+				Ok( _ ) => {},
+				Err( e ) => return Err(anyhow::anyhow!("Error saving variables: {:?}", e )),
+			}
+		}
+		// :TODO:
+		/*
+		if let Some( server_thread ) = self.server_thread.take() {
+			match server_thread.join() {
+				Ok( _ ) => {},
+				Err( e ) => return Err(anyhow::anyhow!("Error joining server thread: {:?}", e )),
+			}
+		}
+		*/
+		Ok(())
 	}
 }

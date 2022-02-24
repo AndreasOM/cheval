@@ -4,6 +4,7 @@ use expresso::expression::Expression;
 use expresso::variables::Variable;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct BakedExpression {
 	original: String,
 	expression: Option< Expression >,
@@ -31,7 +32,10 @@ impl BakedExpression {
 	pub fn from_str( v: &str ) -> Self {
 		let mut expression = Expression::new();
 		expression.enable_upgrade_of_literals_to_strings();
-		expression.from_str( v );
+		match expression.from_str( v ) {
+			// :TODO: handle error
+			_ => {},			
+		}
 
 		Self {
 			original: v.to_string(),
@@ -65,7 +69,7 @@ impl BakedExpression {
 					self.baked = Baked::F32( *f );
 				},
 				Some( Variable::ERROR( e ) ) => {
-					println!("Error baking {:?} in {:?}", self, context );
+					println!("Error baking {:?} in {:?} -> {:?}", self, context, e );
 					self.baked = Baked::F32( default );
 				},
 				t => todo!("Result type not handled {:?} {:?} {:?}", t, r, e ),
@@ -90,7 +94,7 @@ impl BakedExpression {
 				},
 				Some( Variable::ERROR( e ) ) => {
 					// :TODO: make error visible to caller/user
-					println!("Error baking {:?} got stack {:?} using default {}", &self, &r, &default );
+					println!("Error baking {:?} got stack {:?} using default {} -> {:?}", &self, &r, &default, e );
 					self.baked = Baked::U32( default );
 				},
 				t => {
@@ -117,7 +121,7 @@ impl BakedExpression {
 					self.baked = Baked::STRING( s.to_string() );
 				},
 				Some( Variable::ERROR( e ) ) => {
-					println!("Error baking {:?} in {:?}", self, context );
+					println!("Error baking {:?} in {:?} -> {:?}", self, context, e );
 					self.baked = Baked::STRING( default.to_string() );
 				},
 				None => {

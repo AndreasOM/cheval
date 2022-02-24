@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use regex::Regex;
 
 use expresso::expression::Expression;
@@ -11,6 +10,7 @@ pub struct Context {
 	time_step: f64,
 	soundbank: SoundBank,
 	machine: Machine,
+	selected_variable: String,
 }
 
 impl Context {
@@ -19,6 +19,7 @@ impl Context {
 			time_step: 1.0/60.0,
 			soundbank: SoundBank::new(),
 			machine: Machine::new(),
+			selected_variable: String::new(),
 		}
 	}
 
@@ -41,6 +42,53 @@ impl Context {
 
 	pub fn time_step( &self ) -> f64 {
 		self.time_step
+	}
+
+	pub fn selected_variable( &self ) -> &str {
+		&self.selected_variable
+	}
+
+	pub fn select_next_variable( &mut self, prefix: Option< &str > ) -> &str {
+		let vs = self.machine.get_variable_storage();
+
+		let mut names: Vec< &str > = if let Some( prefix ) = prefix {
+			vs.names().filter_map(
+			|v| {
+				if v.starts_with( prefix ){
+					Some( v.as_ref() )
+				} else {
+					None 
+				}
+			}).collect()
+		} else {
+			vs.names().map( |v| v.as_ref() ).collect()
+		};
+
+		match names.len() {
+			0 => {
+			},
+			1 => {
+				self.selected_variable = names[ 0 ].to_string();
+			},
+			_ => {
+				names.sort();
+				match names.binary_search( &self.selected_variable.as_ref() ) {
+					Ok( i ) => {
+//						dbg!(&i);
+						let i = ( i+1 ).wrapping_rem( names.len() );
+//						println!("Found using [{}]", i);
+						self.selected_variable = names[ i ].to_string();
+					},
+					Err( _ ) => {
+//						println!("Not found using [0]" );
+						self.selected_variable = names[ 0 ].to_string();
+					}
+				};
+			}
+		};
+
+		dbg!(&self.selected_variable);
+		&self.selected_variable
 	}
 
 	pub fn set_string( &mut self, name: &str, value: &str ) {
@@ -106,7 +154,10 @@ impl Context {
 			}
 		} else if let Some( caps ) = re2.captures( &s ) {
 			let mut expression = Expression::new();
-			expression.from_str( &caps[ 1 ] );
+			match expression.from_str( &caps[ 1 ] ) {
+				// :TODO: error reporting
+				_ => {},
+			};
 //			println!("{}", expression);
 			let mut r = expression.run( &mut self.machine );
 			match r.pop() {
@@ -116,7 +167,7 @@ impl Context {
 				Some( expresso::variables::Variable::F32( f ) ) => {
 					format!("{}", f )
 				},
-				None => format!("No result" ),
+				None => "No result".to_string(),
 				r => todo!("Result is not printable {:?}", r ),
 			}
 
@@ -179,4 +230,64 @@ impl Context {
 	}
 */	
 
+}
+
+
+#[cfg(test)]
+mod tests {
+	use crate::context::Context;
+
+    #[test]
+    fn select_next_variable_works_without_variables() {
+    	let mut context = Context::new();
+    	context.select_next_variable( None );
+    	context.select_next_variable( Some( "not_found_anyway" ) );
+    }
+
+    #[test]
+    fn select_next_variable_without_prefix() {
+    	let mut context = Context::new();
+    	context.set_string( "a", "one" );
+    	context.set_string( "b", "two" );
+    	assert_eq!( "", context.selected_variable() );
+    	context.select_next_variable( None );
+    	assert_eq!( "a", context.selected_variable() );
+    	context.select_next_variable( None );
+    	assert_eq!( "b", context.selected_variable() );
+    	context.select_next_variable( None );
+    	assert_eq!( "a", context.selected_variable() );
+    	context.select_next_variable( None );
+    	assert_eq!( "b", context.selected_variable() );
+    	context.select_next_variable( None );
+    	assert_eq!( "a", context.selected_variable() );
+    }
+
+    #[test]
+    fn select_next_variable_with_prefix() {
+    	let mut context = Context::new();
+    	context.set_string( "a_one", "a one" );
+    	context.set_string( "a_two", "a two" );
+    	context.set_string( "b_one", "b one" );
+    	context.set_string( "b_two", "b two" );
+    	context.set_string( "c", "doesn't matter at all" );
+    	context.set_string( "d", "doesn't matter at all" );
+    	context.set_string( "e", "doesn't matter at all" );
+    	context.set_string( "f", "doesn't matter at all" );
+    	context.set_string( "g", "doesn't matter at all" );
+    	context.set_string( "h", "doesn't matter at all" );
+//    	dbg!(&context);
+    	assert_eq!( "", context.selected_variable() );
+    	context.select_next_variable( Some( "b" ) );
+    	assert_eq!( "b_one", context.selected_variable() );
+    	context.select_next_variable( Some( "b" ) );
+    	assert_eq!( "b_two", context.selected_variable() );
+    	context.select_next_variable( Some( "b" ) );
+    	assert_eq!( "b_one", context.selected_variable() );
+    	context.select_next_variable( Some( "a" ) );
+    	assert_eq!( "a_one", context.selected_variable() );
+    	context.select_next_variable( Some( "b" ) );
+    	assert_eq!( "b_one", context.selected_variable() );
+    	context.select_next_variable( Some( "c" ) );
+    	assert_eq!( "c", context.selected_variable() );
+    }
 }

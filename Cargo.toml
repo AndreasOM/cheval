@@ -17,6 +17,11 @@ categories = ["graphics"]
 name="cheval"
 path="src/cheval_main.rs"
 
+[features]
+default = []
+with_termion = [ "termion" ]
+
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
@@ -29,21 +34,23 @@ async-trait = "0.1.40"
 tokio = { version = "0.2.22", features = [ "full", "tracing" ] }
 anyhow = "1.0"
 clap = "2.33.3"
-actix-web = "3.2.0"
+actix-web = "4.0.0-rc.2"
 hhmmss = "0.1"
 
-expresso = "0.2"
+expresso = "0.2.4"
 glob = "0.3.0"
-termion = "1.5.6"
+termion = { version = "1.5.6", optional = true }
 css-color = "0.1.1"
 oml-audio = "0.2.1"
+derivative = "2.2.0"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-minifb = "0.18.0"
-pprof = { version = "0.3", features = ["flamegraph"] }
+minifb = "0.20.0"
+# pprof = { version = "0.3", features = ["flamegraph"] }
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
-minifb = "0.18.0"
+minifb = "0.20.0"
+pprof = { version = "0.6.2", features = ["flamegraph", "criterion"] }
 
 
 [target.'cfg(target_arch = "arm")'.dependencies]
@@ -51,4 +58,20 @@ framebuffer = "0.2.0"
 
 [build-dependencies]
 cfg_aliases = "0.1.0"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[target.'cfg(target_arch = "arm")'.dev-dependencies]
+pprof = { version = "0.6.2", features = ["flamegraph", "criterion"] }
+
+[[bench]]
+name = "next_frame_benchmark"
+harness = false
+
+
+[patch.crates-io]
+# minifb = { path = "../rust_minifb" }
+minifb = { git = "https://github.com/andreasom/rust_minifb" }
+#expresso = { path = "../expresso" }
 
