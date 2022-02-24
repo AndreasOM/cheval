@@ -20,6 +20,9 @@ pub struct TextElement {
 	font: Option< Font<'static> >,
 	display_text: String,
 	bounding_box: AxisAlignedRectangle,
+	shadow_color:		u32,
+	shadow_offset_x:	BakedExpression,
+	shadow_offset_y:	BakedExpression,
 }
 
 impl TextElement {
@@ -51,6 +54,10 @@ impl Element for TextElement {
 		self.fontfile	= config.get_path_or( "font", "" );
 		self.size	= config.get_u32_or( "size", 20 );
 		self.display_text	= config.get_string_or( "text", "" );
+		self.shadow_color  		= config.get_u32_or( "shadow_color", 0xff11ffff );
+		self.shadow_offset_x	= config.get_bakedexpression_u32( "shadow_offset_x", 0 );
+		self.shadow_offset_y	= config.get_bakedexpression_u32( "shadow_offset_y", 0 );
+
 
 		// NOTE: We could just directly us the self.bounding_box, but want to keep our options open
 		let mut bb = AxisAlignedRectangle::new();
@@ -84,6 +91,9 @@ impl Element for TextElement {
 		self.bounding_box.bake_or( context, &self.ar );
 
 		self.text.bake_string_or( context, "" );
+
+		self.shadow_offset_x.bake_u32_or( context, 0 );
+		self.shadow_offset_y.bake_u32_or( context, 0 );
 	}
 
 	fn render( &self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext ) {
@@ -96,6 +106,21 @@ impl Element for TextElement {
 		match render_context.use_font( &self.fontfile ) {
 			// :TODO: handle error
 			_ => {},			
+		}
+		let (x,y) = ( self.shadow_offset_x.as_u32(), self.shadow_offset_y.as_u32() );
+		if ( x, y ) != ( 0, 0 ) {
+			match render_context.draw_text(
+				render_buffer,
+				&self.text.as_string(),
+				self.ar.x.as_u32() + x, self.ar.y.as_u32() + y,
+				self.ar.width.as_u32(), self.ar.height.as_u32(),
+				&self.bounding_box,
+				self.size,					// :TODO: maybe move this to use font
+				self.shadow_color
+			) {
+				// :TODO: handle error
+				_ => {},			
+			}
 		}
 		match render_context.draw_text(
 			render_buffer,
@@ -138,6 +163,9 @@ impl TextElementFactory {
 			font: None,
 			display_text: "".to_string(),
 			bounding_box: AxisAlignedRectangle::new(),
+			shadow_color:	0xff11ffff,
+			shadow_offset_x: BakedExpression::from_u32( 0 ),
+			shadow_offset_y: BakedExpression::from_u32( 0 ),
 		}
 	}
 }

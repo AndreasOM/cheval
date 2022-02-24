@@ -3,6 +3,9 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Add text effects (shadow, glow?) to text element
+	- [x] Add text shadow
+	- [ ] Add text glow
 
 ## TODO
 
