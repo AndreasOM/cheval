@@ -798,7 +798,7 @@ impl Cheval {
 //					dbg!("http_receiver got message", &msg);
 					match msg {
 						Message::SelectNextVariable( result_sender, maybe_prefix ) => {
-							let name = self.context.select_next_variable( maybe_prefix );
+							let name = self.context.select_next_variable( maybe_prefix.as_ref().map(String::as_str) );
 							match result_sender.send( Response::VariableSelected( name.to_string() ) ) {
 								_ => {},
 							};

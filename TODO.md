@@ -6,8 +6,6 @@ TODO: This file is not up to date. Sorry.
 
 ## TODO
 
-- [ ] Send actual resulting value back when changing variables via http
-
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise
 
@@ -62,6 +60,7 @@ config
 
 ## DONE
 
+- [x] Send actual resulting value back when changing variables via http
 - [x] Allow selecting of variable, and inc/dec of that selected variable
 - [x] Fix set/inc/dec variable api to respond with resulting value (and name)
 - [x] Allow incrementing & decrementing variable via http api
