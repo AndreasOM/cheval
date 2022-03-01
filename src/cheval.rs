@@ -8,6 +8,7 @@ use serde::Deserialize;
 use serde_yaml;
 
 use crate::element_instance::ElementInstance;
+use crate::file_cache::FileCache;
 
 use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
@@ -95,7 +96,8 @@ pub struct Cheval {
 	http_receiver: Option< mpsc::Receiver< Message > >,
 	done: bool,
 	config_path: PathBuf,
-	server_thread: Option< std::thread::JoinHandle< () > >
+	server_thread: Option< std::thread::JoinHandle< () > >,
+	file_cache: std::sync::Arc< std::sync::Mutex< FileCache > >,
 }
 
 
@@ -410,6 +412,7 @@ impl Cheval {
 			done: false,
 			config_path: PathBuf::new(),
 			server_thread: None,
+			file_cache: std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) ),
 		}
 	}
 
@@ -514,6 +517,12 @@ impl Cheval {
 
 		if let Some( config_path ) = config_file_name.parent() {
 			self.config_path = PathBuf::from( &config_path );
+
+			// update file cache base
+			{
+				let mut fc = self.file_cache.lock().unwrap();
+				fc.set_base_path( &self.config_path );
+			}
 		};
 
 
@@ -565,6 +574,7 @@ impl Cheval {
 		};
 
 		// :HACK:
+		{
 		let function_table = self.context.get_mut_machine().get_mut_function_table();
 
 		function_table.register(
@@ -595,6 +605,61 @@ impl Cheval {
 				}
 			}
 		);
+
+
+		let file_cache = self.file_cache.clone();
+		function_table.register(
+			"text_from_file",
+			move |argc, variable_stack, _variable_storage| {
+				if argc == 1 {
+					let filename = variable_stack.pop_as_string();
+					// :TODO: check stack validity here?!
+
+					// :TODO: load text from file
+					//file_cache = "updated".to_string();
+//					let mut file_cache = file_cache_for_text_from_file.lock().unwrap();
+					let mut lock = file_cache.try_lock();
+				    if let Ok(ref mut file_cache) = lock {
+						//**file_cache = filename.clone();
+						match file_cache.load_string( &filename ) {
+							Ok((v,s)) => {
+								dbg!(&s);
+								variable_stack.push( expresso::variables::Variable::String( s ) );
+								true
+							},
+							Err( e ) => {
+								let s = format!( "Error: {:?}", &e );
+								variable_stack.push( expresso::variables::Variable::String( s ) );
+								false
+							}
+						}
+//						variable_stack.push( expresso::variables::Variable::String( format!(":TODO: load from file {} {}", &filename, &file_cache ) ) );
+//						true
+				    } else {
+				        println!("try_lock failed");
+				        false
+				    }
+
+				} else {
+					false
+				}
+			}
+		);
+		}
+/*
+		{
+			{
+				let mut file_cache = file_cache_main.lock().unwrap();
+				*file_cache = "updated".to_string();
+			}
+			let mut m = self.context.get_mut_machine();
+			let mut vs = expresso::variable_stack::VariableStack::new();
+			vs.push( expresso::variables::Variable::String( "Ooops".to_string() ) );
+			m.call_function( "text_from_file", 1, &mut vs );
+		}
+
+//		file_cache = "external_update".to_string();
+*/
 		// -- :HACK:		
 
 		if let Some( default_page ) = &config.default_page {

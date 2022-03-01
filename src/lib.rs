@@ -4,6 +4,7 @@ pub mod element;
 
 pub mod axisalignedrectangle;
 pub mod bakedexpression;
+pub mod file_cache;
 
 pub mod variable;
 
