@@ -6,6 +6,11 @@ TODO: This file is not up to date. Sorry.
 
 ## TODO
 
+- [ ] Add file watcher to FileCache to allow automatic updates
+- [ ] Add multi line support to TextElement
+- [ ] Replace/refactor LoadTextElement
+- [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
+
 - [ ] Remember previous window positions for windows that are not currently used
 
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
@@ -42,7 +47,7 @@ TODO: This file is not up to date. Sorry.
 - [ ] Add more position modes, e.g negative values for "from bottom/right"
 - [ ] Add clipping at buffer edges
 	- [x] Add clipping for text
-- [ ] Auto reloading on config
+- [ ] Auto reloading on config change
 - [ ] Make config loading more robust
 - [ ] Improve Debug and/or Display traits for elements
 - [ ] Fix alpha handling
@@ -53,7 +58,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Add animations
 	- [ ] Use spline/bezier based files for values
 - [ ] Add audio support -> is started
-- [ ] Check file watcher (seems to be broken sometimes)
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Handle strings with whitespace in expressions
 - [ ] Replace :HACK: text effects with better version
@@ -65,6 +69,8 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Add text_lines_from_file to expressions to allow loading specific lines from file
+- [x] Add text_from_file to expressions to allow loading text from file
 - [x] Rename `master` branch to `main`
 - [x] Merge `multi-window` branch
 - [x] Add text effects (shadow, glow?) to text element

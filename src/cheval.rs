@@ -615,12 +615,8 @@ impl Cheval {
 					let filename = variable_stack.pop_as_string();
 					// :TODO: check stack validity here?!
 
-					// :TODO: load text from file
-					//file_cache = "updated".to_string();
-//					let mut file_cache = file_cache_for_text_from_file.lock().unwrap();
 					let mut lock = file_cache.try_lock();
 				    if let Ok(ref mut file_cache) = lock {
-						//**file_cache = filename.clone();
 						match file_cache.load_string( &filename ) {
 							Ok((v,s)) => {
 								dbg!(&s);
@@ -633,8 +629,47 @@ impl Cheval {
 								false
 							}
 						}
-//						variable_stack.push( expresso::variables::Variable::String( format!(":TODO: load from file {} {}", &filename, &file_cache ) ) );
-//						true
+				    } else {
+				        println!("try_lock failed");
+				        false
+				    }
+
+				} else {
+					false
+				}
+			}
+		);
+		let file_cache = self.file_cache.clone();
+		function_table.register(
+			"text_lines_from_file",
+			move |argc, variable_stack, _variable_storage| {
+				if argc == 3 {
+					let filename = variable_stack.pop_as_string();
+					let count = variable_stack.pop_as_i32();
+					let skip = variable_stack.pop_as_i32();
+					// :TODO: check stack validity here?!
+
+					let mut lock = file_cache.try_lock();
+				    if let Ok(ref mut file_cache) = lock {
+						match file_cache.load_string( &filename ) {
+							Ok((v,s)) => {
+								let s = s.split("\n").skip( skip as usize );
+								let s = if count > 0 {
+									s.take( count as usize ).collect::<Vec<&str>>()
+								} else { // zero -> take everything
+									s.collect::<Vec<&str>>()
+								};
+
+								let s = s.join("\n");
+								variable_stack.push( expresso::variables::Variable::String( s ) );
+								true
+							},
+							Err( e ) => {
+								let s = format!( "Error: {:?}", &e );
+								variable_stack.push( expresso::variables::Variable::String( s ) );
+								false
+							}
+						}
 				    } else {
 				        println!("try_lock failed");
 				        false
@@ -646,20 +681,7 @@ impl Cheval {
 			}
 		);
 		}
-/*
-		{
-			{
-				let mut file_cache = file_cache_main.lock().unwrap();
-				*file_cache = "updated".to_string();
-			}
-			let mut m = self.context.get_mut_machine();
-			let mut vs = expresso::variable_stack::VariableStack::new();
-			vs.push( expresso::variables::Variable::String( "Ooops".to_string() ) );
-			m.call_function( "text_from_file", 1, &mut vs );
-		}
 
-//		file_cache = "external_update".to_string();
-*/
 		// -- :HACK:		
 
 		if let Some( default_page ) = &config.default_page {
