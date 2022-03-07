@@ -10,7 +10,6 @@ TODO: This file is not up to date. Sorry.
 ## TODO
 
 - [ ] Refactor FileCache::run
-- [ ] Add multi line support to TextElement
 - [ ] Replace/refactor LoadTextElement -> delete?
 - [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
 
@@ -72,6 +71,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Add multi line support to TextElement
 - [x] Add text_lines_from_file to expressions to allow loading specific lines from file
 - [x] Add text_from_file to expressions to allow loading text from file
 - [x] Rename `master` branch to `main`

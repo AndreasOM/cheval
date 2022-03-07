@@ -72,80 +72,87 @@ impl RenderContext{
 				if let Some( font ) = &font {
 
 					let scale = Scale::uniform( size as f32 );
-					let start = point( pos_x as f32, ( pos_y + size ) as f32 );
-					let glyphs: Vec<_> = font.layout( &text, scale, start).collect();
-		//			dbg!(&glyphs);
 
-					let start_x = bounding_box.x.as_u32();
-					let start_y = bounding_box.y.as_u32();
-					let end_x = bounding_box.x.as_u32() + bounding_box.width.as_u32(); // pos_x + width;
-					let end_y = bounding_box.y.as_u32() + bounding_box.height.as_u32(); // pos_y + height;
+					let text_lines: Vec< &str > = text.split('\n').collect();
 
-					let mut visible_glyphs = Vec::new();
+					let mut line = 0;
+					for text in text_lines {
+						let start = point( pos_x as f32, ( pos_y + ( line + 1) * size ) as f32 );
+						let glyphs: Vec<_> = font.layout( &text, scale, start).collect();
+			//			dbg!(&glyphs);
 
-					for g in glyphs {
-						let bb = g.pixel_bounding_box();
-						match bb {
-							Some( r ) => {
-								if r.max.x >= bounding_box.x.as_u32() as i32 && r.min.x < ( bounding_box.x.as_u32() + bounding_box.width.as_u32() ) as i32 {
-//									self.draw_frame( render_buffer, r.min.x as u32, r.min.y as u32, ( r.max.x - r.min.x ) as u32, ( r.max.y - r.min.y ) as u32, 0xffaaaaee );
-									visible_glyphs.push( g );
-								}
-							},
-							None => {}
-						}
-					}
+						let start_x = bounding_box.x.as_u32();
+						let start_y = bounding_box.y.as_u32();
+						let end_x = bounding_box.x.as_u32() + bounding_box.width.as_u32(); // pos_x + width;
+						let end_y = bounding_box.y.as_u32() + bounding_box.height.as_u32(); // pos_y + height;
 
-					for g in visible_glyphs {
-						if let Some( bb ) = &g.pixel_bounding_box() {
-							/* :TODO: use nested loops instead of closure
-								// pseudo code from `rusttype` crate
-								let bb = glyph.pixel_bounding_box();
-								for y in 0..bb.height() {
-								    for x in 0..bb.width() {
-								        o(x, y, calc_coverage(&glyph, x, y));
-								    }
-								}
-							*/
-							let debug_overflow = false; //true;
+						let mut visible_glyphs = Vec::new();
 
-							g.draw(|x, y, v| {
-								if v > 0.0 {
-									let mut color = color;
-									let x = ( bb.min.x as u32 + x ) as u32;
-
-									if x>= render_buffer.width as u32 {
-										return;
+						for g in glyphs {
+							let bb = g.pixel_bounding_box();
+							match bb {
+								Some( r ) => {
+									if r.max.x >= bounding_box.x.as_u32() as i32 && r.min.x < ( bounding_box.x.as_u32() + bounding_box.width.as_u32() ) as i32 {
+	//									self.draw_frame( render_buffer, r.min.x as u32, r.min.y as u32, ( r.max.x - r.min.x ) as u32, ( r.max.y - r.min.y ) as u32, 0xffaaaaee );
+										visible_glyphs.push( g );
 									}
+								},
+								None => {}
+							}
+						}
 
-									if x >= end_x || x < start_x {
-										if debug_overflow {
-											color = 0xff44ee44; 
-										} else {
+						for g in visible_glyphs {
+							if let Some( bb ) = &g.pixel_bounding_box() {
+								/* :TODO: use nested loops instead of closure
+									// pseudo code from `rusttype` crate
+									let bb = glyph.pixel_bounding_box();
+									for y in 0..bb.height() {
+									    for x in 0..bb.width() {
+									        o(x, y, calc_coverage(&glyph, x, y));
+									    }
+									}
+								*/
+								let debug_overflow = false; //true;
+
+								g.draw(|x, y, v| {
+									if v > 0.0 {
+										let mut color = color;
+										let x = ( bb.min.x as u32 + x ) as u32;
+
+										if x>= render_buffer.width as u32 {
 											return;
 										}
-									}
 
-									let y = ( bb.min.y as u32 + y ) as u32;
-									if y >= end_y || y < start_y {
-										if debug_overflow {
-											color = 0xff44ee44; 
-										} else {
-											return;
+										if x >= end_x || x < start_x {
+											if debug_overflow {
+												color = 0xff44ee44; 
+											} else {
+												return;
+											}
+										}
+
+										let y = ( bb.min.y as u32 + y ) as u32;
+										if y >= end_y || y < start_y {
+											if debug_overflow {
+												color = 0xff44ee44; 
+											} else {
+												return;
+											}
+										}
+
+
+										let o = ( y * render_buffer.width as u32 + x ) as usize;
+										if o < render_buffer.buffer.len() {
+											let old_pixel = Pixel::from_u32( render_buffer.buffer[ o ] );
+											let new_pixel = Pixel::from_u32( color );
+											let pixel = Pixel::blend_with_alpha_and_opacity( &new_pixel, &old_pixel, v );
+											render_buffer.buffer[ o ] = pixel.to_u32();
 										}
 									}
-
-
-									let o = ( y * render_buffer.width as u32 + x ) as usize;
-									if o < render_buffer.buffer.len() {
-										let old_pixel = Pixel::from_u32( render_buffer.buffer[ o ] );
-										let new_pixel = Pixel::from_u32( color );
-										let pixel = Pixel::blend_with_alpha_and_opacity( &new_pixel, &old_pixel, v );
-										render_buffer.buffer[ o ] = pixel.to_u32();
-									}
-								}
-							});
+								});
+							}
 						}
+						line += 1;
 					}
 				}
 			}
