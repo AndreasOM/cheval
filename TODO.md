@@ -3,12 +3,15 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Add file watcher to FileCache to allow automatic updates
+	- [x] Poll files for changes
+	- [ ] Use operating system to get notified about changes
 
 ## TODO
 
-- [ ] Add file watcher to FileCache to allow automatic updates
+- [ ] Refactor FileCache::run
 - [ ] Add multi line support to TextElement
-- [ ] Replace/refactor LoadTextElement
+- [ ] Replace/refactor LoadTextElement -> delete?
 - [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
 
 - [ ] Remember previous window positions for windows that are not currently used

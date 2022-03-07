@@ -682,6 +682,8 @@ impl Cheval {
 		);
 		}
 
+		self.file_cache.lock().unwrap().run().await?;
+
 		// -- :HACK:		
 
 		if let Some( default_page ) = &config.default_page {
@@ -878,6 +880,15 @@ impl Cheval {
 		let ts = self.context.time_step();
 		let soundbank = &mut self.context.get_soundbank_mut();
 		soundbank.update( ts );
+
+		match self.file_cache.try_lock() {
+			Ok( ref mut file_cache ) => {
+				file_cache.update();
+			},
+			_ => {},
+//			if let Ok(ref mut file_cache) = lock {
+
+		}
 
 		if let Some( http_receiver ) = &self.http_receiver {
 			match http_receiver.try_recv() {
