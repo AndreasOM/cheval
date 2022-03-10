@@ -395,8 +395,10 @@ struct Config {
 
 	async fn goto_page_name(
 		state: web::Data<HttpState>,
-		web::Path( page_name ): web::Path< String >
+		path: web::Path< String >,
+//		web::Path( page_name ): web::Path< String >
 	) -> impl Responder {
+		let page_name = path.into_inner();
 		let (sender, receiver) = mpsc::channel();
 		match state.http_sender.send( Message::GotoPageName( sender, page_name ) ) {
 			Ok( _ ) => {
