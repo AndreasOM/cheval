@@ -54,6 +54,7 @@ enum Message {
 	GotoNextPage( mpsc::Sender< Response > ),
 	GotoPrevPage( mpsc::Sender< Response > ),
 	GotoPage( mpsc::Sender< Response >, usize ),
+	GotoPageName( mpsc::Sender< Response >, String ),
 }
 
 #[allow(dead_code)]
@@ -316,7 +317,7 @@ struct Config {
 					Ok( msg ) => {
 						match msg {
 							Response::PageChanged( new_page_no, old_page_no ) => {
-								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+								return format!(r#"{{ "new_page":{}, "old_page":{} }}"#, new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
 							},
 							_ => {
 								dbg!(&msg);
@@ -344,7 +345,7 @@ struct Config {
 					Ok( msg ) => {
 						match msg {
 							Response::PageChanged( new_page_no, old_page_no ) => {
-								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+								return format!(r#"{{ "new_page":{}, "old_page":{} }}"#, new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
 							},
 							_ => {
 								dbg!(&msg);
@@ -374,7 +375,36 @@ struct Config {
 					Ok( msg ) => {
 						match msg {
 							Response::PageChanged( new_page_no, old_page_no ) => {
-								return format!("{}, {}", new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+								return format!(r#"{{ "new_page":{}, "old_page":{} }}"#, new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
+							},
+							_ => {
+								dbg!(&msg);
+							}
+						}
+					},
+					Err( e ) => {
+						dbg!( &e );
+					}
+				}
+			}
+			_ => {},
+		};
+
+		"{}".to_string()
+	}
+
+	async fn goto_page_name(
+		state: web::Data<HttpState>,
+		web::Path( page_name ): web::Path< String >
+	) -> impl Responder {
+		let (sender, receiver) = mpsc::channel();
+		match state.http_sender.send( Message::GotoPageName( sender, page_name ) ) {
+			Ok( _ ) => {
+				match receiver.recv() {
+					Ok( msg ) => {
+						match msg {
+							Response::PageChanged( new_page_no, old_page_no ) => {
+								return format!(r#"{{ "new_page":{}, "old_page":{} }}"#, new_page_no.unwrap_or( usize::MAX ), old_page_no.unwrap_or( usize::MAX ) );
 							},
 							_ => {
 								dbg!(&msg);
@@ -601,7 +631,8 @@ impl Cheval {
 			self.active_page = *default_page;
 		}
 
-		dbg!(&config);
+//		dbg!(&config);
+
 		if let Some( elements ) = &config.elements {
 			let mut page = Page::new();	// global/top page
 
@@ -609,13 +640,16 @@ impl Cheval {
 
 			page.show();
 			self.page = Some( page );
+
 		}
 
 		// :TODO: allow start page to be configured
 
 		if let Some( pages ) = &config.pages {
 			for active_page_config in pages {
+
 				let mut page = Page::new();	// sub page
+				page.set_name( &active_page_config.name );
 
 				if let Some( parameters ) = &active_page_config.parameters {
 					let mut page_config = ElementConfig::new( &self.config_path.as_path() );
@@ -624,13 +658,9 @@ impl Cheval {
 						page_config.set( &p.0, &p.1 );
 					}
 
-					dbg!(&page_config);
+//					dbg!(&page_config);
 
 					page.configure( &page_config );
-
-					dbg!(&page);
-
-//					todo!("die");
 				}
 
 				self.load_elements_for_page( &mut page, &active_page_config.elements ).await?;
@@ -650,6 +680,9 @@ impl Cheval {
 	fn goto_page( &mut self, page_no: usize ) -> ( Option< usize >, Option< usize > ) {
 		let mut old_page_no = None;
 		let mut new_page_no = None;
+		old_page_no = Some( self.active_page );
+		new_page_no = Some( page_no );
+
 		if self.active_page != page_no {
 			if let Some( old_page ) = self.pages.get_mut( self.active_page ) {
 				old_page_no = Some( self.active_page );
@@ -659,6 +692,41 @@ impl Cheval {
 			if let Some( page ) = self.pages.get_mut( page_no ) {
 				new_page_no = Some( page_no );
 				page.show();
+			} else {
+				new_page_no = None;
+			}
+		}
+
+		let cheval_active_page_number = format!("{}", self.active_page);
+		self.context.set_string( "cheval_active_page_number", &cheval_active_page_number.to_string() );
+
+		( new_page_no, old_page_no )
+	}
+
+	fn goto_page_name( &mut self, page_name: &str ) -> ( Option< usize >, Option< usize > ) {
+		let mut old_page_no = None;
+		let mut new_page_no = None;
+		old_page_no = Some( self.active_page );
+
+		let page_no = if let Some( pos ) = self.pages.iter().position(|p| p.name() == page_name) {
+			pos
+		} else {
+			return ( new_page_no, old_page_no );
+		};
+
+		new_page_no = Some( page_no );
+
+		if self.active_page != page_no {
+			if let Some( old_page ) = self.pages.get_mut( self.active_page ) {
+				old_page_no = Some( self.active_page );
+				old_page.hide();
+			}
+			self.active_page = page_no;
+			if let Some( page ) = self.pages.get_mut( page_no ) {
+				new_page_no = Some( page_no );
+				page.show();
+			} else {
+				new_page_no = None;
 			}
 		}
 
@@ -735,6 +803,7 @@ impl Cheval {
 									.route("/page/next", web::get().to(goto_next_page))
 									.route("/page/prev", web::get().to(goto_prev_page))
 									.route("/page/number/{number}", web::get().to(goto_page_number))
+									.route("/page/name/{name}", web::get().to(goto_page_name))
 							})
 							.bind("0.0.0.0:8080")?
 							.run();
@@ -881,6 +950,12 @@ impl Cheval {
 						},
 						Message::GotoPage( sender, page_no ) => {
 							let ( new_page_no, old_page_no ) = self.goto_page( page_no );
+							match sender.send( Response::PageChanged( new_page_no, old_page_no ) ) {
+								_ => {},
+							};
+						},
+						Message::GotoPageName( sender, page_name ) => {
+							let ( new_page_no, old_page_no ) = self.goto_page_name( &page_name );
 							match sender.send( Response::PageChanged( new_page_no, old_page_no ) ) {
 								_ => {},
 							};
