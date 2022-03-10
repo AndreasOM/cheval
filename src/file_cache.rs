@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::VecDeque;
 
 use std::path::{ 
 	Path,
@@ -138,15 +139,7 @@ impl FileCache {
 								match full_path.related_to( &base_path ) {
 									Ok( filename ) => {
 										let filename = filename.to_string_lossy();
-//										dbg!(&full_path, &filename);
-										match FileCacheInternal::load_entry( &full_path ) {
-											Ok( mut entry ) => {
-												internal.lock().unwrap().update_entry( &filename, entry );
-											},
-											Err( _ ) => {
-												// :TODO: error handling
-											},
-										}
+										internal.lock().unwrap().loading_queue_push_back( filename.to_string() );
 									},
 									Err( e ) => {
 										dbg!(&e);
@@ -176,10 +169,38 @@ impl FileCache {
 
 	pub async fn run(&mut self) -> anyhow::Result<()> {
 		match self.mode {
-			FileCacheMode::Poll => self.run_poll().await,
-			FileCacheMode::Watch => self.run_watch().await,
+			FileCacheMode::Poll => self.run_poll().await?,
+			FileCacheMode::Watch => self.run_watch().await?,
 //			_ => todo!("Unsupported mode {:?}", self.mode ),
 		}
+
+		let mut internal = self.internal.clone();
+	    let base_path = {
+	    	internal.lock().unwrap().base_path( ).to_owned()
+	    };
+		std::thread::spawn(move || {
+			loop {
+			    let front = {
+			    	internal.lock().unwrap().loading_queue_pop_front( )
+			    };
+			    if let Some( filename ) = front {
+					let full_path = base_path.join( &filename);
+					dbg!(&full_path);
+					match FileCacheInternal::load_entry( &full_path ) {
+						Ok( mut entry ) => {
+							// :TODO: add mtime to entry
+							internal.lock().unwrap().update_entry( &filename, entry );
+						},
+						Err( _ ) => {
+							// :TODO: error handling
+						},
+					}
+			    }
+				std::thread::sleep( std::time::Duration::from_millis( 100 ) );
+			}
+		});
+
+		Ok(())
 	}
 
 	pub fn update( &mut self ) {
@@ -243,6 +264,7 @@ struct FileCacheInternal {
 	cache_misses:	u32,
 	cache_hits:		u32,
 	cache:			HashMap< String, FileCacheEntry >,
+	loading_queue:	VecDeque< String >,
 }
 
 impl FileCacheInternal {
@@ -252,6 +274,7 @@ impl FileCacheInternal {
 			cache_misses:	0,
 			cache_hits:		0,
 			cache:			HashMap::new(),
+			loading_queue:	VecDeque::new(),
 		}
 	}
 
@@ -326,6 +349,7 @@ impl FileCacheInternal {
 				}		
 			} else {
 				self.update_entry( filename, FileCacheEntry::default() );
+				self.loading_queue_push_back( filename.to_string() );
 				Ok((0,String::new()))
 			}
 /*
@@ -344,6 +368,14 @@ impl FileCacheInternal {
 			}
 */			
 		}
+	}
+
+	pub fn loading_queue_pop_front( &mut self ) -> Option< String > {
+		self.loading_queue.pop_front()
+	}
+
+	pub fn loading_queue_push_back( &mut self, entry: String ) {
+		self.loading_queue.push_back( entry );
 	}
 
 	pub fn cache_misses( &self ) -> u32 {

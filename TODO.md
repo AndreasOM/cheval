@@ -8,12 +8,12 @@ TODO: This file is not up to date. Sorry.
 	- [x] Use operating system to get notified about changes
 		- [ ] Allow watching files that are under a different base directory
 		- [ ] Make file watching work with block on initial load disabled
+		- [ ] Refactor FileCache, use a "loading queue"
 		
 ## TODO
 
 - [ ] Allow window title prefix to be passed on command line
 - [ ] Refactor FileCache::run
-- [ ] Replace/refactor LoadTextElement -> delete?
 - [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
 
 - [ ] Use tracing for all debugging
@@ -76,6 +76,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Replace/refactor LoadTextElement -> delete?
 - [x] Add multi line support to TextElement
 - [x] Add text_lines_from_file to expressions to allow loading specific lines from file
 - [x] Add text_from_file to expressions to allow loading text from file
