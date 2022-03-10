@@ -12,7 +12,6 @@ use crate::file_cache::FileCache;
 
 use crate::block_element::BlockElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
-use crate::loadtext_element::LoadTextElementFactory;
 use crate::image_element::ImageElementFactory;
 use crate::scrolltext_element::ScrollTextElementFactory;
 use crate::soundbank_element::SoundbankElementFactory;
@@ -432,7 +431,6 @@ impl Cheval {
 			let mut element: Box< dyn Element + Send > = match e.the_type.as_ref() {
 				"block"			=> Box::new( BlockElementFactory::create() ) as Box<dyn Element + Send>,
 				"timer"			=> Box::new( TimerElementFactory::create() ) as Box<dyn Element + Send>,
-				"loadtext"		=> Box::new( LoadTextElementFactory::create() ) as Box<dyn Element + Send>,
 				"lissajous" 	=> Box::new( LissajousElementFactory::create() ),
 				"image"			=> Box::new( ImageElementFactory::create() ),
 				"text"			=> Box::new( TextElementFactory::create() ),
