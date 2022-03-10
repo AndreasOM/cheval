@@ -5,20 +5,49 @@ use std::path::{
 	PathBuf,
 };
 
-#[derive(Debug)]
+use notify::{
+	DebouncedEvent,
+	RecommendedWatcher,
+	Watcher,
+	RecursiveMode
+};
+
+use derivative::Derivative;
+use path_calculate::*;
+
+use std::sync::mpsc::channel;
+use std::time::Duration;
+
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct FileCache {
 	internal:		std::sync::Arc< std::sync::Mutex< FileCacheInternal > >,
+	mode:			FileCacheMode,
+	#[derivative(Debug="ignore")]
+	watcher:		Option<RecommendedWatcher>,
+}
+
+
+#[derive(Debug)]
+pub enum FileCacheMode {
+	Poll,
+	Watch,
 }
 
 impl FileCache {
 	pub fn new() -> Self {
 		Self {
 			internal:		std::sync::Arc::new(std::sync::Mutex::new( FileCacheInternal::new() )),
+			mode:			FileCacheMode::Poll,
+			watcher:		None,
 		}
 	}
 
-	pub async fn run(&mut self) -> anyhow::Result<()> {
+	pub fn set_mode( &mut self, mode: FileCacheMode ) {
+		self.mode = mode;
+	}
 
+	pub async fn run_poll(&mut self) -> anyhow::Result<()> {
 		let mut internal = self.internal.clone();
 		std::thread::spawn(move || {
 			loop {
@@ -76,6 +105,81 @@ impl FileCache {
 		});
 
 		Ok(())
+	}
+
+	pub async fn run_watch( &mut self ) -> anyhow::Result<()> {
+	    // Create a channel to receive the events.
+	    let (tx, rx) = channel();
+
+	    // Automatically select the best implementation for your platform.
+	    // You can also access each implementation directly e.g. INotifyWatcher.
+	    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2))?;
+
+	    // Add a path to be watched. All files and directories at that path and
+	    // below will be monitored for changes.
+	    let base_path = {
+	    	self.internal.lock().unwrap().base_path( ).to_owned()
+	    };
+
+	    watcher.watch( base_path.clone(), RecursiveMode::Recursive)?;
+
+	    self.watcher = Some( watcher );
+	    // This is a simple loop, but you may want to use more complex logic here,
+	    // for example to handle I/O.
+		let mut internal = self.internal.clone();
+
+		std::thread::spawn(move || {
+		    loop {
+		        match rx.recv() {
+		            Ok(event) => {
+//		            	println!("{:?}", event);
+		            	match event {
+		            		DebouncedEvent::Write( full_path ) => {
+								match full_path.related_to( &base_path ) {
+									Ok( filename ) => {
+										let filename = filename.to_string_lossy();
+//										dbg!(&full_path, &filename);
+										match FileCacheInternal::load_entry( &full_path ) {
+											Ok( mut entry ) => {
+												internal.lock().unwrap().update_entry( &filename, entry );
+											},
+											Err( _ ) => {
+												// :TODO: error handling
+											},
+										}
+									},
+									Err( e ) => {
+										dbg!(&e);
+									},
+								}
+		            		},
+		            		// :TODO: handle other cases
+		            		_ => {},
+		            	}
+		            },
+		            Err(e) => {
+		            	match e {
+		            		RecvError => {
+		            			return;
+		            		},
+		            		e => {
+				            	println!("watch error: {:?}", e);
+		            		},
+
+		            	}
+		            },
+		        }
+		    }
+		});
+    	Ok(())
+	}
+
+	pub async fn run(&mut self) -> anyhow::Result<()> {
+		match self.mode {
+			FileCacheMode::Poll => self.run_poll().await,
+			FileCacheMode::Watch => self.run_watch().await,
+//			_ => todo!("Unsupported mode {:?}", self.mode ),
+		}
 	}
 
 	pub fn update( &mut self ) {
@@ -207,7 +311,7 @@ impl FileCacheInternal {
 
 			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
 			dbg!(&full_filename);
-			let block_on_initial_load = true;			// :TODO: expose via setter
+			let block_on_initial_load = false;			// :TODO: expose via setter
 			if block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
 					Ok( mut entry ) => {

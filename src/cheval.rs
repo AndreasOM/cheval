@@ -522,6 +522,8 @@ impl Cheval {
 			{
 				let mut fc = self.file_cache.lock().unwrap();
 				fc.set_base_path( &self.config_path );
+
+				fc.set_mode( crate::file_cache::FileCacheMode::Watch );
 			}
 		};
 

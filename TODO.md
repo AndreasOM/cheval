@@ -5,13 +5,18 @@ TODO: This file is not up to date. Sorry.
 
 - [ ] Add file watcher to FileCache to allow automatic updates
 	- [x] Poll files for changes
-	- [ ] Use operating system to get notified about changes
-
+	- [x] Use operating system to get notified about changes
+		- [ ] Allow watching files that are under a different base directory
+		- [ ] Make file watching work with block on initial load disabled
+		
 ## TODO
 
+- [ ] Allow window title prefix to be passed on command line
 - [ ] Refactor FileCache::run
 - [ ] Replace/refactor LoadTextElement -> delete?
 - [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
+
+- [ ] Use tracing for all debugging
 
 - [ ] Remember previous window positions for windows that are not currently used
 
