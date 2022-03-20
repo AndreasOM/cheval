@@ -92,12 +92,12 @@ impl FileCache {
 					let reload_file = match ( old_modification_time, new_modification_time ) {
 						( Some( o ), Some( n ) ) => n > *o,
 						( Some( o ), None ) => false,	// no new time, file probably doesn't exist
-						( None, Some( n ) ) => true,
+						( None, Some( n ) ) => false,	// the initial creator of the entry is responsible for queuing the entry once
 						( None, None ) => false,
 					};
 
 					if reload_file {
-//						println!("FC {} is outdated", &e.0 );
+						println!("FC {} is outdated {:?} {:?}", &e.0, old_modification_time, new_modification_time );
 						internal.lock().unwrap().loading_queue_push_back( e.0.to_string() );
 						std::thread::sleep( std::time::Duration::from_millis( 16 ) );
 					} else {
@@ -144,6 +144,8 @@ impl FileCache {
 										let filename = filename.to_string_lossy();
 										let filename = filename.to_string();
 										if internal.lock().unwrap().cache.contains_key( &filename ) { // check we are actually interested in this file
+											dbg!("Watcher putting file in queue");
+											dbg!(&filename);
 											internal.lock().unwrap().loading_queue_push_back( filename );
 										} else {
 											/*
@@ -259,6 +261,7 @@ impl FileCache {
 
 #[derive(Debug)]
 struct FileCacheEntry {
+	version:			u32,
 	content:			String,
 	modification_time:	Option< std::time::SystemTime >,
 }
@@ -266,6 +269,7 @@ struct FileCacheEntry {
 impl Default for FileCacheEntry {
 	fn default() -> Self {
 		Self {
+			version:			0,
 			content:			String::new(),
 			modification_time:	None,
 		}
@@ -273,6 +277,14 @@ impl Default for FileCacheEntry {
 }
 
 impl FileCacheEntry {
+	pub fn version( &self ) -> u32 {
+		self.version
+	}
+
+	pub fn set_version( &mut self, version: u32 ) {
+		self.version = version;
+	}
+
 	pub fn content( &self ) -> &str {
 		&self.content
 	}
@@ -345,8 +357,20 @@ impl FileCacheInternal {
 		&self.cache
 	}
 
-	pub fn update_entry( &mut self, filename: &str, entry: FileCacheEntry ) -> anyhow::Result<()> {
+	pub fn update_entry( &mut self, filename: &str, mut entry: FileCacheEntry ) -> anyhow::Result<()> {
 		self.entry_updates += 1;
+		let version = if let Some( old_entry ) = self.cache.get( &filename.to_string() ) {
+			if old_entry.modification_time == entry.modification_time {
+				dbg!(&old_entry);
+				dbg!(&entry);
+				panic!("Entry not modified! ???");
+			}
+			old_entry.version + 1
+		} else {
+			0
+		};
+		entry.set_version( version );
+//		dbg!(&entry);
 		self.cache.insert( filename.to_string(), entry );
 		Ok(())
 	}
@@ -372,7 +396,7 @@ impl FileCacheInternal {
 		if let Some( cached ) = &self.cache.get( filename ) {
 //			anyhow::bail!(":TODO: cache hit")
 			self.cache_hits += 1;
-			Ok((0,cached.content().to_string()))
+			Ok((cached.version(),cached.content().to_string()))
 		} else {
 //			dbg!(&self.base_path,&filename);
 			self.cache_misses += 1;
@@ -383,8 +407,9 @@ impl FileCacheInternal {
 				match FileCacheInternal::load_entry( &full_filename ) {
 					Ok( mut entry ) => {
 						let s = entry.content().to_string();
+						let v = entry.version();
 						self.update_entry( &filename, entry );
-						Ok((0,s))
+						Ok((v,s))
 					},
 					Err( e ) => {
 						// :TODO: error handling
@@ -392,9 +417,15 @@ impl FileCacheInternal {
 					},
 				}		
 			} else {
-				self.update_entry( filename, FileCacheEntry::default() );
+				let entry = FileCacheEntry::default();
+				let s = entry.content().to_string();
+				let v = entry.version();
+
+				self.update_entry( filename, entry );
+//				dbg!("load_string putting default entry on loading queue");
+//				dbg!(&filename);
 				self.loading_queue_push_back( filename.to_string() );
-				Ok((0,String::new()))
+				Ok((v,s))
 			}
 		}
 	}
@@ -572,11 +603,13 @@ mod test {
     		file.write_all( b"01" )?;
 		}
 
+		std::thread::sleep( std::time::Duration::from_millis( 2000 ) );
+
 		let f = fc.load_string( &test_file );
 		assert_eq!( "", f.unwrap().1.to_string() );
 		assert_eq!( 1, fc.entry_updates() );
 
-		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+		std::thread::sleep( std::time::Duration::from_millis( 2000 ) );
 
 		let f = fc.load_string( &test_file );	// cache hit
 		assert_eq!( "01", f.unwrap().1.to_string() );
@@ -644,6 +677,60 @@ mod test {
 
 
 		std::thread::sleep( std::time::Duration::from_millis( 2500 ) );
+
+
+		assert_eq!( 3, fc.entry_updates() );
+		Ok(())
+	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_updates_vector_clock_in_watch_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Watch );
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let test_file = "auto_test_vector_watch.txt";
+		let test_file_with_dir = "./test/auto_test_vector_watch.txt";
+		// write "01" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"01" )?;
+		}
+
+		let f = fc.load_string( &test_file );
+		let f = f.unwrap();
+		assert_eq!( "", f.1.to_string() );
+		assert_eq!( 0, f.0 );
+		assert_eq!( 1, fc.entry_updates() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( &test_file );	// cache hit
+		let f = f.unwrap();
+		assert_eq!( "01", f.1.to_string() );
+		assert_eq!( 1, f.0 );
+		assert_eq!( 2, fc.entry_updates() );
+
+		// write "02" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"02" )?;
+    		dbg!("Wrote 02 to test file");
+		}
+
+		std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+		let f = fc.load_string( &test_file );	// cache hit
+		let f = f.unwrap();
+		assert_eq!( "02", f.1.to_string() );
+		assert_eq!( 2, f.0 );
+		assert_eq!( 3, fc.entry_updates() );
+
+
+		std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
 
 
 		assert_eq!( 3, fc.entry_updates() );

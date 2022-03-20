@@ -13,13 +13,12 @@ TODO: This file is not up to date. Sorry.
 		- [x] Add mtime when updating an entry
 		- [x] Simplify poll mode update by utilising queue
 		- [x] Fix tests for watch mode
-		- [ ] Implement the vector clock
+		- [x] Implement the vector clock
 		
 ## TODO
 
 - [ ] Allow window title prefix to be passed on command line
 - [ ] Refactor FileCache::run
-- [ ] Check file watcher (seems to be broken sometimes) (merge with FileCache?!)
 
 - [ ] Use tracing for all debugging
 
@@ -84,6 +83,7 @@ TODO: This file is not up to date. Sorry.
 ## DONE
 
 - [x] Replace/refactor LoadTextElement -> delete?
+	- [x] Removed ~Check~ file watcher (seems to be broken sometimes) (merge with FileCache?!)
 - [x] Add multi line support to TextElement
 - [x] Add text_lines_from_file to expressions to allow loading specific lines from file
 - [x] Add text_from_file to expressions to allow loading text from file
