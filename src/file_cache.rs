@@ -60,6 +60,7 @@ impl FileCache {
 		let mut internal = self.internal.clone();
 		std::thread::spawn(move || {
 			loop {
+				//dbg!("run_pool::loop");
 				let cache: Vec< ( String, Option< std::time::SystemTime > ) > = {
 					let file_cache = internal.lock().unwrap();
 					file_cache.cache().iter().map(|e| { ( e.0.clone(), e.1.modification_time().to_owned() ) }).collect()
@@ -391,9 +392,11 @@ impl FileCacheInternal {
 
 mod test {
 
+	use std::fs::File;
+	use std::io::Write;
 	use std::path::Path;
 
-	use crate::file_cache::FileCache;
+	use crate::file_cache::{FileCache, FileCacheMode};
 
 //	#[test]
 	#[actix_rt::test]
@@ -458,5 +461,108 @@ mod test {
 		Ok(())
 	}
 
-	// :TODO: test other variants, no block on initial load, and poll
+	#[actix_rt::test]
+	async fn file_cache_can_load_file_in_poll_mode_with_block_on_initial_load_enabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Poll );
+		fc.enable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let f = fc.load_string( "test_text_01.txt" );
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 1, fc.cache_misses() );
+
+		let f = fc.load_string( "test_text_02.txt" );
+		assert_eq!( "02", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+
+		let f = fc.load_string( "test_text_01.txt" );
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+		assert_eq!( 1, fc.cache_hits() );
+
+		Ok(())
+	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_load_file_in_poll_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Poll );
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let f = fc.load_string( "test_text_01.txt" );
+		assert_eq!( "", f.unwrap().1.to_string() );
+		assert_eq!( 1, fc.cache_misses() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( "test_text_01.txt" );	// cache hit
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 1, fc.cache_misses() );
+		assert_eq!( 1, fc.cache_hits() );
+
+		let f = fc.load_string( "test_text_02.txt" );
+		assert_eq!( "", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( "test_text_02.txt" );	// cache hit
+		assert_eq!( "02", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+		assert_eq!( 2, fc.cache_hits() );
+
+		let f = fc.load_string( "test_text_01.txt" );	// cache hit
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+		assert_eq!( 3, fc.cache_hits() );
+
+		Ok(())
+	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_load_and_update_file_in_poll_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Poll );
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let test_file = "auto_test.txt";
+		let test_file_with_dir = "./test/auto_test.txt";
+		// write "01" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"01" )?;
+		}
+
+		let f = fc.load_string( &test_file );
+		assert_eq!( "", f.unwrap().1.to_string() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( &test_file );	// cache hit
+		assert_eq!( "01", f.unwrap().1.to_string() );
+
+		// write "02" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"02" )?;
+    		dbg!("Wrote 02 to test file");
+		}
+
+		std::thread::sleep( std::time::Duration::from_millis( 2500 ) );
+
+		let f = fc.load_string( &test_file );	// cache hit
+		assert_eq!( "02", f.unwrap().1.to_string() );
+
+		Ok(())
+	}
+
 }
