@@ -7,8 +7,13 @@ TODO: This file is not up to date. Sorry.
 	- [x] Poll files for changes
 	- [x] Use operating system to get notified about changes
 		- [ ] Allow watching files that are under a different base directory
-		- [ ] Make file watching work with block on initial load disabled
-		- [ ] Refactor FileCache, use a "loading queue"
+		- [x] Make file watching work with block on initial load disabled
+		- [x] Refactor FileCache, use a "loading queue"
+		- [x] Expose block on inital load setting
+		- [ ] Add mtime when updating an entry
+		- [ ] Simplify poll mode update by utilising queue
+		- [x] Fix tests for watch mode
+		- [ ] Implement the vector clock
 		
 ## TODO
 
@@ -21,6 +26,8 @@ TODO: This file is not up to date. Sorry.
 - [ ] Remember previous window positions for windows that are not currently used
 
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
+
+- [ ] Remove actix, and use axum instead
 
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise

@@ -48,6 +48,14 @@ impl FileCache {
 		self.mode = mode;
 	}
 
+	pub fn enable_block_on_initial_load( &mut self ) {
+		self.internal.lock().unwrap().enable_block_on_initial_load();
+	}
+
+	pub fn disable_block_on_initial_load( &mut self ) {
+		self.internal.lock().unwrap().disable_block_on_initial_load();
+	}
+
 	pub async fn run_poll(&mut self) -> anyhow::Result<()> {
 		let mut internal = self.internal.clone();
 		std::thread::spawn(move || {
@@ -265,6 +273,7 @@ struct FileCacheInternal {
 	cache_hits:		u32,
 	cache:			HashMap< String, FileCacheEntry >,
 	loading_queue:	VecDeque< String >,
+	block_on_initial_load:	bool,
 }
 
 impl FileCacheInternal {
@@ -275,10 +284,19 @@ impl FileCacheInternal {
 			cache_hits:		0,
 			cache:			HashMap::new(),
 			loading_queue:	VecDeque::new(),
+			block_on_initial_load: 		false,
 		}
 	}
 
 	pub fn update( &mut self ) {
+	}
+
+	pub fn enable_block_on_initial_load( &mut self ) {
+		self.block_on_initial_load = true;
+	}
+
+	pub fn disable_block_on_initial_load( &mut self ) {
+		self.block_on_initial_load = false;
 	}
 
 	pub fn set_base_path(&mut self, base_path: &PathBuf ) {
@@ -334,8 +352,7 @@ impl FileCacheInternal {
 
 			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
 			dbg!(&full_filename);
-			let block_on_initial_load = false;			// :TODO: expose via setter
-			if block_on_initial_load {
+			if self.block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
 					Ok( mut entry ) => {
 						let s = entry.content().to_string();
@@ -352,21 +369,6 @@ impl FileCacheInternal {
 				self.loading_queue_push_back( filename.to_string() );
 				Ok((0,String::new()))
 			}
-/*
-			match std::fs::read_to_string( &full_filename )
-			{
-				Ok( s ) => {
-					self.cache_misses += 1;
-					let mut e = FileCacheEntry::default();
-					e.set_content( s.clone() );
-					self.cache.insert( filename.to_string(), e );
-					Ok((0,s))
-				},
-				Err( e ) => {
-					anyhow::bail!("Error opening file {:?} -> {:?}", &full_filename, &e )
-				},
-			}
-*/			
 		}
 	}
 
@@ -393,24 +395,68 @@ mod test {
 
 	use crate::file_cache::FileCache;
 
-	#[test]
-	pub fn file_cache_can_load_file() {
+//	#[test]
+	#[actix_rt::test]
+	async fn file_cache_can_load_file_with_block_on_initial_load_enabled() -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
+		fc.enable_block_on_initial_load();
 		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
 		let f = fc.load_string( "test_text_01.txt" );
-//		assert!(f.is_ok());
 		assert_eq!( "01", f.unwrap().1.to_string() );
 		assert_eq!( 1, fc.cache_misses() );
 
 		let f = fc.load_string( "test_text_02.txt" );
-//		assert!(f.is_ok());
 		assert_eq!( "02", f.unwrap().1.to_string() );
 		assert_eq!( 2, fc.cache_misses() );
 
 		let f = fc.load_string( "test_text_01.txt" );
-//		assert!(f.is_ok());
 		assert_eq!( "01", f.unwrap().1.to_string() );
 		assert_eq!( 2, fc.cache_misses() );
 		assert_eq!( 1, fc.cache_hits() );
+
+		Ok(())
 	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_load_file_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let f = fc.load_string( "test_text_01.txt" );
+		assert_eq!( "", f.unwrap().1.to_string() );
+		assert_eq!( 1, fc.cache_misses() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( "test_text_01.txt" );	// cache hit
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 1, fc.cache_misses() );
+		assert_eq!( 1, fc.cache_hits() );
+
+		let f = fc.load_string( "test_text_02.txt" );
+		assert_eq!( "", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load_string( "test_text_02.txt" );	// cache hit
+		assert_eq!( "02", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+		assert_eq!( 2, fc.cache_hits() );
+
+		let f = fc.load_string( "test_text_01.txt" );	// cache hit
+		assert_eq!( "01", f.unwrap().1.to_string() );
+		assert_eq!( 2, fc.cache_misses() );
+		assert_eq!( 3, fc.cache_hits() );
+
+		Ok(())
+	}
+
+	// :TODO: test other variants, no block on initial load, and poll
 }
