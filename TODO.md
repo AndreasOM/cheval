@@ -10,8 +10,8 @@ TODO: This file is not up to date. Sorry.
 		- [x] Make file watching work with block on initial load disabled
 		- [x] Refactor FileCache, use a "loading queue"
 		- [x] Expose block on inital load setting
-		- [ ] Add mtime when updating an entry
-		- [ ] Simplify poll mode update by utilising queue
+		- [x] Add mtime when updating an entry
+		- [x] Simplify poll mode update by utilising queue
 		- [x] Fix tests for watch mode
 		- [ ] Implement the vector clock
 		
