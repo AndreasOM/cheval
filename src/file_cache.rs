@@ -432,39 +432,8 @@ impl FileCacheInternal {
 
 	// :TODO: change String to &str
 	pub fn load_string( &mut self, filename: &str ) -> anyhow::Result<(u32,String)> {
-		if let Some( cached ) = &self.cache.get( filename ) {
-			self.cache_hits += 1;
-			Ok((cached.version(),String::from_utf8_lossy( cached.content() ).to_string()))
-		} else {
-			self.cache_misses += 1;
-
-			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
-			dbg!(&full_filename);
-			if self.block_on_initial_load {
-				match FileCacheInternal::load_entry( &full_filename ) {
-					Ok( mut entry ) => {
-						let s = String::from_utf8_lossy( entry.content() ).to_string();
-						let v = entry.version();
-						self.update_entry( &filename, entry );
-						Ok((v,s))
-					},
-					Err( e ) => {
-						// :TODO: error handling
-						anyhow::bail!("TODO {:?}", e )
-					},
-				}		
-			} else {
-				let entry = FileCacheEntry::default();
-				let s = String::from_utf8_lossy( entry.content() ).to_string();
-				let v = entry.version();
-
-				self.update_entry( filename, entry );
-//				dbg!("load_string putting default entry on loading queue");
-//				dbg!(&filename);
-				self.loading_queue_push_back( filename.to_string() );
-				Ok((v,s))
-			}
-		}
+		let (version,data) = self.load( filename )?;
+		Ok((version, String::from_utf8_lossy( &data ).to_string()))
 	}
 
 	pub fn loading_queue_pop_front( &mut self ) -> Option< String > {

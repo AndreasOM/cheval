@@ -21,6 +21,8 @@ TODO: This file is not up to date. Sorry.
 - [ ] Allow window title prefix to be passed on command line
 - [ ] Refactor FileCache::run
 
+- [ ] Remove unneeded copying from FileCache aka buffer bloat
+
 - [ ] Use tracing for all debugging
 
 - [ ] Remember previous window positions for windows that are not currently used
