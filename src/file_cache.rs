@@ -240,6 +240,10 @@ impl FileCache {
 		self.internal.lock().unwrap().set_base_path( base_path );
 	}
 
+	pub fn load( &mut self, filename: &str ) -> anyhow::Result<(u32,Vec< u8 >)> {
+		self.internal.lock().unwrap().load( filename )
+	}
+
 	// :TODO: change String to &str
 	pub fn load_string( &mut self, filename: &str ) -> anyhow::Result<(u32,String)> {
 		self.internal.lock().unwrap().load_string( filename )
@@ -262,7 +266,7 @@ impl FileCache {
 #[derive(Debug)]
 struct FileCacheEntry {
 	version:			u32,
-	content:			String,
+	content:			Vec<u8>,
 	modification_time:	Option< std::time::SystemTime >,
 }
 
@@ -270,7 +274,7 @@ impl Default for FileCacheEntry {
 	fn default() -> Self {
 		Self {
 			version:			0,
-			content:			String::new(),
+			content:			Vec::new(),
 			modification_time:	None,
 		}
 	}
@@ -285,11 +289,11 @@ impl FileCacheEntry {
 		self.version = version;
 	}
 
-	pub fn content( &self ) -> &str {
+	pub fn content( &self ) -> &Vec< u8 > {
 		&self.content
 	}
 
-	pub fn set_content( &mut self, content: String ) {
+	pub fn set_content( &mut self, content: Vec< u8 > ) {
 		self.content = content;
 	}
 
@@ -376,11 +380,12 @@ impl FileCacheInternal {
 	}
 
 	pub fn load_entry( path: &Path ) -> anyhow::Result< FileCacheEntry > {
-		match std::fs::read_to_string( &path )
+		// :TODO: handle very large files
+		match std::fs::read( &path )
 		{
 			Ok( s ) => {
 				let mut e = FileCacheEntry::default();
-				e.set_content( s.clone() );
+				e.set_content( s );
 				Ok( e )
 			},
 			Err( e ) => {
@@ -389,16 +394,11 @@ impl FileCacheInternal {
 		}
 	}
 
-	// :TODO: change String to &str
-	pub fn load_string( &mut self, filename: &str ) -> anyhow::Result<(u32,String)> {
-		// :TODO: caching
-
+	pub fn load( &mut self, filename: &str ) -> anyhow::Result<(u32, Vec< u8 > ) > {
 		if let Some( cached ) = &self.cache.get( filename ) {
-//			anyhow::bail!(":TODO: cache hit")
 			self.cache_hits += 1;
-			Ok((cached.version(),cached.content().to_string()))
+			Ok((cached.version(),cached.content().clone()))
 		} else {
-//			dbg!(&self.base_path,&filename);
 			self.cache_misses += 1;
 
 			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
@@ -406,7 +406,7 @@ impl FileCacheInternal {
 			if self.block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
 					Ok( mut entry ) => {
-						let s = entry.content().to_string();
+						let s = entry.content().clone();
 						let v = entry.version();
 						self.update_entry( &filename, entry );
 						Ok((v,s))
@@ -418,7 +418,44 @@ impl FileCacheInternal {
 				}		
 			} else {
 				let entry = FileCacheEntry::default();
-				let s = entry.content().to_string();
+				let s = entry.content().clone();
+				let v = entry.version();
+
+				self.update_entry( filename, entry );
+//				dbg!("load_string putting default entry on loading queue");
+//				dbg!(&filename);
+				self.loading_queue_push_back( filename.to_string() );
+				Ok((v,s))
+			}
+		}
+	}
+
+	// :TODO: change String to &str
+	pub fn load_string( &mut self, filename: &str ) -> anyhow::Result<(u32,String)> {
+		if let Some( cached ) = &self.cache.get( filename ) {
+			self.cache_hits += 1;
+			Ok((cached.version(),String::from_utf8_lossy( cached.content() ).to_string()))
+		} else {
+			self.cache_misses += 1;
+
+			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
+			dbg!(&full_filename);
+			if self.block_on_initial_load {
+				match FileCacheInternal::load_entry( &full_filename ) {
+					Ok( mut entry ) => {
+						let s = String::from_utf8_lossy( entry.content() ).to_string();
+						let v = entry.version();
+						self.update_entry( &filename, entry );
+						Ok((v,s))
+					},
+					Err( e ) => {
+						// :TODO: error handling
+						anyhow::bail!("TODO {:?}", e )
+					},
+				}		
+			} else {
+				let entry = FileCacheEntry::default();
+				let s = String::from_utf8_lossy( entry.content() ).to_string();
 				let v = entry.version();
 
 				self.update_entry( filename, entry );
@@ -684,7 +721,7 @@ mod test {
 	}
 
 	#[actix_rt::test]
-	async fn file_cache_can_updates_vector_clock_in_watch_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+	async fn file_cache_can_update_vector_clock_in_watch_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
 		fc.set_mode( FileCacheMode::Watch );
 		fc.disable_block_on_initial_load();
@@ -726,6 +763,60 @@ mod test {
 		let f = fc.load_string( &test_file );	// cache hit
 		let f = f.unwrap();
 		assert_eq!( "02", f.1.to_string() );
+		assert_eq!( 2, f.0 );
+		assert_eq!( 3, fc.entry_updates() );
+
+
+		std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+
+		assert_eq!( 3, fc.entry_updates() );
+		Ok(())
+	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_update_vector_clock_for_binary_file_in_watch_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Watch );
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test" ).to_path_buf() );
+
+		fc.run().await?;
+
+		let test_file = "auto_test_vector_binary_watch.txt";
+		let test_file_with_dir = "./test/auto_test_vector_binary_watch.txt";
+		// write "01" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"01" )?;
+		}
+
+		let f = fc.load( &test_file );
+		let f = f.unwrap();
+		assert_eq!( b"", f.1.as_slice() );
+		assert_eq!( 0, f.0 );
+		assert_eq!( 1, fc.entry_updates() );
+
+		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+
+		let f = fc.load( &test_file );	// cache hit
+		let f = f.unwrap();
+		assert_eq!( b"01", f.1.as_slice() );
+		assert_eq!( 1, f.0 );
+		assert_eq!( 2, fc.entry_updates() );
+
+		// write "02" to test_file
+		{
+		    let mut file = File::create( &test_file_with_dir )?;
+    		file.write_all( b"02" )?;
+    		dbg!("Wrote 02 to test file");
+		}
+
+		std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+		let f = fc.load( &test_file );	// cache hit
+		let f = f.unwrap();
+		assert_eq!( b"02", f.1.as_slice() );
 		assert_eq!( 2, f.0 );
 		assert_eq!( 3, fc.entry_updates() );
 

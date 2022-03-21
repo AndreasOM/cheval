@@ -3,6 +3,7 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Use file cache for image element
 - [ ] Add file watcher to FileCache to allow automatic updates
 	- [x] Poll files for changes
 	- [x] Use operating system to get notified about changes
