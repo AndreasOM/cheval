@@ -395,13 +395,20 @@ struct Config {
 
 impl Cheval {
 	pub fn new() -> Self {
+		let mut file_cache = std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) );
+		{	// :TODO: remove once ImageSequence is fully implemented
+			let mut fc = file_cache.lock().unwrap();
+			fc.enable_block_on_initial_load();
+		}
+		let mut context = Context::new();
+		context.set_file_cache(file_cache.clone());
 		Self {
 //			element_instances: Vec::new(),
 			page: None,
 			pages: Vec::new(),
 			active_page: 1,
 			variable_filename: None,
-			context: Context::new(),
+			context,
 			last_update_time: Utc::now(),
 			start_time: Utc::now(),
 			render_context: RenderContext::new(),
@@ -411,7 +418,7 @@ impl Cheval {
 			done: false,
 			config_path: PathBuf::new(),
 			server_thread: None,
-			file_cache: std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) ),
+			file_cache,
 		}
 	}
 
@@ -1066,6 +1073,8 @@ impl Cheval {
 			}
 		}
 		*/
+
+//		dbg!(&self.file_cache);
 		Ok(())
 	}
 }

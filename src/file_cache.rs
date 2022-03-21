@@ -225,7 +225,7 @@ impl FileCache {
 						},
 					}
 			    }
-				std::thread::sleep( std::time::Duration::from_millis( 100 ) );
+				std::thread::sleep( std::time::Duration::from_millis( 10 ) );
 			}
 		});
 
@@ -263,9 +263,11 @@ impl FileCache {
 
 }
 
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug)]
 struct FileCacheEntry {
 	version:			u32,
+	#[derivative(Debug="ignore")]	
 	content:			Vec<u8>,
 	modification_time:	Option< std::time::SystemTime >,
 }

@@ -5,12 +5,15 @@ use expresso::machine::Machine;
 
 use oml_audio::SoundBank;
 
+use crate::file_cache::FileCache;
+
 #[derive(Debug)]
 pub struct Context {
 	time_step: f64,
 	soundbank: SoundBank,
 	machine: Machine,
 	selected_variable: String,
+	file_cache: std::sync::Arc< std::sync::Mutex< FileCache > >,
 }
 
 impl Context {
@@ -20,7 +23,16 @@ impl Context {
 			soundbank: SoundBank::new(),
 			machine: Machine::new(),
 			selected_variable: String::new(),
+			file_cache: std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) ),
 		}
+	}
+
+	pub fn file_cache(&mut self) -> &mut std::sync::Arc< std::sync::Mutex< FileCache > > {
+		&mut self.file_cache
+	}
+
+	pub fn set_file_cache(&mut self, file_cache: std::sync::Arc< std::sync::Mutex< FileCache > > ) {
+		self.file_cache = file_cache;
 	}
 
 	pub fn play_sound( &mut self, id: &str ) {

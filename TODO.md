@@ -22,6 +22,7 @@ TODO: This file is not up to date. Sorry.
 - [ ] Refactor FileCache::run
 
 - [ ] Remove unneeded copying from FileCache aka buffer bloat
+- [ ] Double check why outer FileCache needs to be Arc< Mutex< ... > >
 
 - [ ] Use tracing for all debugging
 

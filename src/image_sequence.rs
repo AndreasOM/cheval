@@ -1,9 +1,13 @@
+use std::io::Cursor;
 
 use image::DynamicImage;
 use image::GenericImageView;
+use image::io::Reader;
 use crate::pixel::Pixel;
 
 use glob::glob;
+
+use crate::file_cache::FileCache;
 
 #[derive(Debug)]
 pub struct ImageSequence {
@@ -26,20 +30,23 @@ impl ImageSequence {
 	pub fn set_filename(&mut self, filename: &str ) {
 		self.filename = filename.to_string();
 	}
-	pub fn load( &mut self ) -> anyhow::Result<()> {
-		if self.filename != "" {
-			self.images = Vec::new();
+	pub fn load( &mut self, file_cache: &mut std::sync::Arc< std::sync::Mutex< FileCache > > ) -> anyhow::Result<()> {
+		if self.images.len() == 0 { // :HACK: to allow multiple calls for now
+			if self.filename != "" {
+				self.images = Vec::new();
 
-			let fileglob = self.filename.clone();
+				let fileglob = self.filename.clone();
 
-			for entry in glob( &fileglob ).expect("Failed to read glob pattern") {
-			    match entry {
-			        Ok(path) => {
-			        	dbg!(&path);
-			        	self.add_image( &path.to_string_lossy() );
-			        },
-			        Err(e) => println!("{:?}", e),
-			    }
+				for entry in glob( &fileglob ).expect("Failed to read glob pattern") {
+					let mut fc = file_cache.lock().unwrap();
+				    match entry {
+				        Ok(path) => {
+				        	dbg!(&path);
+				        	self.add_image( &mut fc, &path.to_string_lossy() );
+				        },
+				        Err(e) => println!("{:?}", e),
+				    }
+				}
 			}
 		}
 		Ok(())
@@ -49,12 +56,16 @@ impl ImageSequence {
 		self.images.get( index )
 	}
 
-	fn add_image( &mut self, filename: &str ) -> bool {
+	fn add_image( &mut self, file_cache: &mut FileCache, filename: &str ) -> bool {
 		println!( "Trying to load image {:?}", &filename );
-		match image::open(&filename) {
+		let (version,data) = file_cache.load( filename ).unwrap();
+
+		let mut reader = Reader::new(Cursor::new(data))
+							.with_guessed_format()
+							.unwrap();
+
+		match reader.decode() {
 		    Ok( img ) => {
-//		    	self.width = img.dimensions().0;
-//			    self.height = img.dimensions().1;
 			    self.images.push( img );
 			    true
 			},

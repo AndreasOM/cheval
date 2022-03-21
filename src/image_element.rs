@@ -45,7 +45,6 @@ impl Element for ImageElement {
 		self.color  = config.get_u32_or( "color", 0xff00ffff );
 		self.filename  = config.get_path_or( "filename", "" );
 		self.image_sequence.set_filename( &self.filename );
-		self.image_sequence.load();
 		self.fps = config.get_bakedexpression_f32( "fps", 0.0 );
 	}
 
@@ -59,6 +58,7 @@ impl Element for ImageElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
+		self.image_sequence.load( context.file_cache() );
 		self.x.bake_u32_or( context, 0 );
 		self.y.bake_u32_or( context, 0 );
 		self.fps.bake_f32_or( context, 0.0 );
