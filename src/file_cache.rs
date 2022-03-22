@@ -136,7 +136,6 @@ impl FileCache {
 		    loop {
 		        match rx.recv() {
 		            Ok(event) => {
-		            	dbg!(&event);
 		            	match event {
 		            		DebouncedEvent::Write( full_path )
 //		            		| DebouncedEvent::Create( full_path )
@@ -147,14 +146,14 @@ impl FileCache {
 //										let filename = full_path.to_string_lossy();
 //										let filename = filename.to_string();
 										if internal.lock().unwrap().cache.contains_key( &filename ) { // check we are actually interested in this file
-											dbg!("Watcher putting file in queue");
-											dbg!(&filename);
+//											dbg!("Watcher putting file in queue");
+//											dbg!(&filename);
 											internal.lock().unwrap().loading_queue_push_back( filename );
 										} else {
 											
-											dbg!("Not interested in ...");
-											dbg!(&filename);
-											dbg!(&internal.lock().unwrap().cache);
+//											dbg!("Not interested in ...");
+//											dbg!(&filename);
+//											dbg!(&internal.lock().unwrap().cache);
 											
 										};
 //									},
@@ -165,7 +164,7 @@ impl FileCache {
 		            		},
 		            		// :TODO: handle other cases
 		            		o => {
-		            			dbg!(&o);
+//		            			dbg!(&o);
 		            		},
 		            	}
 		            },
@@ -203,7 +202,6 @@ impl FileCache {
 			    	internal.lock().unwrap().loading_queue_pop_front( )
 			    };
 			    if let Some( full_path ) = front {
-					dbg!(&full_path);
 					match FileCacheInternal::load_entry( &full_path ) {
 						Ok( mut entry ) => {
 							let new_modification_time = match std::fs::metadata( &full_path ) {

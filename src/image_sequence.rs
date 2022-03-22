@@ -44,7 +44,6 @@ impl ImageSequenceEntry {
 
 		match reader.decode() {
 		    Ok( image ) => {
-		    	dbg!("Decoded image from data!");
 				Ok(
 					Self {
 						filename: filename.to_string(),
@@ -93,7 +92,6 @@ impl ImageSequence {
 					let mut fc = file_cache.lock().unwrap();
 				    match entry {
 				        Ok(path) => {
-				        	dbg!(&path);
 				        	self.add_image( &mut fc, &path.to_string_lossy() );
 				        },
 				        Err(e) => println!("{:?}", e),
@@ -122,7 +120,7 @@ impl ImageSequence {
 		let (version,data) = file_cache.load( &filename ).unwrap();
 
 		if old_version != version {
-			eprintln!("Updating image from data version {}", version );
+//			eprintln!("Updating image from data version {}", version );
 			let entry_new = ImageSequenceEntry::from_data( &filename, version, &data )?;
 
 			*entry = entry_new;
@@ -132,9 +130,8 @@ impl ImageSequence {
 	}
 
 	fn add_image( &mut self, file_cache: &mut FileCache, filename: &str ) -> anyhow::Result<()> {
-		println!( "Trying to load image {:?}", &filename );
+//		println!( "Trying to load image {:?}", &filename );
 		let (version,data) = file_cache.load( filename ).unwrap();
-		dbg!(&version);
 
 		if data.len() > 0 { // only true if cache blocks on initial load, or somebody else already requested the same file earlier
 			let entry = ImageSequenceEntry::from_data( &filename, version, &data )?;
