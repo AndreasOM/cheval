@@ -395,11 +395,7 @@ struct Config {
 
 impl Cheval {
 	pub fn new() -> Self {
-		let mut file_cache = std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) );
-		{	// :TODO: remove once ImageSequence is fully implemented
-			let mut fc = file_cache.lock().unwrap();
-//			fc.enable_block_on_initial_load();
-		}
+		let file_cache = std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) );
 		let mut context = Context::new();
 		context.set_file_cache(file_cache.clone());
 		Self {
@@ -625,7 +621,7 @@ impl Cheval {
 					let mut lock = file_cache.try_lock();
 				    if let Ok(ref mut file_cache) = lock {
 						match file_cache.load_string( &filename ) {
-							Ok((v,s)) => {
+							Ok((_v,s)) => {
 								dbg!(&s);
 								variable_stack.push( expresso::variables::Variable::String( s ) );
 								true
@@ -659,7 +655,7 @@ impl Cheval {
 					let mut lock = file_cache.try_lock();
 				    if let Ok(ref mut file_cache) = lock {
 						match file_cache.load_string( &filename ) {
-							Ok((v,s)) => {
+							Ok((_v,s)) => {
 								let s = s.split("\n").skip( skip as usize );
 								let s = if count > 0 {
 									s.take( count as usize ).collect::<Vec<&str>>()

@@ -7,11 +7,9 @@ use crate::render_buffer::RenderBuffer;
 
 use async_trait::async_trait;
 
-use image::DynamicImage;
 use image::GenericImageView;
 use crate::pixel::Pixel;
 
-use glob::glob;
 
 pub struct ImageElement {
 	name: String,
@@ -58,7 +56,7 @@ impl Element for ImageElement {
 
 
 	fn update( &mut self, context: &mut Context ) {
-		self.image_sequence.load( context.file_cache() );
+		self.image_sequence.load( context.file_cache() );//?;
 		self.x.bake_u32_or( context, 0 );
 		self.y.bake_u32_or( context, 0 );
 		self.fps.bake_f32_or( context, 0.0 );

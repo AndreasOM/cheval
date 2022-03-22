@@ -14,7 +14,6 @@ use notify::{
 };
 
 use derivative::Derivative;
-use path_calculate::*;
 
 use std::sync::mpsc::channel;
 use std::time::Duration;
@@ -57,7 +56,7 @@ impl FileCache {
 	}
 
 	pub async fn run_poll(&mut self) -> anyhow::Result<()> {
-		let mut internal = self.internal.clone();
+		let internal = self.internal.clone();
 		std::thread::spawn(move || {
 			loop {
 				//dbg!("run_pool::loop");
@@ -65,11 +64,12 @@ impl FileCache {
 					let file_cache = internal.lock().unwrap();
 					file_cache.cache().iter().map(|e| { ( e.0.clone(), e.1.modification_time().to_owned() ) }).collect()
 				};
+/*				
 				let base_path = {
 					let file_cache = internal.lock().unwrap();
 					file_cache.base_path().to_owned()
 				};
-
+*/
 				for e in cache {
 					let full_path = &e.0;
 
@@ -91,9 +91,12 @@ impl FileCache {
 
 					let reload_file = match ( old_modification_time, new_modification_time ) {
 						( Some( o ), Some( n ) ) => n > *o,
-						( Some( o ), None ) => false,	// no new time, file probably doesn't exist
-						( None, Some( n ) ) => false,	// the initial creator of the entry is responsible for queuing the entry once
+						_ => false,
+						/*
+						( Some( _o ), None ) => false,	// no new time, file probably doesn't exist
+						( None, Some( _n ) ) => false,	// the initial creator of the entry is responsible for queuing the entry once
 						( None, None ) => false,
+						*/
 					};
 
 					if reload_file {
@@ -130,7 +133,7 @@ impl FileCache {
 	    self.watcher = Some( watcher );
 	    // This is a simple loop, but you may want to use more complex logic here,
 	    // for example to handle I/O.
-		let mut internal = self.internal.clone();
+		let internal = self.internal.clone();
 
 		std::thread::spawn(move || {
 		    loop {
@@ -163,20 +166,21 @@ impl FileCache {
 //								}
 		            		},
 		            		// :TODO: handle other cases
-		            		o => {
+		            		_o => {
 //		            			dbg!(&o);
 		            		},
 		            	}
 		            },
 		            Err(e) => {
 		            	match e {
-		            		RecvError => {
+		            		std::sync::mpsc::RecvError => {
 		            			return;
 		            		},
+/*		            		
 		            		e => {
 				            	println!("watch error: {:?}", e);
 		            		},
-
+*/		            		
 		            	}
 		            },
 		        }
@@ -192,10 +196,12 @@ impl FileCache {
 //			_ => todo!("Unsupported mode {:?}", self.mode ),
 		}
 
-		let mut internal = self.internal.clone();
+		let internal = self.internal.clone();
+		/*
 	    let base_path = {
 	    	internal.lock().unwrap().base_path( ).to_owned()
 	    };
+	    */
 		std::thread::spawn(move || {
 			loop {
 			    let front = {
@@ -221,7 +227,7 @@ impl FileCache {
 
 							entry.set_modification_time( new_modification_time );
 
-							internal.lock().unwrap().update_entry( &full_path, entry );
+							internal.lock().unwrap().update_entry( &full_path, entry );//?;
 						},
 						Err( _ ) => {
 							// :TODO: error handling
@@ -230,6 +236,7 @@ impl FileCache {
 			    }
 				std::thread::sleep( std::time::Duration::from_millis( 10 ) );
 			}
+//			Ok(())
 		});
 
 		Ok(())
@@ -412,10 +419,10 @@ impl FileCacheInternal {
 
 			if self.block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
-					Ok( mut entry ) => {
+					Ok( entry ) => {
 						let s = entry.content().clone();
 						let v = entry.version();
-						self.update_entry( &full_filename, entry );
+						self.update_entry( &full_filename, entry )?;
 						Ok((v,s))
 					},
 					Err( e ) => {
@@ -428,7 +435,7 @@ impl FileCacheInternal {
 				let s = entry.content().clone();
 				let v = entry.version();
 
-				self.update_entry( &full_filename, entry );
+				self.update_entry( &full_filename, entry )?;
 //				dbg!("load_string putting default entry on loading queue");
 //				dbg!(&filename);
 				self.loading_queue_push_back( full_filename );
@@ -464,6 +471,7 @@ impl FileCacheInternal {
 	}
 }
 
+#[cfg(test)]
 mod test {
 
 	use std::fs::File;

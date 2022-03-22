@@ -1,9 +1,7 @@
 use std::io::Cursor;
 
 use image::DynamicImage;
-use image::GenericImageView;
 use image::io::Reader;
-use crate::pixel::Pixel;
 
 use glob::glob;
 
@@ -38,7 +36,7 @@ impl ImageSequenceEntry {
 	}
 
 	pub fn from_data( filename: &str, version: u32, data: &Vec< u8 > ) -> anyhow::Result< Self > {
-		let mut reader = Reader::new(Cursor::new(data))
+		let reader = Reader::new(Cursor::new(data))
 							.with_guessed_format()
 							.unwrap();
 
@@ -92,7 +90,7 @@ impl ImageSequence {
 					let mut fc = file_cache.lock().unwrap();
 				    match entry {
 				        Ok(path) => {
-				        	self.add_image( &mut fc, &path.to_string_lossy() );
+				        	self.add_image( &mut fc, &path.to_string_lossy() )?;
 				        },
 				        Err(e) => println!("{:?}", e),
 				    }
@@ -102,7 +100,7 @@ impl ImageSequence {
 			// :TODO: maybe don't do this on the main thread
 			for entry in self.entries.iter_mut() {
 				let mut fc = file_cache.lock().unwrap();
-				ImageSequence::update_entry( &mut fc, entry );
+				ImageSequence::update_entry( &mut fc, entry )?;
 			}	
 		}
 		Ok(())
