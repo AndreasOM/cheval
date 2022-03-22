@@ -61,7 +61,7 @@ impl FileCache {
 		std::thread::spawn(move || {
 			loop {
 				//dbg!("run_pool::loop");
-				let cache: Vec< ( String, Option< std::time::SystemTime > ) > = {
+				let cache: Vec< ( PathBuf, Option< std::time::SystemTime > ) > = {
 					let file_cache = internal.lock().unwrap();
 					file_cache.cache().iter().map(|e| { ( e.0.clone(), e.1.modification_time().to_owned() ) }).collect()
 				};
@@ -71,7 +71,7 @@ impl FileCache {
 				};
 
 				for e in cache {
-					let full_path = base_path.join( &e.0 );
+					let full_path = &e.0;
 
 					let old_modification_time = &e.1;
 					let new_modification_time = match std::fs::metadata( &full_path ) {
@@ -97,8 +97,8 @@ impl FileCache {
 					};
 
 					if reload_file {
-						println!("FC {} is outdated {:?} {:?}", &e.0, old_modification_time, new_modification_time );
-						internal.lock().unwrap().loading_queue_push_back( e.0.to_string() );
+						println!("FC {:?} is outdated {:?} {:?}", &e.0, old_modification_time, new_modification_time );
+						internal.lock().unwrap().loading_queue_push_back( e.0.to_path_buf() );
 						std::thread::sleep( std::time::Duration::from_millis( 16 ) );
 					} else {
 						std::thread::sleep( std::time::Duration::from_millis( 1 ) );
@@ -136,31 +136,37 @@ impl FileCache {
 		    loop {
 		        match rx.recv() {
 		            Ok(event) => {
-//		            	println!("{:?}", event);
+		            	dbg!(&event);
 		            	match event {
-		            		DebouncedEvent::Write( full_path ) => {
-								match full_path.related_to( &base_path ) {
-									Ok( filename ) => {
-										let filename = filename.to_string_lossy();
-										let filename = filename.to_string();
+		            		DebouncedEvent::Write( full_path )
+//		            		| DebouncedEvent::Create( full_path )
+		            		=> {
+		            			let filename = full_path;
+//								match full_path.related_to( &base_path ) {
+//									Ok( filename ) => {
+//										let filename = full_path.to_string_lossy();
+//										let filename = filename.to_string();
 										if internal.lock().unwrap().cache.contains_key( &filename ) { // check we are actually interested in this file
 											dbg!("Watcher putting file in queue");
 											dbg!(&filename);
 											internal.lock().unwrap().loading_queue_push_back( filename );
 										} else {
-											/*
+											
 											dbg!("Not interested in ...");
 											dbg!(&filename);
-											*/
+											dbg!(&internal.lock().unwrap().cache);
+											
 										};
-									},
-									Err( e ) => {
-										dbg!(&e);
-									},
-								}
+//									},
+//									Err( e ) => {
+//										dbg!(&e);
+//									},
+//								}
 		            		},
 		            		// :TODO: handle other cases
-		            		_ => {},
+		            		o => {
+		            			dbg!(&o);
+		            		},
 		            	}
 		            },
 		            Err(e) => {
@@ -196,8 +202,7 @@ impl FileCache {
 			    let front = {
 			    	internal.lock().unwrap().loading_queue_pop_front( )
 			    };
-			    if let Some( filename ) = front {
-					let full_path = base_path.join( &filename);
+			    if let Some( full_path ) = front {
 					dbg!(&full_path);
 					match FileCacheInternal::load_entry( &full_path ) {
 						Ok( mut entry ) => {
@@ -218,7 +223,7 @@ impl FileCache {
 
 							entry.set_modification_time( new_modification_time );
 
-							internal.lock().unwrap().update_entry( &filename, entry );
+							internal.lock().unwrap().update_entry( &full_path, entry );
 						},
 						Err( _ ) => {
 							// :TODO: error handling
@@ -314,8 +319,8 @@ struct FileCacheInternal {
 	cache_misses:	u32,
 	cache_hits:		u32,
 	entry_updates:	u32,
-	cache:			HashMap< String, FileCacheEntry >,
-	loading_queue:	VecDeque< String >,
+	cache:			HashMap< PathBuf, FileCacheEntry >,
+	loading_queue:	VecDeque< PathBuf >,
 	block_on_initial_load:	bool,
 }
 
@@ -359,13 +364,13 @@ impl FileCacheInternal {
 		&self.base_path
 	}
 
-	pub fn cache( &self ) -> &HashMap< String, FileCacheEntry > {
+	pub fn cache( &self ) -> &HashMap< PathBuf, FileCacheEntry > {
 		&self.cache
 	}
 
-	pub fn update_entry( &mut self, filename: &str, mut entry: FileCacheEntry ) -> anyhow::Result<()> {
+	pub fn update_entry( &mut self, full_path: &Path, mut entry: FileCacheEntry ) -> anyhow::Result<()> {
 		self.entry_updates += 1;
-		let version = if let Some( old_entry ) = self.cache.get( &filename.to_string() ) {
+		let version = if let Some( old_entry ) = self.cache.get( full_path ) {
 			if old_entry.modification_time == entry.modification_time {
 				dbg!(&old_entry);
 				dbg!(&entry);
@@ -377,7 +382,7 @@ impl FileCacheInternal {
 		};
 		entry.set_version( version );
 //		dbg!(&entry);
-		self.cache.insert( filename.to_string(), entry );
+		self.cache.insert( full_path.to_path_buf(), entry );
 		Ok(())
 	}
 
@@ -397,20 +402,22 @@ impl FileCacheInternal {
 	}
 
 	pub fn load( &mut self, filename: &str ) -> anyhow::Result<(u32, Vec< u8 > ) > {
-		if let Some( cached ) = &self.cache.get( filename ) {
+		let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
+//		dbg!(&full_filename);
+		let full_filename = full_filename.to_path_buf();
+
+		if let Some( cached ) = &self.cache.get( &full_filename ) {
 			self.cache_hits += 1;
 			Ok((cached.version(),cached.content().clone()))
 		} else {
 			self.cache_misses += 1;
 
-			let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
-			dbg!(&full_filename);
 			if self.block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
 					Ok( mut entry ) => {
 						let s = entry.content().clone();
 						let v = entry.version();
-						self.update_entry( &filename, entry );
+						self.update_entry( &full_filename, entry );
 						Ok((v,s))
 					},
 					Err( e ) => {
@@ -423,10 +430,10 @@ impl FileCacheInternal {
 				let s = entry.content().clone();
 				let v = entry.version();
 
-				self.update_entry( filename, entry );
+				self.update_entry( &full_filename, entry );
 //				dbg!("load_string putting default entry on loading queue");
 //				dbg!(&filename);
-				self.loading_queue_push_back( filename.to_string() );
+				self.loading_queue_push_back( full_filename );
 				Ok((v,s))
 			}
 		}
@@ -438,11 +445,11 @@ impl FileCacheInternal {
 		Ok((version, String::from_utf8_lossy( &data ).to_string()))
 	}
 
-	pub fn loading_queue_pop_front( &mut self ) -> Option< String > {
+	pub fn loading_queue_pop_front( &mut self ) -> Option< PathBuf > {
 		self.loading_queue.pop_front()
 	}
 
-	pub fn loading_queue_push_back( &mut self, entry: String ) {
+	pub fn loading_queue_push_back( &mut self, entry: PathBuf ) {
 		self.loading_queue.push_back( entry );
 	}
 

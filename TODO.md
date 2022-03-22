@@ -3,7 +3,6 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Use file cache for image element
 - [ ] Add file watcher to FileCache to allow automatic updates
 	- [x] Poll files for changes
 	- [x] Use operating system to get notified about changes
@@ -86,6 +85,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Use file cache for image element, including hot reload
 - [x] Replace/refactor LoadTextElement -> delete?
 	- [x] Removed ~Check~ file watcher (seems to be broken sometimes) (merge with FileCache?!)
 - [x] Add multi line support to TextElement

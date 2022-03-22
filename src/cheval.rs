@@ -398,7 +398,7 @@ impl Cheval {
 		let mut file_cache = std::sync::Arc::new( std::sync::Mutex::new( FileCache::new() ) );
 		{	// :TODO: remove once ImageSequence is fully implemented
 			let mut fc = file_cache.lock().unwrap();
-			fc.enable_block_on_initial_load();
+//			fc.enable_block_on_initial_load();
 		}
 		let mut context = Context::new();
 		context.set_file_cache(file_cache.clone());
