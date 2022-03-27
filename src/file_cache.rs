@@ -13,18 +13,25 @@ use notify::{
 	RecursiveMode
 };
 
+use futures::{
+	select,
+};
 use derivative::Derivative;
 
 use std::sync::mpsc::channel;
 use std::time::Duration;
+
+#[derive(Debug)]
+enum WatchChange {
+	Add( PathBuf ),
+}
 
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct FileCache {
 	internal:		std::sync::Arc< std::sync::Mutex< FileCacheInternal > >,
 	mode:			FileCacheMode,
-	#[derivative(Debug="ignore")]
-	watcher:		Option<RecommendedWatcher>,
+//	#[derivative(Debug="ignore")]
 }
 
 
@@ -39,7 +46,6 @@ impl FileCache {
 		Self {
 			internal:		std::sync::Arc::new(std::sync::Mutex::new( FileCacheInternal::new() )),
 			mode:			FileCacheMode::Poll,
-			watcher:		None,
 		}
 	}
 
@@ -114,76 +120,120 @@ impl FileCache {
 		Ok(())
 	}
 
-	pub async fn run_watch( &mut self ) -> anyhow::Result<()> {
-	    // Create a channel to receive the events.
-	    let (tx, rx) = channel();
-
-	    // Automatically select the best implementation for your platform.
-	    // You can also access each implementation directly e.g. INotifyWatcher.
-	    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2))?;
-
-	    // Add a path to be watched. All files and directories at that path and
-	    // below will be monitored for changes.
-	    let base_path = {
-	    	self.internal.lock().unwrap().base_path( ).to_owned()
-	    };
-
-	    watcher.watch( base_path.clone(), RecursiveMode::Recursive)?;
-
-	    self.watcher = Some( watcher );
-	    // This is a simple loop, but you may want to use more complex logic here,
-	    // for example to handle I/O.
-		let internal = self.internal.clone();
-
-		std::thread::spawn(move || {
-		    loop {
-		        match rx.recv() {
-		            Ok(event) => {
-		            	match event {
-		            		DebouncedEvent::Write( full_path )
+	fn run_watch_wait_for_file_changes( rx: &std::sync::mpsc::Receiver< DebouncedEvent >, internal: &std::sync::Arc< std::sync::Mutex< FileCacheInternal > > ) -> anyhow::Result<bool> {
+        match rx.try_recv() {
+            Ok(event) => {
+            	dbg!(&event);
+            	match event {
+            		DebouncedEvent::Write( full_path )
 //		            		| DebouncedEvent::Create( full_path )
-		            		=> {
-		            			let filename = full_path;
+            		=> {
+            			let filename = full_path;
 //								match full_path.related_to( &base_path ) {
 //									Ok( filename ) => {
 //										let filename = full_path.to_string_lossy();
 //										let filename = filename.to_string();
-										if internal.lock().unwrap().cache.contains_key( &filename ) { // check we are actually interested in this file
+								if internal.lock().unwrap().cache.contains_key( &filename ) { // check we are actually interested in this file
 //											dbg!("Watcher putting file in queue");
 //											dbg!(&filename);
-											internal.lock().unwrap().loading_queue_push_back( filename );
-										} else {
-											
+									internal.lock().unwrap().loading_queue_push_back( filename );
+								} else {
+									
 //											dbg!("Not interested in ...");
 //											dbg!(&filename);
 //											dbg!(&internal.lock().unwrap().cache);
-											
-										};
+									
+								};
 //									},
 //									Err( e ) => {
 //										dbg!(&e);
 //									},
 //								}
-		            		},
-		            		// :TODO: handle other cases
-		            		_o => {
+            		},
+            		// :TODO: handle other cases
+            		_o => {
 //		            			dbg!(&o);
-		            		},
-		            	}
-		            },
-		            Err(e) => {
-		            	match e {
-		            		std::sync::mpsc::RecvError => {
-		            			return;
-		            		},
+            		},
+            	}
+            },
+            Err(e) => {
+            	match e {
+            		/*
+            		std::sync::mpsc::RecvError => {
+            			eprintln!("Closing FileCache run_watch!");
+            			return Ok(true);
+            		},
+            		*/
+            		std::sync::mpsc::TryRecvError::Empty => {
+            			return Ok( false );
+            		},
+            		std::sync::mpsc::TryRecvError::Disconnected => {
+            			return Ok( true );
+            		},
+
 /*		            		
-		            		e => {
-				            	println!("watch error: {:?}", e);
-		            		},
+            		e => {
+		            	println!("watch error: {:?}", e);
+            		},
 */		            		
-		            	}
-		            },
-		        }
+            	}
+            },
+        }
+		Ok( false )
+	}
+
+	fn run_watch_wait_for_watch_changes( watch_change_rx: &std::sync::mpsc::Receiver< WatchChange >, watcher: &mut RecommendedWatcher ) -> anyhow::Result<bool> {
+		match watch_change_rx.try_recv() {
+			Ok( m ) => {
+				match m {
+					WatchChange::Add( added ) => {
+//						eprintln!("Added {:?}", &added );
+						watcher.watch( added.clone(), RecursiveMode::Recursive)?;
+					},
+				};
+			},
+			Err( e ) => {
+				match e {
+            		std::sync::mpsc::TryRecvError::Empty => {
+            			return Ok( false );
+            		},
+            		std::sync::mpsc::TryRecvError::Disconnected => {
+            			return Ok( true );
+            		},
+				}
+			},
+		};
+
+		Ok( false )
+	}
+
+	pub async fn run_watch( &mut self ) -> anyhow::Result<()> {
+
+		let ( watch_change_tx, watch_change_rx ) = channel();
+		{
+		    	self.internal.lock().unwrap().set_watch_change_tx( Some( watch_change_tx ) );
+		};
+		let internal = self.internal.clone();
+
+		std::thread::spawn(move || -> anyhow::Result<()> {
+		    let (tx, rx) = channel();
+		    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2))?;
+		    /*
+		    let base_path = {
+		    	internal.lock().unwrap().base_path( ).to_owned()
+		    };
+		    */
+
+//		    watcher.watch( base_path.clone(), RecursiveMode::Recursive)?;
+
+		    loop {
+		    	let watch_changes_done = FileCache::run_watch_wait_for_watch_changes( &watch_change_rx, &mut watcher )?;
+		    	let file_changes_done = FileCache::run_watch_wait_for_file_changes( &rx, &internal )?;
+//		    	select! {	// :TODO: make async
+//			    }
+				if watch_changes_done || file_changes_done {
+					return Ok(())
+				}
 		    }
 		});
     	Ok(())
@@ -327,6 +377,7 @@ struct FileCacheInternal {
 	cache:			HashMap< PathBuf, FileCacheEntry >,
 	loading_queue:	VecDeque< PathBuf >,
 	block_on_initial_load:	bool,
+	watch_change_tx:		Option< std::sync::mpsc::Sender< WatchChange > >,
 }
 
 impl FileCacheInternal {
@@ -339,6 +390,7 @@ impl FileCacheInternal {
 			cache:			HashMap::new(),
 			loading_queue:	VecDeque::new(),
 			block_on_initial_load: 		false,
+			watch_change_tx:			None,
 		}
 	}
 
@@ -351,6 +403,10 @@ impl FileCacheInternal {
 
 	pub fn disable_block_on_initial_load( &mut self ) {
 		self.block_on_initial_load = false;
+	}
+
+	pub fn set_watch_change_tx( &mut self, watch_change_tx: Option< std::sync::mpsc::Sender< WatchChange > > ) {
+		self.watch_change_tx = watch_change_tx;
 	}
 
 	pub fn set_base_path(&mut self, base_path: &PathBuf ) {
@@ -410,12 +466,16 @@ impl FileCacheInternal {
 		let full_filename = &self.base_path.join( Path::new( &filename ) ) ;
 //		dbg!(&full_filename);
 		let full_filename = full_filename.to_path_buf();
+		let full_filename = full_filename.canonicalize()?;
 
 		if let Some( cached ) = &self.cache.get( &full_filename ) {
 			self.cache_hits += 1;
 			Ok((cached.version(),cached.content().clone()))
 		} else {
 			self.cache_misses += 1;
+			if let Some( tx ) = &self.watch_change_tx {
+				let _ = tx.send( WatchChange::Add( full_filename.clone() ) );
+			}
 
 			if self.block_on_initial_load {
 				match FileCacheInternal::load_entry( &full_filename ) {
@@ -781,7 +841,7 @@ mod test {
 		assert_eq!( 0, f.0 );
 		assert_eq!( 1, fc.entry_updates() );
 
-		std::thread::sleep( std::time::Duration::from_millis( 200 ) );
+		std::thread::sleep( std::time::Duration::from_millis( 500 ) );
 
 		let f = fc.load( &test_file );	// cache hit
 		let f = f.unwrap();
@@ -809,6 +869,106 @@ mod test {
 
 
 		assert_eq!( 3, fc.entry_updates() );
+		Ok(())
+	}
+
+	#[actix_rt::test]
+	async fn file_cache_can_update_vector_clock_for_binary_file_out_of_tree_in_watch_mode_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
+		/*
+			test/aaa/1.txt
+			test/bbb/2.txt
+			test/aaa
+
+		*/
+		let mut fc = FileCache::new();
+		fc.set_mode( FileCacheMode::Watch );
+		fc.disable_block_on_initial_load();
+		fc.set_base_path( &Path::new( "./test/aaa" ).to_path_buf() );
+
+		fc.run().await?;
+
+		{
+			let test_file = "auto_test_vector_binary_watch.txt";
+			let test_file_with_dir = "./test/aaa/auto_test_vector_binary_watch.txt";
+			// write "01" to test_file
+			{
+			    let mut file = File::create( &test_file_with_dir )?;
+	    		file.write_all( b"01" )?;
+			}
+
+			let f = fc.load( &test_file );
+			let f = f.unwrap();
+			assert_eq!( b"", f.1.as_slice() );
+			assert_eq!( 0, f.0 );
+			assert_eq!( 1, fc.entry_updates() );
+
+			std::thread::sleep( std::time::Duration::from_millis( 500 ) );
+
+			let f = fc.load( &test_file );	// cache hit
+			let f = f.unwrap();
+			assert_eq!( b"01", f.1.as_slice() );
+			assert_eq!( 1, f.0 );
+			assert_eq!( 2, fc.entry_updates() );
+
+			// write "02" to test_file
+			{
+			    let mut file = File::create( &test_file_with_dir )?;
+	    		file.write_all( b"02" )?;
+	    		dbg!("Wrote 02 to test file");
+			}
+
+			std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+			let f = fc.load( &test_file );	// cache hit
+			let f = f.unwrap();
+			assert_eq!( b"02", f.1.as_slice() );
+			assert_eq!( 2, f.0 );
+			assert_eq!( 3, fc.entry_updates() );
+		}
+
+		{
+			let test_file = "../bbb/auto_test_vector_binary_watch.txt";
+			let test_file_with_dir = "./test/bbb/auto_test_vector_binary_watch.txt";
+			// write "01" to test_file
+			{
+			    let mut file = File::create( &test_file_with_dir )?;
+	    		file.write_all( b"01" )?;
+			}
+
+			let f = fc.load( &test_file );
+			let f = f.unwrap();
+			assert_eq!( b"", f.1.as_slice() );
+			assert_eq!( 0, f.0 );
+			assert_eq!( 4, fc.entry_updates() );
+
+			std::thread::sleep( std::time::Duration::from_millis( 500 ) );
+
+			let f = fc.load( &test_file );	// cache hit
+			let f = f.unwrap();
+			assert_eq!( b"01", f.1.as_slice() );
+			assert_eq!( 1, f.0 );
+			assert_eq!( 5, fc.entry_updates() );
+
+			// write "02" to test_file
+			{
+			    let mut file = File::create( &test_file_with_dir )?;
+	    		file.write_all( b"02" )?;
+	    		dbg!("Wrote 02 to test file");
+			}
+
+			std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+			let f = fc.load( &test_file );	// cache hit
+			let f = f.unwrap();
+			assert_eq!( b"02", f.1.as_slice() );
+			assert_eq!( 2, f.0 );
+			assert_eq!( 6, fc.entry_updates() );
+		}
+
+		std::thread::sleep( std::time::Duration::from_millis( 3000 ) );
+
+
+		assert_eq!( 6, fc.entry_updates() );
 		Ok(())
 	}
 

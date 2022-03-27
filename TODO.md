@@ -3,17 +3,6 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Add file watcher to FileCache to allow automatic updates
-	- [x] Poll files for changes
-	- [x] Use operating system to get notified about changes
-		- [ ] Allow watching files that are under a different base directory
-		- [x] Make file watching work with block on initial load disabled
-		- [x] Refactor FileCache, use a "loading queue"
-		- [x] Expose block on inital load setting
-		- [x] Add mtime when updating an entry
-		- [x] Simplify poll mode update by utilising queue
-		- [x] Fix tests for watch mode
-		- [x] Implement the vector clock
 		
 ## TODO
 
@@ -38,6 +27,9 @@ TODO: This file is not up to date. Sorry.
 - [ ] Add event system
 - [ ] Soundbank element should own it's soundbank, and react to events
 - [ ] Extract ElementConfig parameters
+
+- [ ] Make FileCache watcher async
+- [ ] Optimise pathes to watch for FileCache notify
 
 - [ ] Use BakedExpression where sensible
 	- [x] Use BakedExpression for text position, and bounding box config
@@ -84,6 +76,10 @@ TODO: This file is not up to date. Sorry.
 
 
 ## DONE
+
+- [x] Add file watcher to FileCache to allow automatic updates
+	- [x] Poll files for changes
+	- [x] or: Use operating system to get notified about changes
 
 - [x] Use file cache for image element, including hot reload
 - [x] Replace/refactor LoadTextElement -> delete?
