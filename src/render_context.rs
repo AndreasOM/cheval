@@ -7,6 +7,8 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 
+use tracing::*;
+
 #[derive(Debug)]
 pub struct RenderContext{
 	fonts: HashMap<String, Option< Font<'static> >>,
@@ -29,7 +31,7 @@ impl RenderContext{
 		if self.fonts.contains_key( fontfile ) {
 			self.current_font = Some( fontfile.to_string() );
 		} else {
-			dbg!(&fontfile);
+			debug!("Using font {}", &fontfile);
 			let mut font_file = File::open( &fontfile ).unwrap_or_else(|e| {
 				panic!("{}", e);
 			});

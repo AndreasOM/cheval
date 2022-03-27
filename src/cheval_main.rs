@@ -1,5 +1,8 @@
 //use window::Window;
 
+use tracing::*;
+use tracing_subscriber::FmtSubscriber;
+
 use cheval::cheval::Cheval;
 use clap::{App, Arg};
 use cheval::window::WindowFactory;
@@ -48,6 +51,15 @@ fn render_frame( render_buffer: &mut RenderBuffer, cheval: &mut Cheval )
 #[actix_web::main]
 async fn main() -> Result<(),Box<dyn std::error::Error>> {
 
+    let subscriber = FmtSubscriber::builder()
+        // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
+        // will be written to stdout.
+        .with_max_level(Level::TRACE)
+        // completes the builder.
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
 	const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 	let version = VERSION.to_string(); //format!("{}",VERSION);
 
@@ -59,6 +71,13 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 							.short("c")
 							.value_name("CONFIG")
 							.help("Set the config file to load.")
+							.takes_value(true)
+						)
+						.arg( Arg::with_name("window-title")
+							.long("window-title")
+							.short("t")
+							.value_name("WINDOW-TITLE")
+							.help("Set the window title (prefix) to use.")
 							.takes_value(true)
 						)
 						.arg( Arg::with_name("window-type")
@@ -102,6 +121,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 						.get_matches();
 
 	let config = matches.value_of("config").unwrap_or(".").to_string();
+	let window_title = matches.value_of("window-title").unwrap_or("").to_string();
 	let window_type = matches.value_of("window-type").unwrap_or(&WindowFactory::get_default_window_type()).to_string();
 	let window_mode = matches.value_of("window-mode").unwrap_or("RGB").to_string();
 	let window_layout = matches.value_of("window-layout").unwrap_or("").to_string();
@@ -123,12 +143,13 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	let window_mode: &str = &window_mode;
 	let window_mode: WindowMode = window_mode.into();
 	dbg!(&config);
+	dbg!(&window_title);
 	dbg!(&window_type);
 	dbg!(&window_mode);
 	dbg!(&window_layout);
 	dbg!(&enable_http);
 
-	let mut window = WindowFactory::create( &window_type, &window_mode, scaling );
+	let mut window = WindowFactory::create( &window_title, &window_type, &window_mode, scaling );
 
 	if window_layout.len() > 0 {
 		window.restore_positions( &window_layout );
@@ -143,7 +164,7 @@ async fn main() -> Result<(),Box<dyn std::error::Error>> {
 	cheval.load( &config ).await?;
 	cheval.initialize()?;
 
-	dbg!( &cheval );
+	debug!( "Initialized cheval: {:#?}", &cheval );
 	let mut frame_count = 0;
 /* :TODO: hide behind feature flag	
 	let guard = pprof::ProfilerGuard::new(100).unwrap();

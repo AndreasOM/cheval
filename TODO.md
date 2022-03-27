@@ -3,16 +3,17 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Use tracing for all debugging
+	- [x] Enable tracing, and start using it
+
 		
 ## TODO
 
-- [ ] Allow window title prefix to be passed on command line
 - [ ] Refactor FileCache::run
 
 - [ ] Remove unneeded copying from FileCache aka buffer bloat
 - [ ] Double check why outer FileCache needs to be Arc< Mutex< ... > >
 
-- [ ] Use tracing for all debugging
 
 - [ ] Remember previous window positions for windows that are not currently used
 
@@ -77,6 +78,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Allow window title prefix to be passed on command line
 - [x] Add file watcher to FileCache to allow automatic updates
 	- [x] Poll files for changes
 	- [x] or: Use operating system to get notified about changes
