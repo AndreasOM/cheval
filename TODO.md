@@ -3,7 +3,6 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Upgrade edition to 2021
 
 - [ ] Use tracing for all debugging
 	- [x] Enable tracing, and start using it
@@ -88,6 +87,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Upgrade edition to 2021
 - [x] Allow window title prefix to be passed on command line
 - [x] Add file watcher to FileCache to allow automatic updates
 	- [x] Poll files for changes
