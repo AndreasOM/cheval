@@ -25,7 +25,8 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
-          target: aarch64-apple-darwin
+#          target: aarch64-apple-darwin
+          target: x86_64-apple-darwin
 
       - name: Cache crates
         uses: actions/cache@v2
@@ -38,18 +39,18 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-x86_64-apple-darwin-${{ hashFiles('Cargo.lock') }}
 
-      - name: Run cargo build --release for M1
+      - name: Run cargo build --release for Intel
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --verbose --release --target aarch64-apple-darwin
+          args: --verbose --release --target x86_64-apple-darwin
 
 
-      - name: Run cargo test --release for M1
+      - name: Run cargo test --release for Intel
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --verbose --release --target aarch64-apple-darwin -- --nocapture
+          args: --verbose --release --target x86_64-apple-darwin -- --nocapture
 
