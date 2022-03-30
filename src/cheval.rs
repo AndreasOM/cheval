@@ -766,7 +766,11 @@ impl Cheval {
 	}
 
 	fn goto_next_page(&mut self) -> (Option<usize>, Option<usize>) {
-		let page_no = (self.active_page + 1) % self.pages.len();
+		let page_no = if self.pages.len() > 0 {
+		 	(self.active_page + 1) % self.pages.len()
+		} else {
+			0
+		};
 		self.goto_page(page_no)
 	}
 
