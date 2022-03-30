@@ -81,7 +81,7 @@ pub struct WindowMinifb {
 }
 
 impl WindowMinifb {
-	pub fn new( window_title: &str, window_mode: &WindowMode) -> Self {
+	pub fn new(window_title: &str, window_mode: &WindowMode) -> Self {
 		let w = 1920;
 		let h = 1080;
 		let ds = 2;

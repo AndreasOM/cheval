@@ -628,9 +628,9 @@ impl Cheval {
 			function_table.register("sin", |_argc, variable_stack, _variable_storage| {
 				// :TODO: handle wrong argc
 
-			let fv = variable_stack.pop_as_f32();
+				let fv = variable_stack.pop_as_f32();
 
-			let r = fv.sin();
+				let r = fv.sin();
 
 				variable_stack.push(expresso::variables::Variable::F32(r));
 				true
@@ -842,7 +842,7 @@ impl Cheval {
 
 	fn goto_next_page(&mut self) -> (Option<usize>, Option<usize>) {
 		let page_no = if self.pages.len() > 0 {
-		 	(self.active_page + 1) % self.pages.len()
+			(self.active_page + 1) % self.pages.len()
 		} else {
 			0
 		};
