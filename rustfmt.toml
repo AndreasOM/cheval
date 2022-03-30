@@ -1,0 +1,13 @@
+combine_control_expr = false
+enum_discrim_align_threshold = 20
+hard_tabs = true
+
+# unstable :(
+# imports_layout = "Vertical"
+
+match_block_trailing_comma = true
+
+newline_style = "Unix"
+group_imports = "StdExternalCrate"
+
+struct_field_align_threshold = 20
