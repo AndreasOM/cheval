@@ -9,22 +9,39 @@ TODO: This file is not up to date. Sorry.
 		
 ## TODO
 
+- [ ] Upgrade edition to 2021
+- [ ] Remember previous window positions for windows that are not currently used
+- [ ] Allow writing of png sequences for window mode png
+- [ ] Fix crash when moving right without pages
+- [ ] {verify} Fix alpha handling
+- [ ] Merge, and kill `multi-window` branch for good.
+- [ ] Build packages automatically after push to github.
+
+### post v0.2
+
+- [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
+- [ ] Remove actix, and use axum instead
+
+- [ ] Put profiling behind feature flag
+- [ ] Put profiling behind command line flag
+
+- [ ] Fix mutability of self in Cheval::render()
+
+### post v0.3
+
+- [ ] Extract shared rendering functions -> RenderBuffer package
+- [ ] Replace :HACK: text effects with better version
+
+- [ ] Improve reporting of broken config files
+
 - [ ] Refactor FileCache::run
 
 - [ ] Remove unneeded copying from FileCache aka buffer bloat
 - [ ] Double check why outer FileCache needs to be Arc< Mutex< ... > >
 
-
-- [ ] Remember previous window positions for windows that are not currently used
-
-- [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
-
-- [ ] Remove actix, and use axum instead
-
 - [ ] Add sound effect support
 	- [ ] Fix time expire sound to be more precise
 
-- [ ] Allow writing of png sequences for window mode png
 - [ ] Add event system
 - [ ] Soundbank element should own it's soundbank, and react to events
 - [ ] Extract ElementConfig parameters
@@ -37,15 +54,12 @@ TODO: This file is not up to date. Sorry.
 	- [x] Use BakedExpression for text
 	- [ ] Verify we use BakedExpressions everywhere
 
-- [ ] Improve reporting of broken config files
-- [ ] Fix crash when moving right without pages
 - [ ] Fix missing initialization of active page for multi page configs
 
 - [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
 - [ ] Persist variables in regular intervals
 - [ ] Enable debug frames via command line 
-- [ ] Extract shared rendering functions -> RenderBuffer package
 - [ ] Merge goto next&prev page into turn page with direction
 - [ ] Decide on http response for page changes
 - [ ] Fix default for bounding boxes
@@ -59,17 +73,12 @@ TODO: This file is not up to date. Sorry.
 - [ ] Auto reloading on config change
 - [ ] Make config loading more robust
 - [ ] Improve Debug and/or Display traits for elements
-- [ ] Fix alpha handling
 - [ ] Allow parameters for windows
-- [ ] Put profiling behind feature flag
-- [ ] Put profiling behind command line flag
-- [ ] Fix mutability of self in Cheval::render()
 - [ ] Add animations
 	- [ ] Use spline/bezier based files for values
 - [ ] Add audio support -> is started
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Handle strings with whitespace in expressions
-- [ ] Replace :HACK: text effects with better version
 
 ## Obsolete
 
