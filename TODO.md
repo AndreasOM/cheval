@@ -13,8 +13,6 @@ TODO: This file is not up to date. Sorry.
 ## TODO
 
 - [ ] Remember previous window positions for windows that are not currently used
-- [ ] Allow writing of png sequences for window mode png
-- [ ] {verify} Fix alpha handling
 
 ### post v0.2
 
@@ -79,6 +77,8 @@ TODO: This file is not up to date. Sorry.
 - [ ] Allow elements to register for http (or just sign them up all)
 - [ ] Handle strings with whitespace in expressions
 
+- [ ] Make filename for png renderer configurable
+
 ## Obsolete
 
 ~ - [#] Refactor Variable to allow baking of value ~
@@ -86,6 +86,8 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Allow writing of png sequences for window mode png
+- [x] Alpha handling _should_ be correct now
 - [x] Enable profiling via feature
 - [x] Update packages
 - [x] Merge, and kill `multi-window` branch for good.
