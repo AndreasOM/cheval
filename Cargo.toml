@@ -20,6 +20,7 @@ path="src/cheval_main.rs"
 [features]
 default = []
 with_termion = [ "termion" ]
+with_profiling = [ "pprof", "criterion" ]
 
 
 [dependencies]
@@ -55,20 +56,22 @@ minifb = "0.20.0"
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 minifb = "0.20.0"
-pprof = { version = "0.6.2", features = ["flamegraph", "criterion"] }
+pprof = { version = "0.6.2", features = ["flamegraph", "criterion"], optional = true }
+criterion = { version = "0.3", optional = true }
 
 
-[target.'cfg(target_arch = "arm")'.dependencies]
-framebuffer = "0.2.0"
 
 [build-dependencies]
 cfg_aliases = "0.1.0"
 
 [dev-dependencies]
-criterion = "0.3"
+#criterion = "0.3"
 
-[target.'cfg(target_arch = "arm")'.dev-dependencies]
-pprof = { version = "0.6.2", features = ["flamegraph", "criterion"] }
+[target.'cfg(target_arch = "arm")'.dependencies]
+framebuffer = "0.2.0"
+#[target.'cfg(target_arch = "arm")'.dev-dependencies]
+pprof = { version = "0.6.2", features = ["flamegraph", "criterion"], optional = true }
+criterion = { version = "0.3", optional = true }
 
 [[bench]]
 name = "next_frame_benchmark"

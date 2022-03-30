@@ -3,7 +3,6 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
-- [ ] Update packages
 
 - [ ] Build packages automatically after push to github.
 
@@ -16,7 +15,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Remember previous window positions for windows that are not currently used
 - [ ] Allow writing of png sequences for window mode png
 - [ ] {verify} Fix alpha handling
-- [ ] Enable profiling via feature
 
 ### post v0.2
 
@@ -88,6 +86,8 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Enable profiling via feature
+- [x] Update packages
 - [x] Merge, and kill `multi-window` branch for good.
 - [x] Fix crash when moving right without pages
 - [x] Upgrade edition to 2021
