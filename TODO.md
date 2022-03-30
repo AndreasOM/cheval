@@ -13,7 +13,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Remember previous window positions for windows that are not currently used
 - [ ] Allow writing of png sequences for window mode png
 - [ ] {verify} Fix alpha handling
-- [ ] Merge, and kill `multi-window` branch for good.
 - [ ] Build packages automatically after push to github.
 - [ ] Update packages
 
@@ -87,6 +86,7 @@ TODO: This file is not up to date. Sorry.
 
 ## DONE
 
+- [x] Merge, and kill `multi-window` branch for good.
 - [x] Fix crash when moving right without pages
 - [x] Upgrade edition to 2021
 - [x] Allow window title prefix to be passed on command line
