@@ -15,6 +15,7 @@ enum Visibility {
 
 #[derive(Debug)]
 pub struct Page {
+	name:              String,
 	element_instances: Vec<ElementInstance>,
 	sound_on_show:     BakedExpression,
 	visibility:        Visibility,
@@ -24,6 +25,7 @@ pub struct Page {
 impl Page {
 	pub fn new() -> Self {
 		Self {
+			name:              String::new(),
 			element_instances: Vec::new(),
 			sound_on_show:     BakedExpression::new(),
 			visibility:        Visibility::Hidden,
@@ -89,6 +91,14 @@ impl Page {
 			Visibility::Visible => true,
 			_ => false,
 		}
+	}
+
+	pub fn set_name(&mut self, name: &str) {
+		self.name = name.to_string();
+	}
+
+	pub fn name(&self) -> &str {
+		&self.name
 	}
 
 	pub fn hide(&mut self) {
