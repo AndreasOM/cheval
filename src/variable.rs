@@ -88,23 +88,21 @@ impl Variable {
 // :IDEA: use From/Into trait
 /*
 impl From<Variable> for f32 {
-    fn from(v: Variable) -> Self {
+	fn from(v: Variable) -> Self {
 		match v.baked {
 			Baked::F32( v ) => v,
 			_ => panic!("Tried to get Variable as f32 that is not an F32"),
 		}
-    }
+	}
 }
 */
 /*
 impl Into<f32> for Variable {
-    fn into(self) -> f32 {
+	fn into(self) -> f32 {
 		match self.baked {
 			Baked::F32( v ) => v,
 			_ => panic!("Tried to get Variable as f32 that is not an F32"),
 		}
-    }
+	}
 }
 */
-
-
