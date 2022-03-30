@@ -3,13 +3,14 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Upgrade edition to 2021
+
 - [ ] Use tracing for all debugging
 	- [x] Enable tracing, and start using it
 
 		
 ## TODO
 
-- [ ] Upgrade edition to 2021
 - [ ] Remember previous window positions for windows that are not currently used
 - [ ] Allow writing of png sequences for window mode png
 - [ ] Fix crash when moving right without pages
