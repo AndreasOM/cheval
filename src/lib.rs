@@ -3,6 +3,8 @@ pub mod element;
 
 pub mod axisalignedrectangle;
 pub mod bakedexpression;
+pub mod file_cache;
+pub mod image_sequence;
 
 pub mod variable;
 
@@ -11,7 +13,6 @@ pub mod element_instance;
 pub mod block_element;
 pub mod image_element;
 pub mod lissajous_element;
-pub mod loadtext_element;
 pub mod page;
 pub mod pixel;
 pub mod scrolltext_element;

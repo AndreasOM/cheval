@@ -21,9 +21,9 @@ use crate::block_element::BlockElementFactory;
 use crate::context::Context;
 use crate::element::{Element, ElementConfig};
 use crate::element_instance::ElementInstance;
+use crate::file_cache::FileCache;
 use crate::image_element::ImageElementFactory;
 use crate::lissajous_element::LissajousElementFactory;
-use crate::loadtext_element::LoadTextElementFactory;
 use crate::page::Page;
 use crate::render_buffer::RenderBuffer;
 use crate::render_context::RenderContext;
@@ -87,6 +87,7 @@ pub struct Cheval {
 	done:              bool,
 	config_path:       PathBuf,
 	server_thread:     Option<std::thread::JoinHandle<()>>,
+	file_cache:        std::sync::Arc<std::sync::Mutex<FileCache>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -430,22 +431,26 @@ async fn goto_page_name(
 
 impl Cheval {
 	pub fn new() -> Self {
+		let file_cache = std::sync::Arc::new(std::sync::Mutex::new(FileCache::new()));
+		let mut context = Context::new();
+		context.set_file_cache(file_cache.clone());
 		Self {
 			//			element_instances: Vec::new(),
-			page:              None,
-			pages:             Vec::new(),
-			active_page:       1,
+			page: None,
+			pages: Vec::new(),
+			active_page: 1,
 			variable_filename: None,
-			context:           Context::new(),
-			last_update_time:  Utc::now(),
-			start_time:        Utc::now(),
-			render_context:    RenderContext::new(),
-			http_enabled:      false,
+			context,
+			last_update_time: Utc::now(),
+			start_time: Utc::now(),
+			render_context: RenderContext::new(),
+			http_enabled: false,
 			//			http_server: None,
-			http_receiver:     None,
-			done:              false,
-			config_path:       PathBuf::new(),
-			server_thread:     None,
+			http_receiver: None,
+			done: false,
+			config_path: PathBuf::new(),
+			server_thread: None,
+			file_cache,
 		}
 	}
 
@@ -469,7 +474,6 @@ impl Cheval {
 			let mut element: Box<dyn Element + Send> = match e.the_type.as_ref() {
 				"block" => Box::new(BlockElementFactory::create()) as Box<dyn Element + Send>,
 				"timer" => Box::new(TimerElementFactory::create()) as Box<dyn Element + Send>,
-				"loadtext" => Box::new(LoadTextElementFactory::create()) as Box<dyn Element + Send>,
 				"lissajous" => Box::new(LissajousElementFactory::create()),
 				"image" => Box::new(ImageElementFactory::create()),
 				"text" => Box::new(TextElementFactory::create()),
@@ -555,6 +559,14 @@ impl Cheval {
 
 		if let Some(config_path) = config_file_name.parent() {
 			self.config_path = PathBuf::from(&config_path);
+
+			// update file cache base
+			{
+				let mut fc = self.file_cache.lock().unwrap();
+				fc.set_base_path(&self.config_path);
+
+				fc.set_mode(crate::file_cache::FileCacheMode::Watch);
+			}
 		};
 
 		let cf = match std::fs::File::open(&config_file_name) {
@@ -610,38 +622,115 @@ impl Cheval {
 		};
 
 		// :HACK:
-		let function_table = self.context.get_mut_machine().get_mut_function_table();
+		{
+			let function_table = self.context.get_mut_machine().get_mut_function_table();
 
-		function_table.register("sin", |_argc, variable_stack, _variable_storage| {
-			// :TODO: handle wrong argc
+			function_table.register("sin", |_argc, variable_stack, _variable_storage| {
+				// :TODO: handle wrong argc
 
 			let fv = variable_stack.pop_as_f32();
 
 			let r = fv.sin();
 
-			variable_stack.push(expresso::variables::Variable::F32(r));
-			true
-		});
-
-		function_table.register("printHHMMSS", |argc, variable_stack, _variable_storage| {
-			if argc == 1 {
-				let f = variable_stack.pop_as_f32();
-				let duration = std::time::Duration::new(f as u64, 0);
-
-				variable_stack.push(expresso::variables::Variable::String(duration.hhmmss()));
+				variable_stack.push(expresso::variables::Variable::F32(r));
 				true
-			} else {
-				false
-			}
-		});
+			});
+
+			function_table.register("printHHMMSS", |argc, variable_stack, _variable_storage| {
+				if argc == 1 {
+					let f = variable_stack.pop_as_f32();
+					let duration = std::time::Duration::new(f as u64, 0);
+
+					variable_stack.push(expresso::variables::Variable::String(duration.hhmmss()));
+					true
+				} else {
+					false
+				}
+			});
+
+			let file_cache = self.file_cache.clone();
+			function_table.register(
+				"text_from_file",
+				move |argc, variable_stack, _variable_storage| {
+					if argc == 1 {
+						let filename = variable_stack.pop_as_string();
+						// :TODO: check stack validity here?!
+
+						let mut lock = file_cache.try_lock();
+						if let Ok(ref mut file_cache) = lock {
+							match file_cache.load_string(&filename) {
+								Ok((_v, s)) => {
+									dbg!(&s);
+									variable_stack.push(expresso::variables::Variable::String(s));
+									true
+								},
+								Err(e) => {
+									let s = format!("Error: {:?}", &e);
+									variable_stack.push(expresso::variables::Variable::String(s));
+									false
+								},
+							}
+						} else {
+							println!("try_lock failed");
+							false
+						}
+					} else {
+						false
+					}
+				},
+			);
+			let file_cache = self.file_cache.clone();
+			function_table.register(
+				"text_lines_from_file",
+				move |argc, variable_stack, _variable_storage| {
+					if argc == 3 {
+						let filename = variable_stack.pop_as_string();
+						let count = variable_stack.pop_as_i32();
+						let skip = variable_stack.pop_as_i32();
+						// :TODO: check stack validity here?!
+
+						let mut lock = file_cache.try_lock();
+						if let Ok(ref mut file_cache) = lock {
+							match file_cache.load_string(&filename) {
+								Ok((_v, s)) => {
+									let s = s.split("\n").skip(skip as usize);
+									let s = if count > 0 {
+										s.take(count as usize).collect::<Vec<&str>>()
+									} else {
+										// zero -> take everything
+										s.collect::<Vec<&str>>()
+									};
+
+									let s = s.join("\n");
+									variable_stack.push(expresso::variables::Variable::String(s));
+									true
+								},
+								Err(e) => {
+									let s = format!("Error: {:?}", &e);
+									variable_stack.push(expresso::variables::Variable::String(s));
+									false
+								},
+							}
+						} else {
+							println!("try_lock failed");
+							false
+						}
+					} else {
+						false
+					}
+				},
+			);
+		}
+
+		self.file_cache.lock().unwrap().run().await?;
+
 		// -- :HACK:
 
 		if let Some(default_page) = &config.default_page {
 			self.active_page = *default_page;
 		}
 
-		//		dbg!(&config);
-
+		dbg!(&config);
 		if let Some(elements) = &config.elements {
 			let mut page = Page::new(); // global/top page
 
@@ -665,9 +754,11 @@ impl Cheval {
 						page_config.set(&p.0, &p.1);
 					}
 
-					//					dbg!(&page_config);
+					dbg!(&page_config);
 
 					page.configure(&page_config);
+
+					dbg!(&page);
 				}
 
 				self.load_elements_for_page(&mut page, &active_page_config.elements)
@@ -750,7 +841,11 @@ impl Cheval {
 	}
 
 	fn goto_next_page(&mut self) -> (Option<usize>, Option<usize>) {
-		let page_no = (self.active_page + 1) % self.pages.len();
+		let page_no = if self.pages.len() > 0 {
+		 	(self.active_page + 1) % self.pages.len()
+		} else {
+			0
+		};
 		self.goto_page(page_no)
 	}
 
@@ -891,6 +986,14 @@ impl Cheval {
 		let ts = self.context.time_step();
 		let soundbank = &mut self.context.get_soundbank_mut();
 		soundbank.update(ts);
+
+		match self.file_cache.try_lock() {
+			Ok(ref mut file_cache) => {
+				file_cache.update();
+			},
+			_ => {},
+			//			if let Ok(ref mut file_cache) = lock {
+		}
 
 		if let Some(http_receiver) = &self.http_receiver {
 			match http_receiver.try_recv() {
@@ -1094,6 +1197,8 @@ impl Cheval {
 			}
 		}
 		*/
+
+		//		dbg!(&self.file_cache);
 		Ok(())
 	}
 }

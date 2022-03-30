@@ -70,6 +70,7 @@ impl WindowWithFrame {
 
 #[allow(dead_code)]
 pub struct WindowMinifb {
+	window_title:  String,
 	render_buffer: RenderBuffer,
 	downscale:     usize,
 	frame:         Vec<u32>,
@@ -90,6 +91,7 @@ impl WindowMinifb {
 		let keybuffer = KeyVec::new(RefCell::new(Vec::new()));
 
 		let mut s = Self {
+			window_title: window_title.to_string(),
 			render_buffer,
 			downscale: ds,
 			frame: vec![0u32; fw * fh],
@@ -109,7 +111,7 @@ impl WindowMinifb {
 
 		let (mut x, mut y) = (100, 100);
 		if need_rgb {
-			let name = "RGB";
+			let name = format!("{}RGB", &s.window_title);
 			let mut w = WindowWithFrame::new(&name, fw, fh);
 			w.window
 				.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
@@ -122,7 +124,7 @@ impl WindowMinifb {
 		}
 
 		if need_a {
-			let name = "A";
+			let name = format!("{}A", &s.window_title);
 			let mut w = WindowWithFrame::new(&name, fw, fh);
 			w.window
 				.limit_update_rate(Some(std::time::Duration::from_micros(16600)));

@@ -50,11 +50,16 @@ impl WindowFactory {
 		}
 	}
 
-	pub fn create(window_type: &str, window_mode: &WindowMode, scaling: f32) -> Box<dyn Window> {
+	pub fn create(
+		window_title: &str,
+		window_type: &str,
+		window_mode: &WindowMode,
+		scaling: f32,
+	) -> Box<dyn Window> {
 		match window_type {
 			"png" => Box::new(WindowPng::new(scaling)),
 			#[cfg(minifb)]
-			"minifb" => Box::new(WindowMinifb::new(&window_mode)),
+			"minifb" => Box::new(WindowMinifb::new(&window_title, &window_mode)),
 			#[cfg(framebuffer)]
 			"framebuffer" => Box::new(WindowFramebuffer::new()),
 			_ => panic!("window type not supported {:?}", &window_type),
