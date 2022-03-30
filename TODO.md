@@ -3,6 +3,7 @@ TODO: This file is not up to date. Sorry.
 
 ## In Progress
 
+- [ ] Update packages
 
 - [ ] Build packages automatically after push to github.
 
@@ -15,7 +16,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Remember previous window positions for windows that are not currently used
 - [ ] Allow writing of png sequences for window mode png
 - [ ] {verify} Fix alpha handling
-- [ ] Update packages
 - [ ] Enable profiling via feature
 
 ### post v0.2
