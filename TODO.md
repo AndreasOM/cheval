@@ -16,6 +16,7 @@ TODO: This file is not up to date. Sorry.
 - [ ] Allow writing of png sequences for window mode png
 - [ ] {verify} Fix alpha handling
 - [ ] Update packages
+- [ ] Enable profiling via feature
 
 ### post v0.2
 
