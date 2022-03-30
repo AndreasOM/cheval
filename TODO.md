@@ -4,6 +4,8 @@ TODO: This file is not up to date. Sorry.
 ## In Progress
 
 
+- [ ] Build packages automatically after push to github.
+
 - [ ] Use tracing for all debugging
 	- [x] Enable tracing, and start using it
 
@@ -13,7 +15,6 @@ TODO: This file is not up to date. Sorry.
 - [ ] Remember previous window positions for windows that are not currently used
 - [ ] Allow writing of png sequences for window mode png
 - [ ] {verify} Fix alpha handling
-- [ ] Build packages automatically after push to github.
 - [ ] Update packages
 
 ### post v0.2
