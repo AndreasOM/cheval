@@ -37,6 +37,14 @@ impl Into<&str> for WindowMode {
 	}
 }
 
+impl core::fmt::Display for WindowMode {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		write!(f, "WindowMode: ")?;
+		writeln!(f, "{:?}", &self)?;
+		Ok(())
+	}
+}
+
 pub struct WindowFactory {}
 
 impl WindowFactory {

@@ -145,12 +145,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	let window_mode: &str = &window_mode;
 	let window_mode: WindowMode = window_mode.into();
-	dbg!(&config);
-	dbg!(&window_title);
-	dbg!(&window_type);
-	dbg!(&window_mode);
-	dbg!(&window_layout);
-	dbg!(&enable_http);
+	debug!("config:        {}", &config);
+	debug!("window_title:  {}", &window_title);
+	debug!("window_type:   {}", &window_type);
+	debug!("window_mode:   {}", &window_mode);
+	debug!("window_layout: {}", &window_layout);
+	debug!("enable_http:   {}", &enable_http);
 
 	let mut window = WindowFactory::create(&window_title, &window_type, &window_mode, scaling);
 

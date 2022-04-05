@@ -70,15 +70,15 @@ impl WindowWithFrame {
 
 #[allow(dead_code)]
 pub struct WindowMinifb {
-	window_title:  String,
-	render_buffer: RenderBuffer,
-	downscale:     usize,
-	frame:         Vec<u32>,
+	window_title:    String,
+	render_buffer:   RenderBuffer,
+	downscale:       usize,
+	frame:           Vec<u32>,
 	//	window: minifb::Window,
-	window_rgb:    Option<WindowWithFrame>,
-	window_a:      Option<WindowWithFrame>,
-	keybuffer:     Rc<RefCell<Vec<u32>>>,
-	original_layout:	Option< WindowLayout >,
+	window_rgb:      Option<WindowWithFrame>,
+	window_a:        Option<WindowWithFrame>,
+	keybuffer:       Rc<RefCell<Vec<u32>>>,
+	original_layout: Option<WindowLayout>,
 }
 
 impl WindowMinifb {
@@ -395,12 +395,12 @@ impl Window for WindowMinifb {
 				}
 			}
 
-			self.original_layout = Some( c );
+			self.original_layout = Some(c);
 		}
 	}
 
 	fn store_positions(&mut self, filename: &str) {
-		let mut layout = if let Some( owl ) = self.original_layout.take() {
+		let mut layout = if let Some(owl) = self.original_layout.take() {
 			owl
 		} else {
 			WindowLayout::default()
@@ -426,6 +426,6 @@ impl Window for WindowMinifb {
 			_ => {},
 		}
 
-		self.original_layout = Some( layout );
+		self.original_layout = Some(layout);
 	}
 }

@@ -7,6 +7,7 @@ use std::time::Duration;
 use derivative::Derivative;
 use futures::select;
 use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
+use tracing::*;
 
 #[derive(Debug)]
 enum WatchChange {
@@ -125,7 +126,7 @@ impl FileCache {
 	) -> anyhow::Result<bool> {
 		match rx.try_recv() {
 			Ok(event) => {
-				dbg!(&event);
+//				debug!("event: {:?}", &event);
 				match event {
             		DebouncedEvent::Write( full_path )
 //		            		| DebouncedEvent::Create( full_path )
@@ -150,9 +151,12 @@ impl FileCache {
 //									},
 //								}
             		},
+            		DebouncedEvent::NoticeWrite( _ ) => {
+            			debug!("Ignored {:?}", &event );
+            		}
             		// :TODO: handle other cases
-            		_o => {
-//		            			dbg!(&o);
+            		o => {
+						debug!("Unhandled: {:?}", &o);
             		},
             	}
 			},
@@ -313,18 +317,22 @@ impl FileCache {
 	pub fn wait_for_change_with_timeout(&mut self, timeout: Duration) {
 		// :TODO: this could select on multiple futures instead of polling
 		let mut timeout = timeout;
-		let step = Duration::from_millis( 100 );
+		let step = Duration::from_millis(100);
 		let old_updates = self.entry_updates();
 		while timeout != Duration::ZERO {
-			timeout = timeout.saturating_sub( step );
-			std::thread::sleep( step );
-//			eprintln!(".");
-			dbg!(&timeout);
+			timeout = timeout.saturating_sub(step);
+			std::thread::sleep(step);
+			//			eprintln!(".");
+			//			dbg!(&timeout);
 			let new_updates = self.entry_updates();
 			if new_updates > old_updates {
-//				eprintln!("!");
+				//				eprintln!("!");
 				break;
 			}
+		}
+
+		if timeout == Duration::ZERO {
+			eprintln!("Timeout while waiting for changes!");
 		}
 	}
 
@@ -564,6 +572,8 @@ mod test {
 	use std::io::Write;
 	use std::path::Path;
 
+	use tracing_test::traced_test;
+
 	use crate::file_cache::{FileCache, FileCacheMode};
 
 	//	#[test]
@@ -790,6 +800,7 @@ mod test {
 	}
 
 	#[actix_rt::test]
+	#[traced_test]
 	async fn file_cache_can_update_vector_clock_in_watch_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
