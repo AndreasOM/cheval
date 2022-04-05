@@ -77,7 +77,7 @@ pub trait Window {
 	fn next_frame(&mut self);
 	fn get_key(&mut self) -> Option<u32>;
 	fn restore_positions(&mut self, _filename: &str) {}
-	fn store_positions(&self, _filename: &str) {}
+	fn store_positions(&mut self, _filename: &str) {}
 }
 
 #[cfg(minifb)]

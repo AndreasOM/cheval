@@ -78,6 +78,7 @@ pub struct WindowMinifb {
 	window_rgb:    Option<WindowWithFrame>,
 	window_a:      Option<WindowWithFrame>,
 	keybuffer:     Rc<RefCell<Vec<u32>>>,
+	original_layout:	Option< WindowLayout >,
 }
 
 impl WindowMinifb {
@@ -98,6 +99,7 @@ impl WindowMinifb {
 			window_rgb: None,
 			window_a: None,
 			keybuffer: keybuffer.clone(),
+			original_layout: None,
 		};
 
 		// :TODO: loop for all windows
@@ -382,21 +384,28 @@ impl Window for WindowMinifb {
 		let mut c = WindowLayout::default();
 
 		if let Ok(_) = c.load(&Path::new(&filename)) {
-			if let Some(wc) = c.window_rgb {
+			if let Some(ref wc) = c.window_rgb {
 				if let Some(w) = &mut self.window_rgb {
 					w.window.set_position(wc.pos_x as isize, wc.pos_y as isize);
 				}
 			}
-			if let Some(wc) = c.window_a {
+			if let Some(ref wc) = c.window_a {
 				if let Some(w) = &mut self.window_a {
 					w.window.set_position(wc.pos_x as isize, wc.pos_y as isize);
 				}
 			}
+
+			self.original_layout = Some( c );
 		}
 	}
 
-	fn store_positions(&self, filename: &str) {
-		let mut layout = WindowLayout::default();
+	fn store_positions(&mut self, filename: &str) {
+		let mut layout = if let Some( owl ) = self.original_layout.take() {
+			owl
+		} else {
+			WindowLayout::default()
+		};
+
 		if let Some(w) = &self.window_rgb {
 			let (x, y) = w.window.get_position();
 			let mut wc = WindowLayoutWindowConfig::default();
@@ -416,5 +425,7 @@ impl Window for WindowMinifb {
 			// :TODO: handle errors
 			_ => {},
 		}
+
+		self.original_layout = Some( layout );
 	}
 }
