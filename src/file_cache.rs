@@ -312,12 +312,14 @@ impl FileCache {
 
 	pub fn wait_for_change_with_timeout(&mut self, timeout: Duration) {
 		// :TODO: this could select on multiple futures instead of polling
+		let mut timeout = timeout;
 		let step = Duration::from_millis( 100 );
 		let old_updates = self.entry_updates();
 		while timeout != Duration::ZERO {
-			timeout.saturating_sub( step );
+			timeout = timeout.saturating_sub( step );
 			std::thread::sleep( step );
 //			eprintln!(".");
+			dbg!(&timeout);
 			let new_updates = self.entry_updates();
 			if new_updates > old_updates {
 //				eprintln!("!");
