@@ -7,6 +7,7 @@ TODO: This file is not 100% up to date. Sorry.
 		
 ## TODO
 
+- [ ] Cleanup window mode compile time decision mess. :(
 
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
 
