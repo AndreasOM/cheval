@@ -930,7 +930,7 @@ mod test {
 			assert_eq!(0, f.0);
 			assert_eq!(1, fc.entry_updates());
 
-			std::thread::sleep(std::time::Duration::from_millis(500));
+			fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 			let f = fc.load(&test_file); // cache hit
 			let f = f.unwrap();
@@ -945,7 +945,7 @@ mod test {
 				dbg!("Wrote 02 to test file");
 			}
 
-			std::thread::sleep(std::time::Duration::from_millis(3000));
+			fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 			let f = fc.load(&test_file); // cache hit
 			let f = f.unwrap();
@@ -969,7 +969,7 @@ mod test {
 			assert_eq!(0, f.0);
 			assert_eq!(4, fc.entry_updates());
 
-			std::thread::sleep(std::time::Duration::from_millis(500));
+			fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 			let f = fc.load(&test_file); // cache hit
 			let f = f.unwrap();
@@ -984,7 +984,7 @@ mod test {
 				dbg!("Wrote 02 to test file");
 			}
 
-			std::thread::sleep(std::time::Duration::from_millis(3000));
+			fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 			let f = fc.load(&test_file); // cache hit
 			let f = f.unwrap();
@@ -993,9 +993,6 @@ mod test {
 			assert_eq!(6, fc.entry_updates());
 		}
 
-		std::thread::sleep(std::time::Duration::from_millis(3000));
-
-		assert_eq!(6, fc.entry_updates());
 		Ok(())
 	}
 }
