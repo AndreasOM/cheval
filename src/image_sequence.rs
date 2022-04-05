@@ -3,6 +3,7 @@ use std::io::Cursor;
 use glob::glob;
 use image::io::Reader;
 use image::DynamicImage;
+use tracing::*;
 
 use crate::file_cache::FileCache;
 
@@ -91,7 +92,7 @@ impl ImageSequence {
 						Ok(path) => {
 							self.add_image(&mut fc, &path.to_string_lossy())?;
 						},
-						Err(e) => println!("{:?}", e),
+						Err(e) => debug!("Error globbing {:?}", e),
 					}
 				}
 			}

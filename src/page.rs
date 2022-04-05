@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use tracing::*;
+
 use crate::bakedexpression::BakedExpression;
 use crate::context::Context;
 use crate::element::ElementConfig;
@@ -106,7 +108,7 @@ impl Page {
 	}
 
 	pub fn show(&mut self) {
-		dbg!(&self.sound_on_show);
+		debug!("Sound on show: {:?}", &self.sound_on_show);
 		let sound_on_show = self.sound_on_show.as_string();
 		if sound_on_show.len() > 0 {
 			self.sound_queue.push_back(sound_on_show.to_string());

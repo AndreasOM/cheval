@@ -2,6 +2,7 @@ use expresso::expression::Expression;
 use expresso::machine::Machine;
 use oml_audio::SoundBank;
 use regex::Regex;
+use tracing::*;
 
 use crate::file_cache::FileCache;
 
@@ -34,7 +35,7 @@ impl Context {
 	}
 
 	pub fn play_sound(&mut self, id: &str) {
-		println!("play_sound: {:?}", id);
+		debug!("play_sound: {:?}", id);
 		self.soundbank.enable_debug();
 		self.soundbank.play(id);
 	}
@@ -97,7 +98,7 @@ impl Context {
 			},
 		};
 
-		dbg!(&self.selected_variable);
+		debug!("selected variable: {:?}", &self.selected_variable);
 		&self.selected_variable
 	}
 
