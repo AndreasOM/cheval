@@ -16,6 +16,7 @@ use derivative::Derivative;
 use hhmmss::Hhmmss;
 use serde::Deserialize;
 use serde_yaml;
+use tracing::*;
 
 use crate::block_element::BlockElementFactory;
 use crate::context::Context;
@@ -494,7 +495,7 @@ impl Cheval {
 				element_config.set(&p.0, &p.1);
 			}
 
-			dbg!(&element_config);
+			debug!("element_config: {:?}", &element_config);
 
 			element.configure(&element_config);
 
@@ -577,7 +578,7 @@ impl Cheval {
 			),
 		};
 
-		dbg!(&cf);
+		debug!("config: {:?}", &cf);
 
 		let config: Config = match serde_yaml::from_reader(&cf) {
 			Ok(c) => c,
@@ -599,13 +600,13 @@ impl Cheval {
 			};
 
 			println!("Loaded variables from {}", &variable_filename);
-			dbg!(self.context.get_mut_machine());
+			debug!("{:?}", self.context.get_mut_machine());
 		}
 
 		// :HACK: load variable default
 		if let Some(defaults) = &config.variable_defaults {
 			for (key, val) in defaults.iter() {
-				dbg!(&key, &val);
+				debug!("{:?} = {:?}", &key, &val);
 				let vs = self.context.get_mut_machine().get_mut_variable_storage();
 				if vs.get(&key).is_none() {
 					println!("Variable {} not found using default {}", &key, &val);
@@ -660,7 +661,7 @@ impl Cheval {
 						if let Ok(ref mut file_cache) = lock {
 							match file_cache.load_string(&filename) {
 								Ok((_v, s)) => {
-									dbg!(&s);
+									debug!("{:?}", &s);
 									variable_stack.push(expresso::variables::Variable::String(s));
 									true
 								},
@@ -671,7 +672,7 @@ impl Cheval {
 								},
 							}
 						} else {
-							println!("try_lock failed");
+							warn!("try_lock failed");
 							false
 						}
 					} else {
@@ -730,7 +731,7 @@ impl Cheval {
 			self.active_page = *default_page;
 		}
 
-		dbg!(&config);
+		debug!("{:?}", &config);
 		if let Some(elements) = &config.elements {
 			let mut page = Page::new(); // global/top page
 
@@ -754,11 +755,11 @@ impl Cheval {
 						page_config.set(&p.0, &p.1);
 					}
 
-					dbg!(&page_config);
+					debug!("{:?}", &page_config);
 
 					page.configure(&page_config);
 
-					dbg!(&page);
+					debug!("{:?}", &page);
 				}
 
 				self.load_elements_for_page(&mut page, &active_page_config.elements)
@@ -938,7 +939,7 @@ impl Cheval {
 			}); //.join().expect("Thread panicked");
 
 			self.server_thread = Some(server_thread);
-			dbg!(&self.http_enabled);
+			debug!("http_enabled: {:?}", &self.http_enabled);
 			/*
 						let server = rx.recv().unwrap();
 						self.http_server = Some( server );
@@ -1009,7 +1010,7 @@ impl Cheval {
 							};
 						},
 						Message::SetVariable(result_sender, name, value) => {
-							dbg!("set variable", &name, &value);
+							debug!("set variable {} => {}", &name, &value);
 							if let Ok(v) = value.parse::<u32>() {
 								self.context.set_f32(&name, v as f32);
 								match result_sender
@@ -1033,10 +1034,10 @@ impl Cheval {
 									_ => {},
 								};
 							};
-							dbg!(&self.context);
+							debug!("{:?}", &self.context);
 						},
 						Message::IncrementVariable(result_sender, name, delta) => {
-							dbg!("inc variable", &name, delta);
+							debug!("inc variable {} by {}", &name, delta);
 							if let Some(old) = self.context.get_f32(&name) {
 								let new = old + delta as f32;
 								self.context.set_f32(&name, new);
@@ -1047,11 +1048,11 @@ impl Cheval {
 								};
 							}
 
-							dbg!(&self.context);
+							debug!("{:?}", &self.context);
 						},
 						Message::IncrementSelectedVariable(result_sender, delta) => {
 							let name = self.context.selected_variable().to_string();
-							dbg!("inc selected variable", &name, delta);
+							debug!("inc selected variable {} by {}", &name, delta);
 							if let Some(old) = self.context.get_f32(&name) {
 								let new = old + delta as f32;
 								self.context.set_f32(&name, new);
@@ -1060,14 +1061,14 @@ impl Cheval {
 								};
 							}
 
-							dbg!(&self.context);
+							debug!("{:?}", &self.context);
 						},
 						Message::SetElementVisibilityByName(name, visible) => {
-							dbg!("set visibility", &name, &visible);
+							debug!("set visibility {} to {}", &name, &visible);
 							self.run_for_element_instance_with_name(
 								&name,
 								Box::new(move |element_instance| {
-									dbg!("Found element_instance", &element_instance);
+									debug!("Found element_instance: {:?}", &element_instance);
 									if visible {
 										element_instance.show();
 									} else {
@@ -1108,7 +1109,7 @@ impl Cheval {
 							};
 						},
 						x => {
-							dbg!("unhandled", &x);
+							debug!("unhandled {:?}", &x);
 						},
 					}
 				},
@@ -1166,7 +1167,7 @@ impl Cheval {
 				self.goto_page(p as usize);
 			},
 			_ => {
-				dbg!("Got key", &key);
+				debug!("Got key {:?}", &key);
 			},
 		}
 	}

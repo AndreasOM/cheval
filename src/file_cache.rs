@@ -129,7 +129,7 @@ impl FileCache {
 //				debug!("event: {:?}", &event);
 				match event {
             		DebouncedEvent::Write( full_path )
-//		            		| DebouncedEvent::Create( full_path )
+		            	| DebouncedEvent::Create( full_path )
             		=> {
             			let filename = full_path;
 //								match full_path.related_to( &base_path ) {

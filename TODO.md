@@ -15,12 +15,14 @@ TODO: This file is not 100% up to date. Sorry.
 ### post v0.2
 
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
-- [ ] Remove actix, and use axum instead
 
 - [ ] Put profiling behind feature flag
 - [ ] Put profiling behind command line flag
 
 - [ ] Fix mutability of self in Cheval::render()
+
+- [ ] Extract http handling from cheval.rs
+- [ ] Remove actix, and use axum instead
 
 ### post v0.3
 
