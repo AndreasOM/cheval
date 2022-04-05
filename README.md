@@ -1,3 +1,5 @@
+[![Build & Test](https://github.com/AndreasOM/cheval/actions/workflows/build_and_test.yml/badge.svg?branch=main)](https://github.com/AndreasOM/cheval/actions/workflows/build_and_test.yml)
+
 # cheval
 Info renderer in rust targeting
 - png

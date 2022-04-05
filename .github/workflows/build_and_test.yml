@@ -12,7 +12,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11]
+        include:
+          - os: macos-11
+            target: x86_64-apple-darwin
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+#        os: [macos-11]
 #        os: [ubuntu-latest, macos-11, windows-latest]
 
     steps:
@@ -26,7 +34,7 @@ jobs:
           profile: minimal
           override: true
 #          target: aarch64-apple-darwin
-          target: x86_64-apple-darwin
+          target: ${{ matrix.target }}
 
       - name: Cache crates
         uses: actions/cache@v2
@@ -39,18 +47,18 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-x86_64-apple-darwin-${{ hashFiles('Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
 
       - name: Run cargo build --release for Intel
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --verbose --release --target x86_64-apple-darwin
+          args: --verbose --release --target ${{ matrix.target }}
 
 
       - name: Run cargo test --release for Intel
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release --target x86_64-apple-darwin -- --nocapture
+          args: --release --target ${{ matrix.target }} -- --nocapture
 
