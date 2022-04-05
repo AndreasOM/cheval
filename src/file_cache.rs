@@ -310,6 +310,22 @@ impl FileCache {
 		self.internal.lock().unwrap().load_string(filename)
 	}
 
+	pub fn wait_for_change_with_timeout(&mut self, timeout: Duration) {
+		// :TODO: this could select on multiple futures instead of polling
+		let step = Duration::from_millis( 100 );
+		let old_updates = self.entry_updates();
+		while timeout != Duration::ZERO {
+			timeout.saturating_sub( step );
+			std::thread::sleep( step );
+//			eprintln!(".");
+			let new_updates = self.entry_updates();
+			if new_updates > old_updates {
+//				eprintln!("!");
+				break;
+			}
+		}
+	}
+
 	pub fn cache_misses(&self) -> u32 {
 		self.internal.lock().unwrap().cache_misses()
 	}
@@ -749,7 +765,7 @@ mod test {
 		assert_eq!("", f.unwrap().1.to_string());
 		assert_eq!(1, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(200));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load_string(&test_file); // cache hit
 		assert_eq!("01", f.unwrap().1.to_string());
@@ -762,15 +778,12 @@ mod test {
 			dbg!("Wrote 02 to test file");
 		}
 
-		std::thread::sleep(std::time::Duration::from_millis(2500));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load_string(&test_file); // cache hit
 		assert_eq!("02", f.unwrap().1.to_string());
 		assert_eq!(3, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(2500));
-
-		assert_eq!(3, fc.entry_updates());
 		Ok(())
 	}
 
@@ -798,7 +811,7 @@ mod test {
 		assert_eq!(0, f.0);
 		assert_eq!(1, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(200));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load_string(&test_file); // cache hit
 		let f = f.unwrap();
@@ -813,7 +826,7 @@ mod test {
 			dbg!("Wrote 02 to test file");
 		}
 
-		std::thread::sleep(std::time::Duration::from_millis(3000));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load_string(&test_file); // cache hit
 		let f = f.unwrap();
@@ -821,9 +834,6 @@ mod test {
 		assert_eq!(2, f.0);
 		assert_eq!(3, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(3000));
-
-		assert_eq!(3, fc.entry_updates());
 		Ok(())
 	}
 
@@ -851,7 +861,7 @@ mod test {
 		assert_eq!(0, f.0);
 		assert_eq!(1, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(500));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load(&test_file); // cache hit
 		let f = f.unwrap();
@@ -866,7 +876,7 @@ mod test {
 			dbg!("Wrote 02 to test file");
 		}
 
-		std::thread::sleep(std::time::Duration::from_millis(3000));
+		fc.wait_for_change_with_timeout(std::time::Duration::from_millis(60000));
 
 		let f = fc.load(&test_file); // cache hit
 		let f = f.unwrap();
@@ -874,9 +884,6 @@ mod test {
 		assert_eq!(2, f.0);
 		assert_eq!(3, fc.entry_updates());
 
-		std::thread::sleep(std::time::Duration::from_millis(3000));
-
-		assert_eq!(3, fc.entry_updates());
 		Ok(())
 	}
 
