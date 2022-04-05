@@ -1,5 +1,5 @@
-use cheval::cheval::Cheval;
-use cheval::render_buffer::RenderBuffer;
+use crate::cheval::Cheval;
+use crate::render_buffer::RenderBuffer;
 use framebuffer::Framebuffer;
 
 use crate::window::Window;
