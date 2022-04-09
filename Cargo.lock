@@ -480,7 +480,7 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "cheval"
-version = "0.2.0-alpha"
+version = "0.2.1-dev"
 dependencies = [
  "actix-rt",
  "actix-web",
