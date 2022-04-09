@@ -815,6 +815,7 @@ mod test {
 		{
 			let mut file = File::create(&test_file_with_dir)?;
 			file.write_all(b"01")?;
+			dbg!("Wrote 01 to test file");
 		}
 
 		let f = fc.load_string(&test_file);
