@@ -21,6 +21,8 @@ path="src/cheval_main.rs"
 default = []
 with_termion = [ "termion" ]
 with_profiling = [ "pprof", "criterion" ]
+minifb = [ "dep:minifb" ]
+framebuffer = [ "dep:framebuffer" ]
 
 
 [dependencies]
@@ -51,12 +53,20 @@ tracing = "0.1.32"
 tracing-subscriber = "0.3.9"
 tracing-test = "0.2.1"
 
+[dependencies.minifb]
+version = "0.22.0"
+optional = true
+
+[dependencies.framebuffer]
+version = "0.2.0"
+optional = true
+
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-minifb = "0.22.0"
+### minifb = "0.22.0"
 # pprof = { version = "0.3", features = ["flamegraph"] }
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
-minifb = "0.22.0"
+### minifb = "0.22.0"
 pprof = { version = "0.6.2", features = ["flamegraph", "criterion"], optional = true }
 criterion = { version = "0.3", optional = true }
 
@@ -69,7 +79,7 @@ cfg_aliases = "0.1.0"
 #criterion = "0.3"
 
 [target.'cfg(target_arch = "arm")'.dependencies]
-framebuffer = "0.2.0"
+#framebuffer = "0.2.0"
 #[target.'cfg(target_arch = "arm")'.dev-dependencies]
 pprof = { version = "0.6.2", features = ["flamegraph", "criterion"], optional = true }
 criterion = { version = "0.3", optional = true }

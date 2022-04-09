@@ -4,6 +4,7 @@ use cfg_aliases::cfg_aliases;
 
 fn main() {
 	// Doesn't work :( ... println!("cargo:rustc-cfg=feature=\"with-minifb\"");
+
 	cfg_aliases! {
 		// Platforms
 		wasm: { target_arch = "wasm32" },
@@ -14,11 +15,17 @@ fn main() {
 		// window providers
 		minifb: {
 			any(
-				all(macos, not(wasm)),
-				all(windows, not(wasm))
+				all(macos, feature="minifb", not(wasm)),
+				all(linux, feature="minifb", not(wasm)),
+				all(windows, feature="minifb", not(wasm))
 			)
 		},
-		framebuffer: { all(linux, not(wasm)) },
+		framebuffer: { all(linux, feature="framebuffer", not(wasm)) },
+	}
+
+	#[cfg(all(feature = "framebuffer", not(linux)))]
+	{
+		panic!("framebuffer only supported on linux");
 	}
 
 	if std::env::var("TARGET").unwrap().contains("-apple") {
