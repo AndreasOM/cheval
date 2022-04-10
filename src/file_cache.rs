@@ -30,12 +30,71 @@ pub enum FileCacheMode {
 }
 
 impl FileCache {
+	pub fn canonicalize( path: &Path ) -> anyhow::Result< PathBuf > {
+		let c = match path.canonicalize() {
+			Ok(c) => c,
+			Err(e) => anyhow::bail!(
+				"Error canonicalizing filename {:?} -> {:?}",
+				&path, &e
+			),
+		};
+/*
+		let c = c.components().map( |c|{
+//			debug!("{:?}", &c);
+			match c {
+				std::path::Component::Prefix( p ) => {
+					debug!("Prefix {:?}", &p);
+					let p = match p.kind() {
+						std::path::Prefix::VerbatimDisk( disk ) => {
+							debug!("Disk {}", &disk);
+//							p
+							std::path::Prefix::Disk( disk )
+						},
+						o => o,
+					};
+					/*
+					let p = match p.kind() {
+						std::path::Prefix::VerbatimDisk( disk ) => {
+							std::path::Prefix::Disk( disk )
+						},
+						p => p,
+					};
+					*/
+					std::path::Component::Prefix( p )
+					//p
+				},
+				c => c,
+			}
+		}).collect();
+		*/
+		let mut result = PathBuf::new();
+		for c in c.components() {
+			match c {
+				std::path::Component::Prefix( p ) => {
+					match p.kind() {
+						std::path::Prefix::VerbatimDisk( disk ) => {
+//							debug!("Disk {}", &disk);
+							result.push( format!("{}:", disk as char) );
+						},
+						_ => result.push( c ),
+					}
+				},
+				o => result.push( o ),
+			};
+		}
+
+//		debug!("canonicalized -> {:?}", &result);
+		Ok( result )
+	}
 	pub fn glob(pattern: &str) -> anyhow::Result<Vec<PathBuf>> {
 		let mut paths = Vec::new();
 		let path = std::path::Path::new(pattern);
+		/*
 		if path.exists() { // Note: This should not be needed if globbing worked correctly
 			paths.push(path.to_path_buf());
 		} else {
+		*/
+		{
 			let glob = match glob::glob(pattern) {
 				Ok(o) => o,
 				Err(e) => {

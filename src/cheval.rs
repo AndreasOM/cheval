@@ -520,18 +520,21 @@ impl Cheval {
 	}
 
 	pub async fn load(&mut self, config_file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-		dbg!(&config_file_name);
+//		dbg!(&config_file_name);
+		debug!("Loading config from {}", &config_file_name);
 		// make path absolute
 		let cwd = std::env::current_dir().unwrap();
 		let config_file_name = Path::new(&config_file_name);
 		let config_file_name = cwd.join(config_file_name);
-		let config_file_name = match config_file_name.canonicalize() {
+		debug!("Loading config from {:?}", &config_file_name);
+		let config_file_name = match FileCache::canonicalize( config_file_name.as_path() ) {
 			Ok(c) => c,
 			Err(e) => panic!(
 				"Error canonicalizing config file {:?} -> {:?}",
 				&config_file_name, &e
 			),
 		};
+		debug!("Loading config from {:?}", &config_file_name);
 
 		let config_file_name = if config_file_name.is_dir() {
 			let mut cfn = config_file_name.clone();

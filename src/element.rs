@@ -7,6 +7,7 @@ use crate::bakedexpression::BakedExpression;
 use crate::context::Context;
 use crate::render_buffer::RenderBuffer;
 use crate::render_context::RenderContext;
+use crate::file_cache::FileCache;
 
 use tracing::*;
 
@@ -180,7 +181,7 @@ impl ElementConfig {
 		debug!("get_path_or -> {:?}", &filename);
 		let filename = self.config_path.join(filename);
 		debug!("get_path_or {:?} -> {:?}", &self.config_path, &filename);
-		let filename = match filename.canonicalize() {
+		let filename = match FileCache::canonicalize( &filename ) {
 			Ok(f) => f,
 			_ => filename, //panic!("File not found {:?}", &filename ),
 		};
