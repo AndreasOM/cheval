@@ -3,11 +3,10 @@ TODO: This file is not 100% up to date. Sorry.
 
 ## In Progress
 
-- [ ] Extract http handling from cheval.rs
+- [ ] Remove actix, and use axum instead
 		
 ## TODO
 
-- [ ] Remove actix, and use axum instead
 
 - [ ] Combine RGB565 and RGBA8888 mode for fbdev backend
 
@@ -78,6 +77,9 @@ TODO: This file is not 100% up to date. Sorry.
 
 
 ## DONE
+
+
+- [x] Extract http handling from cheval.rs
 
 ### Released in v0.2.0
 

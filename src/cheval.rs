@@ -94,6 +94,14 @@ impl Cheval {
 		let file_cache = std::sync::Arc::new(std::sync::Mutex::new(FileCache::new()));
 		let mut context = Context::new();
 		context.set_file_cache(file_cache.clone());
+		// :HACK:
+		{
+			let cheval_active_page_number = format!("{}", 0);
+			context.set_string(
+				"cheval_active_page_number",
+				&cheval_active_page_number.to_string(),
+			);
+		}
 		Self {
 			//			element_instances: Vec::new(),
 			page: None,
@@ -550,10 +558,27 @@ impl Cheval {
 		if self.http_enabled {
 			let mut http_api = HttpApi::new( tx2.clone() );
 
-			http_api.run();
+//			http_api.run();
+
+			self.http_api = Some( http_api );
 		}
 
 		debug!("http_enabled: {:?}", &self.http_enabled);
+		Ok(())
+	}
+
+	pub fn run( &mut self ) -> anyhow::Result<()> {
+		if let Some( http_api ) = self.http_api.take() {
+			
+			std::thread::spawn( move || -> anyhow::Result<()>  {
+				let sys = actix_web::rt::System::new();
+				sys.block_on( http_api.run() )?;
+//				anyhow::bail!("run ended")
+				Ok(())
+			} );
+			
+		}
+
 		Ok(())
 	}
 

@@ -2,7 +2,6 @@
 use std::sync::mpsc;
 
 use actix_web::{
-	rt::System,
 	web::{self, Data},
 	App,
 	//	HttpRequest,
@@ -24,18 +23,16 @@ struct HttpState {
 #[derive(Debug)]
 pub struct HttpApiActix {
 	control_tx: 	mpsc::Sender< Message >,
-	server_thread:  Option<std::thread::JoinHandle<()>>,
 }
 
 impl HttpApiActix {
 	pub fn new( control_tx: mpsc::Sender< Message > ) -> Self {
 		Self {
 			control_tx,
-			server_thread: None,
 		}
 	}
 
-	pub fn run( &mut self ) -> anyhow::Result<()> {
+	pub async fn run( &self ) -> anyhow::Result<()> {
 		let tx = self.control_tx.clone();
 		let server = HttpServer::new(move || {
 			let http_state = HttpState {
@@ -77,18 +74,7 @@ impl HttpApiActix {
 		})
 		.bind("0.0.0.0:8080")?
 		.run();
-		let server_thread = std::thread::spawn(move || {
-			let sys = System::new(/*"test"*/);
-
-			//				let _ = tx.send( server.clone() );
-
-			match sys.block_on(server) {
-				// :TODO: handle errors
-				_ => {},
-			}
-		}); //.join().expect("Thread panicked");
-
-		self.server_thread = Some(server_thread);
+		server.await?;
 		Ok(())
 	}
 }

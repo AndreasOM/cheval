@@ -23,6 +23,7 @@ with_termion = [ "termion" ]
 with_profiling = [ "pprof", "criterion" ]
 minifb = [ "dep:minifb" ]
 framebuffer = [ "dep:framebuffer" ]
+use_axum = [ "dep:axum" ]
 
 
 [dependencies]
@@ -59,6 +60,10 @@ optional = true
 
 [dependencies.framebuffer]
 version = "0.2.0"
+optional = true
+
+[dependencies.axum]
+version = "0.5.1"
 optional = true
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]

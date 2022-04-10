@@ -180,6 +180,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	#[cfg(all(feature = "with_termion"))]
 	let mut stdin = termion::async_stdin().keys();
 
+
+	cheval.run()?;
+
 	while !window.done() && !cheval.done() {
 		while let Some(key) = window.get_key() {
 			cheval.add_key(key);
