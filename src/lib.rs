@@ -25,3 +25,10 @@ pub mod render_buffer;
 pub mod render_context;
 
 pub mod window;
+
+//pub mod http_api;
+mod http_api_actix;
+
+pub use http_api_actix::HttpApiActix as HttpApi;
+
+pub mod control;
