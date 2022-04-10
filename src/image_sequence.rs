@@ -84,16 +84,11 @@ impl ImageSequence {
 			if self.filename != "" {
 				self.entries = Vec::new();
 
-				let fileglob = self.filename.clone();
-
-				for entry in glob(&fileglob).expect("Failed to read glob pattern") {
+				let paths = FileCache::glob(&self.filename);
+				debug!("Files for {} -> {:?}", &self.filename, &paths);
+				for path in paths? {
 					let mut fc = file_cache.lock().unwrap();
-					match entry {
-						Ok(path) => {
-							self.add_image(&mut fc, &path.to_string_lossy())?;
-						},
-						Err(e) => debug!("Error globbing {:?}", e),
-					}
+					self.add_image(&mut fc, &path.to_string_lossy())?;
 				}
 			}
 		} else {

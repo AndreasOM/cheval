@@ -8,6 +8,7 @@ use derivative::Derivative;
 use futures::select;
 use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
 use tracing::*;
+//use glob::glob;
 
 #[derive(Debug)]
 enum WatchChange {
@@ -29,6 +30,30 @@ pub enum FileCacheMode {
 }
 
 impl FileCache {
+	pub fn glob(pattern: &str) -> anyhow::Result<Vec<PathBuf>> {
+		let mut paths = Vec::new();
+		let path = std::path::Path::new(pattern);
+		if path.exists() {
+			paths.push(path.to_path_buf());
+		} else {
+			let glob = match glob::glob(pattern) {
+				Ok(o) => o,
+				Err(e) => {
+					anyhow::bail!("glob error for {} -> {:?}", &pattern, e);
+				},
+			};
+			for entry in glob {
+				match entry {
+					Ok(path) => {
+						paths.push(path);
+					},
+					Err(e) => debug!("Error globbing {:?}", e),
+				}
+			}
+		}
+		Ok(paths)
+	}
+
 	pub fn new() -> Self {
 		Self {
 			internal: std::sync::Arc::new(std::sync::Mutex::new(FileCacheInternal::new())),
