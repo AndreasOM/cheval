@@ -8,6 +8,8 @@ use crate::context::Context;
 use crate::render_buffer::RenderBuffer;
 use crate::render_context::RenderContext;
 
+use tracing::*;
+
 #[derive(Debug)]
 pub enum ElementConfigEntry {
 	U32(u32),
@@ -175,11 +177,14 @@ impl ElementConfig {
 	pub fn get_path_or(&self, name: &str, default: &str) -> String {
 		let filename = self.get_string_or(name, default);
 		let filename = Path::new(&filename);
+		debug!("get_path_or -> {:?}", &filename);
 		let filename = self.config_path.join(filename);
+		debug!("get_path_or {:?} -> {:?}", &self.config_path, &filename);
 		let filename = match filename.canonicalize() {
 			Ok(f) => f,
 			_ => filename, //panic!("File not found {:?}", &filename ),
 		};
+		debug!("get_path_or -> {:?}", &filename);
 
 		filename.to_string_lossy().to_string()
 	}

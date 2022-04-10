@@ -33,7 +33,7 @@ impl FileCache {
 	pub fn glob(pattern: &str) -> anyhow::Result<Vec<PathBuf>> {
 		let mut paths = Vec::new();
 		let path = std::path::Path::new(pattern);
-		if path.exists() {
+		if path.exists() { // Note: This should not be needed if globbing worked correctly
 			paths.push(path.to_path_buf());
 		} else {
 			let glob = match glob::glob(pattern) {
