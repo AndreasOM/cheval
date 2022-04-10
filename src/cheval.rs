@@ -44,8 +44,6 @@ pub struct Cheval {
 	start_time:        DateTime<Utc>,
 	render_context:    RenderContext,
 	http_enabled:      bool,
-	//	#[derivative(Debug="ignore")]
-	//	http_server: Option< actix_web::dev::Server >,
 	http_receiver:     Option<mpsc::Receiver<Message>>,
 	done:              bool,
 	config_path:       PathBuf,
