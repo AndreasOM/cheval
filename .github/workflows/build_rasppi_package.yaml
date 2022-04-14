@@ -1,0 +1,94 @@
+name:  Build Raspberry Pi package
+
+on:
+  push:
+    tags:
+      - "*-raspberrypi"
+      - "raspberrypi"
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            linker: gcc-arm-linux-gnueabihf
+            features: "framebuffer"
+            cross: true
+            skip_test: true
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+#      - name: Setup Ubuntu
+#        run : sudo apt-get install -y libxkbcommon-dev
+#        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install linker
+        if: matrix.cross
+        run: |
+          sudo apt update
+          sudo apt install ${{ matrix.linker }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: ${{ matrix.target }}
+
+      - name: Cache crates
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-crates
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}
+
+      - name: Run cargo build --release for ${{ matrix.target }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose --release --target ${{ matrix.target }} --features ${{ matrix.features }}
+
+
+      - name: Run cargo test --release for ${{ matrix.target }}
+        uses: actions-rs/cargo@v1
+        if: matrix.skip_test == false
+        with:
+          command: test
+          args: --release --target ${{ matrix.target }} --features ${{ matrix.features }} -- --test-threads 1 --nocapture
+
+      - name: Package
+        run: |
+          src=$(pwd)
+          temp=$(mktemp -d)
+          cp target/${{ matrix.target }}/release/cheval ${temp}/
+          cd ${temp}
+          VERSION=${GITHUB_REF#refs/tags/}
+          NAME="cheval-${VERSION}-${{ matrix.target }}.tar.gz"
+          TGZ="${src}/${NAME}"
+          tar czf ${TGZ} *
+          echo "TGZ=${TGZ}" >> $GITHUB_ENV
+          cd ${src}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files : |
+            ${{ env.TGZ }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
