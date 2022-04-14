@@ -52,6 +52,8 @@ impl HttpApiAxum {
 			.route("/page/prev", get(goto_prev_page))
 			.route("/page/number/:page_no", get(goto_page_number))
 			.route("/page/name/:page_name", get(goto_page_name))
+			.route("/show/name/:name", get(show_by_name))
+			.route("/hide/name/:name", get(hide_by_name))
 			.layer(Extension(http_state))
 		;
 		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -127,3 +129,32 @@ async fn goto_page_name(
 	let (sender, receiver) = mpsc::channel();
 	change_page( &state, Message::GotoPageName(sender, page_name), receiver )
 }
+
+async fn show_by_name(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path(name): Path<String>
+) -> impl IntoResponse {
+	let state = state.lock().unwrap();
+	match state
+		.http_sender
+		.send(Message::SetElementVisibilityByName(name.clone(), true))
+	{
+		_ => {},
+	};
+	format!("show ({}) name == {}", &state.id, &name)
+}
+
+async fn hide_by_name(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path(name): Path<String>
+) -> impl IntoResponse {
+	let state = state.lock().unwrap();
+	match state
+		.http_sender
+		.send(Message::SetElementVisibilityByName(name.clone(), false))
+	{
+		_ => {},
+	};
+	format!("hide ({}) name == {}", &state.id, &name)
+}
+
