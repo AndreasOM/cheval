@@ -2,4 +2,4 @@
 linker="arm-linux-gnueabihf-ld"
 
 [target.armv7-unknown-linux-gnueabihf]
-linker="arm-linux-gnueabihf-ld"
+linker="arm-linux-gnueabihf-gcc"
