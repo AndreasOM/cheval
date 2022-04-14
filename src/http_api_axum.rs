@@ -69,13 +69,9 @@ impl Drop for HttpApiAxum {
 	}
 }
 
-async fn goto_next_page(
-	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
-) -> impl IntoResponse {
-	debug!("goto_next_page");
-	let (sender, receiver) = mpsc::channel();
+fn change_page( state: &Arc<std::sync::Mutex<HttpState>>, message: Message, receiver: mpsc::Receiver< Response > ) -> impl IntoResponse {
 	let state = state.lock().unwrap();
-	match state.http_sender.send(Message::GotoNextPage(sender)) {
+	match state.http_sender.send(message) {
 		Ok(_) => match receiver.recv() {
 			Ok(msg) => match msg {
 				Response::PageChanged(new_page_no, old_page_no) => {
@@ -98,33 +94,20 @@ async fn goto_next_page(
 	"{}".to_string()
 }
 
+async fn goto_next_page(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+) -> impl IntoResponse {
+	debug!("goto_next_page");
+	let (sender, receiver) = mpsc::channel();
+	change_page( &state, Message::GotoNextPage(sender), receiver )
+}
+
 async fn goto_prev_page(
 	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
 ) -> impl IntoResponse {
 	debug!("goto_prev_page");
 	let (sender, receiver) = mpsc::channel();
-	let state = state.lock().unwrap();
-	match state.http_sender.send(Message::GotoPrevPage(sender)) {
-		Ok(_) => match receiver.recv() {
-			Ok(msg) => match msg {
-				Response::PageChanged(new_page_no, old_page_no) => {
-					return format!(
-						r#"{{ "new_page":{}, "old_page":{} }}"#,
-						new_page_no.unwrap_or(usize::MAX),
-						old_page_no.unwrap_or(usize::MAX)
-					);
-				},
-				_ => {
-					dbg!(&msg);
-				},
-			},
-			Err(e) => {
-				dbg!(&e);
-			},
-		},
-		_ => {},
-	};
-	"{}".to_string()
+	change_page( &state, Message::GotoPrevPage(sender), receiver )
 }
 
 async fn goto_page_number(
@@ -133,28 +116,7 @@ async fn goto_page_number(
 ) -> impl IntoResponse {
 	debug!("goto_page_number {}", page_no);
 	let (sender, receiver) = mpsc::channel();
-	let state = state.lock().unwrap();
-	match state.http_sender.send(Message::GotoPage(sender, page_no)) {
-		Ok(_) => match receiver.recv() {
-			Ok(msg) => match msg {
-				Response::PageChanged(new_page_no, old_page_no) => {
-					return format!(
-						r#"{{ "new_page":{}, "old_page":{} }}"#,
-						new_page_no.unwrap_or(usize::MAX),
-						old_page_no.unwrap_or(usize::MAX)
-					);
-				},
-				_ => {
-					dbg!(&msg);
-				},
-			},
-			Err(e) => {
-				dbg!(&e);
-			},
-		},
-		_ => {},
-	};
-	"{}".to_string()
+	change_page( &state, Message::GotoPage(sender, page_no), receiver )
 }
 
 async fn goto_page_name(
@@ -163,26 +125,5 @@ async fn goto_page_name(
 ) -> impl IntoResponse {
 	debug!("goto_page_name {}", page_name);
 	let (sender, receiver) = mpsc::channel();
-	let state = state.lock().unwrap();
-	match state.http_sender.send(Message::GotoPageName(sender, page_name)) {
-		Ok(_) => match receiver.recv() {
-			Ok(msg) => match msg {
-				Response::PageChanged(new_page_no, old_page_no) => {
-					return format!(
-						r#"{{ "new_page":{}, "old_page":{} }}"#,
-						new_page_no.unwrap_or(usize::MAX),
-						old_page_no.unwrap_or(usize::MAX)
-					);
-				},
-				_ => {
-					dbg!(&msg);
-				},
-			},
-			Err(e) => {
-				dbg!(&e);
-			},
-		},
-		_ => {},
-	};
-	"{}".to_string()
+	change_page( &state, Message::GotoPageName(sender, page_name), receiver )
 }
