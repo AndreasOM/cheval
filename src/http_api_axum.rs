@@ -1,8 +1,12 @@
 
-use std::sync::mpsc;
+use std::sync::{
+	Arc,
+	mpsc,
+};
 use std::net::SocketAddr;
 
 use axum::{
+	Extension,
     routing::{get, post},
     http::StatusCode,
     response::IntoResponse,
@@ -14,6 +18,12 @@ use crate::control::{
 	Message,
 	Response,
 };
+
+#[derive(Debug)]
+struct HttpState {
+	id:          String,
+	http_sender: mpsc::Sender<Message>,
+}
 
 #[derive(Debug)]
 pub struct HttpApiAxum {
@@ -28,8 +38,17 @@ impl HttpApiAxum {
 	}
 
 	pub async fn run( &self ) -> anyhow::Result<()> {
+		let http_state = Arc::new(
+			std::sync::Mutex::new(
+				HttpState {
+					id:          "default".to_string(),
+					http_sender: self.control_tx.clone(),
+				}
+			)
+		);
 		let app = Router::new()
 			.route("/page/next", get(goto_next_page))
+			.layer(Extension(http_state))
 		;
 		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
 		let server = axum::Server::bind(&addr)
@@ -46,11 +65,12 @@ impl Drop for HttpApiAxum {
 	}
 }
 
-//async fn goto_next_page(state: web::Data<HttpState>) -> impl Responder {
-async fn goto_next_page() -> &'static str {
+async fn goto_next_page(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+) -> impl IntoResponse {
 	debug!("goto_next_page");
-/*
 	let (sender, receiver) = mpsc::channel();
+	let state = state.lock().unwrap();
 	match state.http_sender.send(Message::GotoNextPage(sender)) {
 		Ok(_) => match receiver.recv() {
 			Ok(msg) => match msg {
@@ -71,6 +91,5 @@ async fn goto_next_page() -> &'static str {
 		},
 		_ => {},
 	};
-*/
-	"{}" //.to_string()
+	"{}".to_string()
 }
