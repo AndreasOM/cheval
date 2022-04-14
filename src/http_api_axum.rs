@@ -54,6 +54,7 @@ impl HttpApiAxum {
 			.route("/page/name/:page_name", get(goto_page_name))
 			.route("/show/name/:name", get(show_by_name))
 			.route("/hide/name/:name", get(hide_by_name))
+			.route("/setVariable/:name/:value", get(set_variable))
 			.layer(Extension(http_state))
 		;
 		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -157,4 +158,51 @@ async fn hide_by_name(
 	};
 	format!("hide ({}) name == {}", &state.id, &name)
 }
+
+fn handle_response(rx: mpsc::Receiver<Response>) -> String {
+	match rx.recv() {
+		Ok(r) => {
+			match r {
+				Response::VariableSelected(name) => {
+					format!("variable selected: {}", &name) // :TODO: decide on formatting
+				},
+				Response::VariableChanged(name, v) => {
+					format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+				},
+				Response::VariableU32Changed(name, v) => {
+					format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+				},
+				Response::VariableF32Changed(name, v) => {
+					format!("{{\"variables\":[{{ \"{}\": {}}}]}}", &name, v)
+				},
+				Response::VariableStringChanged(name, v) => {
+					format!("{{\"variables\":[{{ \"{}\": \"{}\"}}]}}", &name, &v)
+				},
+				o => {
+					format!("Unhandled response: {:?}", &o) // :TODO: format as json
+				},
+			}
+		},
+		Err(e) => format!("Error: {:?}", &e), // :TODO: format as json
+	}
+}
+
+fn send_message_and_handle_response( state: &Arc<std::sync::Mutex<HttpState>>, message: Message, receiver: mpsc::Receiver< Response > ) -> impl IntoResponse {
+	let state = state.lock().unwrap();
+	match state.http_sender.send(message) {
+		Ok(_) => handle_response( receiver ),
+		_ => "{}".to_string(),
+	}
+}
+
+async fn set_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path((name,value)): Path<(String,String)>,
+) -> impl IntoResponse {
+	debug!("set_variable {} => {}", &name, &value );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::SetVariable(sender, name.clone(), value.clone() ), receiver )
+}
+
+
 
