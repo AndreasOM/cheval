@@ -54,7 +54,22 @@ impl HttpApiAxum {
 			.route("/page/name/:page_name", get(goto_page_name))
 			.route("/show/name/:name", get(show_by_name))
 			.route("/hide/name/:name", get(hide_by_name))
+			.route("/selectNextVariable", get(select_next_variable))
+			.route(
+				"/selectNextVariableWithPrefix/:prefix",
+				get(select_next_variable_with_prefix),
+			)
+			.route(
+				"/incSelectedVariable/:value",
+				get(inc_selected_variable),
+			)
+			.route(
+				"/decSelectedVariable/:value",
+				get(dec_selected_variable),
+			)
 			.route("/setVariable/:name/:value", get(set_variable))
+			.route("/incVariable/:name/:delta", get(inc_variable))
+			.route("/decVariable/:name/:delta", get(dec_variable))
 			.layer(Extension(http_state))
 		;
 		let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -195,6 +210,24 @@ fn send_message_and_handle_response( state: &Arc<std::sync::Mutex<HttpState>>, m
 	}
 }
 
+
+async fn select_next_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+) -> impl IntoResponse {
+	debug!("select_next_variable" );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::SelectNextVariable(sender, None ), receiver )
+}
+
+async fn select_next_variable_with_prefix(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path( prefix ): Path<String>,
+) -> impl IntoResponse {
+	debug!("select_next_variable_with_prefix {}", &prefix );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::SelectNextVariable(sender, Some(prefix.clone()) ), receiver )
+}
+
 async fn set_variable(
 	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
 	Path((name,value)): Path<(String,String)>,
@@ -204,5 +237,38 @@ async fn set_variable(
 	send_message_and_handle_response( &state, Message::SetVariable(sender, name.clone(), value.clone() ), receiver )
 }
 
+async fn inc_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path((name,delta)): Path<(String,i32)>,
+) -> impl IntoResponse {
+	debug!("inc_variable {} +{}", &name, &delta );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::IncrementVariable(sender, name.clone(), delta ), receiver )
+}
 
+async fn dec_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path((name,delta)): Path<(String,i32)>,
+) -> impl IntoResponse {
+	debug!("dec_variable {} -{}", &name, &delta );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::IncrementVariable(sender, name.clone(), -delta ), receiver )
+}
 
+async fn inc_selected_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path(delta): Path<i32>,
+) -> impl IntoResponse {
+	debug!("inc_selected_variable +{}", &delta );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::IncrementSelectedVariable(sender, delta ), receiver )
+}
+
+async fn dec_selected_variable(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path(delta): Path<i32>,
+) -> impl IntoResponse {
+	debug!("dec_selected_variable -{}", &delta );
+	let (sender, receiver) = mpsc::channel();
+	send_message_and_handle_response( &state, Message::IncrementSelectedVariable(sender, -delta ), receiver )
+}

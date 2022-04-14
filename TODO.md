@@ -4,7 +4,7 @@ TODO: This file is not 100% up to date. Sorry.
 ## In Progress
 
 - [ ] Remove actix, and use axum instead
-	- [ ] Implement API in Axum
+	- [x] Implement API in Axum
 	- [ ] Remove Actix-web
 	- [ ] Remove Actix
 		
