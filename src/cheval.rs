@@ -28,12 +28,13 @@ use crate::text_element::TextElementFactory;
 use crate::timer_element::TimerElementFactory;
 use crate::HttpApi;
 
-#[derive(Derivative)]
+#[derive(Derivative, Default)]
 #[derivative(Debug)]
 pub struct Cheval {
 	//	element_instances: Vec< ElementInstance >,
 	page:              Option<Page>,
 	pages:             Vec<Page>,
+	page_stack:        Vec<usize>,
 	active_page:       usize,
 	variable_filename: Option<String>,
 	context:           Context,
@@ -115,6 +116,8 @@ impl Cheval {
 			config_path: PathBuf::new(),
 			http_api: None,
 			file_cache,
+
+			..Default::default()
 		}
 	}
 
@@ -244,14 +247,14 @@ impl Cheval {
 			),
 		};
 
-		debug!("config: {:?}", &cf);
+		debug!("config file: {:?}", &cf);
 
 		let config: Config = match serde_yaml::from_reader(&cf) {
 			Ok(c) => c,
 			Err(e) => panic!("Error deserializing config file {:?} -> {:?}", &cf, &e),
 		};
 
-		//		dbg!(&config);
+		//debug!("config: {:?}", &config);
 
 		if let Some(variable_filename) = &config.variable_filename {
 			self.variable_filename = Some(variable_filename.clone());
@@ -471,6 +474,23 @@ impl Cheval {
 		(new_page_no, old_page_no)
 	}
 
+	fn page_return(&mut self) -> (Option<usize>, Option<usize>) {
+		let r = if let Some(p) = self.page_stack.pop() {
+			self.goto_page(p)
+		} else {
+			(Some(self.active_page), Some(self.active_page))
+		};
+		debug!("Page Stack: {:?}", &self.page_stack);
+		r
+	}
+
+	fn gosub_page_name(&mut self, page_name: &str) -> (Option<usize>, Option<usize>) {
+		self.page_stack.push(self.active_page);
+		debug!("Page Stack: {:?}", &self.page_stack);
+
+		self.goto_page_name(page_name)
+	}
+
 	fn goto_page_name(&mut self, page_name: &str) -> (Option<usize>, Option<usize>) {
 		let mut old_page_no = None;
 		let mut new_page_no = None;
@@ -608,6 +628,18 @@ impl Cheval {
 			p.update(&mut self.context);
 		}
 
+		let should_return = if let Some(p) = self.pages.get_mut(self.active_page) {
+			p.should_return()
+		} else {
+			false
+		};
+		//debug!("should_return {:?}", should_return);
+
+		if should_return {
+			debug!("Automatic page return due to timeout");
+			self.page_return();
+		};
+
 		let ts = self.context.time_step();
 		let soundbank = &mut self.context.get_soundbank_mut();
 		soundbank.update(ts);
@@ -728,6 +760,18 @@ impl Cheval {
 						},
 						Message::GotoPageName(sender, page_name) => {
 							let (new_page_no, old_page_no) = self.goto_page_name(&page_name);
+							match sender.send(Response::PageChanged(new_page_no, old_page_no)) {
+								_ => {},
+							};
+						},
+						Message::GosubPageName(sender, page_name) => {
+							let (new_page_no, old_page_no) = self.gosub_page_name(&page_name);
+							match sender.send(Response::PageChanged(new_page_no, old_page_no)) {
+								_ => {},
+							};
+						},
+						Message::PageReturn(sender) => {
+							let (new_page_no, old_page_no) = self.page_return();
 							match sender.send(Response::PageChanged(new_page_no, old_page_no)) {
 								_ => {},
 							};

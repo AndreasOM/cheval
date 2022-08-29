@@ -9,7 +9,7 @@ use crate::axisalignedrectangle::AxisAlignedRectangle;
 use crate::pixel::Pixel;
 use crate::render_buffer::RenderBuffer;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct RenderContext {
 	fonts:        HashMap<String, Option<Font<'static>>>,
 	current_font: Option<String>,

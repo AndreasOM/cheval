@@ -38,6 +38,8 @@ impl HttpApiAxum {
 			.route("/page/prev", get(goto_prev_page))
 			.route("/page/number/:page_no", get(goto_page_number))
 			.route("/page/name/:page_name", get(goto_page_name))
+			.route("/page/gosub/name/:page_name", get(gosub_page_name))
+			.route("/page/return", get(page_return))
 			.route("/show/name/:name", get(show_by_name))
 			.route("/hide/name/:name", get(hide_by_name))
 			.route("/selectNextVariable", get(select_next_variable))
@@ -128,6 +130,23 @@ async fn goto_page_name(
 	debug!("goto_page_name {}", page_name);
 	let (sender, receiver) = mpsc::channel();
 	change_page(&state, Message::GotoPageName(sender, page_name), receiver)
+}
+
+async fn gosub_page_name(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+	Path(page_name): Path<String>,
+) -> impl IntoResponse {
+	debug!("gosub_page_name >{}<", page_name);
+	let (sender, receiver) = mpsc::channel();
+	change_page(&state, Message::GosubPageName(sender, page_name), receiver)
+}
+
+async fn page_return(
+	Extension(state): Extension<Arc<std::sync::Mutex<HttpState>>>,
+) -> impl IntoResponse {
+	debug!("page_return");
+	let (sender, receiver) = mpsc::channel();
+	change_page(&state, Message::PageReturn(sender), receiver)
 }
 
 async fn show_by_name(

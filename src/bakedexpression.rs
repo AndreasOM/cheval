@@ -3,7 +3,7 @@ use expresso::variables::Variable;
 
 use crate::context::Context;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 #[allow(dead_code)]
 pub struct BakedExpression {
 	original:   String,
@@ -11,8 +11,9 @@ pub struct BakedExpression {
 	baked:      Baked,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum Baked {
+	#[default]
 	EMPTY,
 	F32(f32),
 	U32(u32),
@@ -22,9 +23,7 @@ pub enum Baked {
 impl BakedExpression {
 	pub fn new() -> Self {
 		Self {
-			original:   String::new(),
-			expression: None,
-			baked:      Baked::EMPTY,
+			..Default::default()
 		}
 	}
 

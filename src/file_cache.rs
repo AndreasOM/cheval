@@ -15,7 +15,7 @@ enum WatchChange {
 	Add(PathBuf),
 }
 
-#[derive(Derivative)]
+#[derive(Derivative, Default)]
 #[derivative(Debug)]
 pub struct FileCache {
 	internal: std::sync::Arc<std::sync::Mutex<FileCacheInternal>>,
@@ -23,8 +23,9 @@ pub struct FileCache {
 	//	#[derivative(Debug="ignore")]
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum FileCacheMode {
+	#[default]
 	Poll,
 	Watch,
 }
@@ -474,7 +475,7 @@ impl FileCacheEntry {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct FileCacheInternal {
 	base_path:             PathBuf,
 	cache_misses:          u32,

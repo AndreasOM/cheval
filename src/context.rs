@@ -15,6 +15,17 @@ pub struct Context {
 	file_cache:        std::sync::Arc<std::sync::Mutex<FileCache>>,
 }
 
+impl Default for Context {
+	fn default() -> Self {
+		Self {
+			time_step:         1.0 / 60.0,
+			soundbank:         SoundBank::new(),
+			machine:           Machine::new(),
+			selected_variable: String::new(),
+			file_cache:        std::sync::Arc::new(std::sync::Mutex::new(FileCache::new())),
+		}
+	}
+}
 impl Context {
 	pub fn new() -> Self {
 		Self {

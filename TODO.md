@@ -86,6 +86,8 @@ TODO: This file is not 100% up to date. Sorry.
 	- [x] Remove Actix-web
 	- [x] Remove Actix
 - [x] Fix cursor left & right on Windows
+- [x] Add GosSub & Return for Page navigation
+- [x] Add time to automatically trigger return from Page
 
 ### Released in v0.2.0
 

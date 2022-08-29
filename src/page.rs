@@ -9,34 +9,40 @@ use crate::element_instance::ElementInstance;
 use crate::render_buffer::RenderBuffer;
 use crate::render_context::RenderContext;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 enum Visibility {
+	#[default]
 	Hidden,
 	Visible,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Page {
 	name:              String,
 	element_instances: Vec<ElementInstance>,
 	sound_on_show:     BakedExpression,
+	return_timeout:    BakedExpression,
 	visibility:        Visibility,
 	sound_queue:       VecDeque<String>,
+	time_visible:      f64,
 }
 
 impl Page {
 	pub fn new() -> Self {
 		Self {
-			name:              String::new(),
+			name: String::new(),
 			element_instances: Vec::new(),
-			sound_on_show:     BakedExpression::new(),
-			visibility:        Visibility::Hidden,
-			sound_queue:       VecDeque::new(),
+			sound_on_show: BakedExpression::new(),
+			return_timeout: BakedExpression::new(),
+			visibility: Visibility::Hidden,
+			sound_queue: VecDeque::new(),
+			..Default::default()
 		}
 	}
 
 	pub fn configure(&mut self, config: &ElementConfig) {
 		self.sound_on_show = config.get_bakedexpression_string("sound_on_show", "");
+		self.return_timeout = config.get_bakedexpression_string("return_timeout", "");
 	}
 
 	pub fn add_element_instance(&mut self, element_instance: ElementInstance) {
@@ -70,6 +76,8 @@ impl Page {
 			//			println!("sound: {}", &sound);
 			context.play_sound(&sound);
 		}
+		self.return_timeout.bake_f32_or(context, 0.0);
+		self.time_visible += context.time_step();
 	}
 	pub fn render(&self, render_buffer: &mut RenderBuffer, render_context: &mut RenderContext) {
 		if self.is_visible() {
@@ -105,6 +113,7 @@ impl Page {
 
 	pub fn hide(&mut self) {
 		self.visibility = Visibility::Hidden;
+		self.time_visible = 0.0;
 	}
 
 	pub fn show(&mut self) {
@@ -114,5 +123,16 @@ impl Page {
 			self.sound_queue.push_back(sound_on_show.to_string());
 		}
 		self.visibility = Visibility::Visible;
+		self.time_visible = 0.0;
+	}
+
+	pub fn should_return(&self) -> bool {
+		let rt = self.return_timeout.as_f32() as f64;
+		/*
+		if rt > 0.0 {
+			debug!("should_return >{}< -> rt {:?} tv {:?}", &self.name, rt, self.time_visible);
+		}
+		*/
+		rt > 0.0 && self.time_visible > rt
 	}
 }

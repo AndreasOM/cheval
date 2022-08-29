@@ -14,6 +14,8 @@ pub enum Message {
 	GotoPrevPage(mpsc::Sender<Response>),
 	GotoPage(mpsc::Sender<Response>, usize),
 	GotoPageName(mpsc::Sender<Response>, String),
+	GosubPageName(mpsc::Sender<Response>, String),
+	PageReturn(mpsc::Sender<Response>),
 }
 
 #[allow(dead_code)]
