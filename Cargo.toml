@@ -55,7 +55,7 @@ tracing-subscriber = "0.3.9"
 tracing-test = "0.2.1"
 
 [dependencies.minifb]
-version = "0.22.0"
+version = "0.23.0"
 optional = true
 
 [dependencies.framebuffer]
