@@ -3,10 +3,6 @@ TODO: This file is not 100% up to date. Sorry.
 
 ## In Progress
 
-- [ ] Remove actix, and use axum instead
-	- [x] Implement API in Axum
-	- [ ] Remove Actix-web
-	- [ ] Remove Actix
 		
 ## TODO
 
@@ -84,6 +80,10 @@ TODO: This file is not 100% up to date. Sorry.
 
 
 - [x] Extract http handling from cheval.rs
+- [x] Remove actix, and use axum instead
+	- [x] Implement API in Axum
+	- [x] Remove Actix-web
+	- [x] Remove Actix
 
 ### Released in v0.2.0
 

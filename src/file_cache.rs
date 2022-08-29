@@ -657,7 +657,6 @@ mod test {
 	use crate::file_cache::{FileCache, FileCacheMode};
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_file_with_block_on_initial_load_enabled() -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
 		fc.enable_block_on_initial_load();
@@ -682,7 +681,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_file_with_block_on_initial_load_disabled() -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
 		fc.disable_block_on_initial_load();
@@ -721,7 +719,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_file_in_poll_mode_with_block_on_initial_load_enabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
@@ -748,7 +745,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_file_in_poll_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
@@ -789,7 +785,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_and_update_file_in_poll_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
@@ -840,7 +835,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_load_and_update_file_in_watch_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
@@ -885,7 +879,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	#[traced_test]
 	async fn file_cache_can_update_vector_clock_in_watch_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
@@ -938,7 +931,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_update_vector_clock_for_binary_file_in_watch_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		let mut fc = FileCache::new();
@@ -989,7 +981,6 @@ mod test {
 	}
 
 	#[tokio::test]
-	//#[actix_rt::test]
 	async fn file_cache_can_update_vector_clock_for_binary_file_out_of_tree_in_watch_mode_with_block_on_initial_load_disabled(
 	) -> anyhow::Result<()> {
 		/*

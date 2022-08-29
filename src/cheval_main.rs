@@ -41,7 +41,6 @@ fn render_frame(render_buffer: &mut RenderBuffer, cheval: &mut Cheval) {
 }
 
 #[tokio::main]
-//#[actix_web::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let subscriber = FmtSubscriber::builder()
 		// all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)

@@ -567,9 +567,6 @@ impl Cheval {
 			std::thread::spawn(move || -> anyhow::Result<()> {
 				let mut rt = Runtime::new().unwrap();
 				rt.block_on(async { http_api.run().await });
-				//let sys = actix_web::rt::System::new();
-				//sys.block_on( http_api.run() )?;
-				//anyhow::bail!("run ended");
 				debug!("run ended");
 				Ok(())
 			});
