@@ -8,11 +8,12 @@ use derivative::Derivative;
 use hhmmss::Hhmmss;
 use serde::Deserialize;
 use serde_yaml;
-use tracing::*;
 use tokio::runtime::Runtime;
+use tracing::*;
 
 use crate::block_element::BlockElementFactory;
 use crate::context::Context;
+use crate::control::{Message, Response};
 use crate::element::{Element, ElementConfig};
 use crate::element_instance::ElementInstance;
 use crate::file_cache::FileCache;
@@ -25,12 +26,7 @@ use crate::scrolltext_element::ScrollTextElementFactory;
 use crate::soundbank_element::SoundbankElementFactory;
 use crate::text_element::TextElementFactory;
 use crate::timer_element::TimerElementFactory;
-use crate::control::{
-	Message,
-	Response
-};
 use crate::HttpApi;
-
 
 #[derive(Derivative)]
 #[derivative(Debug)]
@@ -48,7 +44,7 @@ pub struct Cheval {
 	http_receiver:     Option<mpsc::Receiver<Message>>,
 	done:              bool,
 	config_path:       PathBuf,
-	http_api:			Option< HttpApi >,
+	http_api:          Option<HttpApi>,
 	file_cache:        std::sync::Arc<std::sync::Mutex<FileCache>>,
 }
 
@@ -89,7 +85,6 @@ struct Config {
 	elements:          Option<Vec<ConfigElement>>,
 }
 
-
 impl Cheval {
 	pub fn new() -> Self {
 		let file_cache = std::sync::Arc::new(std::sync::Mutex::new(FileCache::new()));
@@ -118,7 +113,7 @@ impl Cheval {
 			http_receiver: None,
 			done: false,
 			config_path: PathBuf::new(),
-			http_api:		None,
+			http_api: None,
 			file_cache,
 		}
 	}
@@ -188,14 +183,14 @@ impl Cheval {
 	}
 
 	pub async fn load(&mut self, config_file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-//		dbg!(&config_file_name);
+		//		dbg!(&config_file_name);
 		debug!("Loading config from {}", &config_file_name);
 		// make path absolute
 		let cwd = std::env::current_dir().unwrap();
 		let config_file_name = Path::new(&config_file_name);
 		let config_file_name = cwd.join(config_file_name);
 		debug!("Loading config from {:?}", &config_file_name);
-		let config_file_name = match FileCache::canonicalize( config_file_name.as_path() ) {
+		let config_file_name = match FileCache::canonicalize(config_file_name.as_path()) {
 			Ok(c) => c,
 			Err(e) => panic!(
 				"Error canonicalizing config file {:?} -> {:?}",
@@ -551,36 +546,33 @@ impl Cheval {
 	}
 
 	pub fn initialize(&mut self) -> anyhow::Result<()> {
-
 		let (tx2, rx2) = mpsc::channel();
 
 		self.http_receiver = Some(rx2);
 
 		if self.http_enabled {
-			let mut http_api = HttpApi::new( tx2.clone() );
+			let mut http_api = HttpApi::new(tx2.clone());
 
-//			http_api.run();
+			//			http_api.run();
 
-			self.http_api = Some( http_api );
+			self.http_api = Some(http_api);
 		}
 
 		debug!("http_enabled: {:?}", &self.http_enabled);
 		Ok(())
 	}
 
-	pub fn run( &mut self ) -> anyhow::Result<()> {
-		if let Some( http_api ) = self.http_api.take() {
-			
-			std::thread::spawn( move || -> anyhow::Result<()>  {
-				let mut rt  = Runtime::new().unwrap();
-				rt.block_on( async { http_api.run().await } );
+	pub fn run(&mut self) -> anyhow::Result<()> {
+		if let Some(http_api) = self.http_api.take() {
+			std::thread::spawn(move || -> anyhow::Result<()> {
+				let mut rt = Runtime::new().unwrap();
+				rt.block_on(async { http_api.run().await });
 				//let sys = actix_web::rt::System::new();
 				//sys.block_on( http_api.run() )?;
 				//anyhow::bail!("run ended");
 				debug!("run ended");
 				Ok(())
-			} );
-			
+			});
 		}
 
 		Ok(())

@@ -1,7 +1,7 @@
-use crate::cheval::Cheval;
-use crate::render_buffer::RenderBuffer;
 use framebuffer::Framebuffer;
 
+use crate::cheval::Cheval;
+use crate::render_buffer::RenderBuffer;
 use crate::window::Window;
 
 pub struct WindowFramebuffer {

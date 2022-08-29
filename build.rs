@@ -23,7 +23,7 @@ fn main() {
 		framebuffer: { all(linux, feature="framebuffer", not(wasm)) },
 	}
 
-	#[cfg(all(feature = "framebuffer", not( target_os = "linux" )))]
+	#[cfg(all(feature = "framebuffer", not(target_os = "linux")))]
 	{
 		panic!("framebuffer only supported on linux");
 	}
