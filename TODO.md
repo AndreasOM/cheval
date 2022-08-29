@@ -47,6 +47,7 @@ TODO: This file is not 100% up to date. Sorry.
 
 - [ ] Cleanup config file selection, and error reporting
 - [ ] Make Windows work
+	- [ ] Fix washed out colors on Windows
 - [ ] Persist variables in regular intervals
 - [ ] Enable debug frames via command line 
 - [ ] Merge goto next&prev page into turn page with direction
@@ -84,6 +85,7 @@ TODO: This file is not 100% up to date. Sorry.
 	- [x] Implement API in Axum
 	- [x] Remove Actix-web
 	- [x] Remove Actix
+- [x] Fix cursor left & right on Windows
 
 ### Released in v0.2.0
 

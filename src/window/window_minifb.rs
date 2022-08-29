@@ -3,6 +3,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 use minifb;
+use tracing::*;
 
 use crate::cheval::Cheval;
 use crate::render_buffer::RenderBuffer;
@@ -25,6 +26,7 @@ impl Input {
 
 impl minifb::InputCallback for Input {
 	fn add_char(&mut self, uni_char: u32) {
+		debug!("add_char {}", uni_char);
 		self.keys.borrow_mut().push(uni_char);
 	}
 }
@@ -139,6 +141,10 @@ impl WindowMinifb {
 		}
 		dbg!(x, y);
 		s
+	}
+
+	fn add_char(&mut self, uni_char: u32) {
+		self.keybuffer.borrow_mut().push(uni_char);
 	}
 
 	#[inline(never)] // needed for clean flamegraphs ... :sigh:
@@ -357,7 +363,17 @@ impl Window for WindowMinifb {
 				}
 			}
 		}
+		let mut chars = Vec::new();
 		if let Some(window_rgb) = &mut self.window_rgb {
+			// :HACK:
+			for k in window_rgb.window.get_keys_pressed(minifb::KeyRepeat::No) {
+				//debug!("Key Pressed: {:?}", k);
+				match k {
+					minifb::Key::Left => chars.push(63234),
+					minifb::Key::Right => chars.push(63235),
+					_ => {},
+				}
+			}
 			window_rgb
 				.window
 				.update_with_buffer(&frame_rgb, fw, fh)
@@ -368,6 +384,10 @@ impl Window for WindowMinifb {
 				.window
 				.update_with_buffer(&frame_a, fw, fh)
 				.unwrap();
+		}
+
+		for c in chars {
+			self.add_char(c);
 		}
 	}
 
