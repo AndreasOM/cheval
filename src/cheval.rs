@@ -9,6 +9,7 @@ use hhmmss::Hhmmss;
 use serde::Deserialize;
 use serde_yaml;
 use tracing::*;
+use tokio::runtime::Runtime;
 
 use crate::block_element::BlockElementFactory;
 use crate::context::Context;
@@ -571,9 +572,12 @@ impl Cheval {
 		if let Some( http_api ) = self.http_api.take() {
 			
 			std::thread::spawn( move || -> anyhow::Result<()>  {
-				let sys = actix_web::rt::System::new();
-				sys.block_on( http_api.run() )?;
-//				anyhow::bail!("run ended")
+				let mut rt  = Runtime::new().unwrap();
+				rt.block_on( async { http_api.run().await } );
+				//let sys = actix_web::rt::System::new();
+				//sys.block_on( http_api.run() )?;
+				//anyhow::bail!("run ended");
+				debug!("run ended");
 				Ok(())
 			} );
 			

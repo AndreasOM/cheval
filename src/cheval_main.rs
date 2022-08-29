@@ -34,14 +34,14 @@ fn render_frame(render_buffer: &mut RenderBuffer, cheval: &mut Cheval) {
 			for i in 0..size {
 				*p.add(i) = 0 as u32;
 			}
-		}
+	}
 	*/
 
 	cheval.render(render_buffer);
 }
 
-//#[tokio::main]
-#[actix_web::main]
+#[tokio::main]
+//#[actix_web::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let subscriber = FmtSubscriber::builder()
 		// all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)

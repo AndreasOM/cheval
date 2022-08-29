@@ -34,10 +34,4 @@ mod http_api_axum;
 #[cfg(feature = "use_axum" )]
 pub use http_api_axum::HttpApiAxum as HttpApi;
 
-#[cfg(not(feature = "use_axum" ))]
-mod http_api_actix;
-
-#[cfg(not(feature = "use_axum" ))]
-pub use http_api_actix::HttpApiActix as HttpApi;
-
 pub mod control;

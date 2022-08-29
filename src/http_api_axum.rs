@@ -77,6 +77,7 @@ impl HttpApiAxum {
         .serve(app.into_make_service())
         .await?;
 
+        debug!("done");
 		Ok(())
 	}
 }
